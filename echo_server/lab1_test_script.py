@@ -117,13 +117,13 @@ if __name__ == '__main__':
                             break
                 for i in range(4):
                     if i == 0:
-                        print('Client%d:  Testing short word:' % client_number,)
+                        print('Client%d:  Testing short word:' % client_number,end=" ")
                     elif i == 1:
-                        print('          Testing long sentence:',)
+                        print('          Testing long sentence:', end=" ")
                     elif i == 2:
-                        print('          Testing multiple sentences:',)
+                        print('          Testing multiple sentences:', end=" ")
                     else:
-                        print('          Testing EOF:',)
+                        print('          Testing EOF:', end=" ")
                     if results[i] == 0:
                         print('\033[1;31;40mFAILED\033[0m')
                     else:
