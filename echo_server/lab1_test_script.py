@@ -51,7 +51,7 @@ if __name__ == '__main__':
         prog_path = sys.argv[1]
         
         if not check_binary_valid(prog_path):
-            print('Please input a valid path of your binary program ')
+            print('Please input a valid path of your python file ')
         else:
             messages = [
                 'test case 1',
