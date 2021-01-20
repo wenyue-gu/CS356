@@ -100,7 +100,6 @@ if __name__ == '__main__':
                         print('Client%d: Connection refused.' % client_number)
                         return 0
                 except (pexpect.TIMEOUT, pexpect.EOF) as e:
-                        print(e)
                         print('Client%d: cannot connect to the server.' % client_number)
                         return 0
                 results = [1, 1, 1, 1]
