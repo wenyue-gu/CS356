@@ -15,7 +15,9 @@ if len(sys.argv) > 2:
 
 
 def run(param):
-    os.system("./generator 12582912 a.txt")
+    generator = subprocess.Popen("./generator 12582912 a.txt".split(), stdout=subprocess.DEVNULL)
+    generator.wait()
+
     cmd = "%s/Receiver -p 50001 -s %d -d %d -f %d temp.txt" % (inpath,
                                                                param["synloss"], param["dataloss"], param["finloss"])
     receiver = subprocess.Popen(cmd.split(), stdout=subprocess.DEVNULL)
@@ -32,7 +34,9 @@ def run(param):
         sender.kill()
         out, err = receiver.communicate()
         out, err = sender.communicate()
-        print("Timed out after %d seconds" % param["timeout"])
+        if Exception is subprocess.TimeoutExpired:
+            print("Timed out after %d seconds" % param["timeout"])
+        return 0
 
     res = 1
     with subprocess.Popen(("diff -q %s/a.txt %s/temp.txt" % (inpath, inpath)).split(), stdout=subprocess.PIPE) as proc:
@@ -45,8 +49,8 @@ def run(param):
 params = [{"dataloss": 0, "synloss": 0, "finloss": 0, "timeout": 30},
           {"dataloss": 1, "synloss": 0, "finloss": 0, "timeout": 45},
           {"dataloss": 5, "synloss": 0, "finloss": 0, "timeout": 60},
-          {"dataloss": 1, "synloss": 50, "finloss": 50, "timeout": 45},
-          {"dataloss": 5, "synloss": 50, "finloss": 50, "timeout": 65}]
+          {"dataloss": 1, "synloss": 50, "finloss": 25, "timeout": 45},
+          {"dataloss": 5, "synloss": 50, "finloss": 25, "timeout": 65}]
 
 cases = []
 score = 0
@@ -61,13 +65,14 @@ for param in params:
             "output": json.dumps(param)
         }
 
+        print("Case %d: " % i, param)
         sc = run(param)*10
         case["score"] += sc
         cases.append(case)
         score += sc
-        print("Case %d: %d/10" % (i, sc))
-        print(param)
-print("Scores: %d/100" % score)
+        print("Points: %d/10\n" % sc)
+
+print("Total: %d/100" % score)
 
 res = {
     "score": score,
