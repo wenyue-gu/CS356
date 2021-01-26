@@ -15,7 +15,11 @@ class Server(threading.Thread):
         self.port_number = port_number
 
     def run(self):
-        self.controler = pexpect.spawn("%s s %d" % (self.prog_path, self.port_number))
+        if '.pyc' in prog_path:
+            command = "python3 %s s %d" % (self.prog_path, self.port_number)
+        else:
+            command = "%s s %d" % (self.prog_path, self.port_number)
+        self.controler = pexpect.spawn(command)
         print("Server Port:", self.port_number)
         while True:
             try:
@@ -30,9 +34,12 @@ class Server(threading.Thread):
 
 
 def check_binary_valid(prog_path):
-    return 1
+    if '.pyc' in prog_path:
+        command = "python3 %s" % prog_path
+    else:
+        command = prog_path
     try:
-        client = pexpect.spawn("%s" % prog_path)
+        client = pexpect.spawn(command)
     except pexpect.ExceptionPexpect:
         return 0
     try:
@@ -92,7 +99,11 @@ if __name__ == '__main__':
                         return 1
 
             def start_client(client_number):
-                client = pexpect.spawn("python3 %s c localhost %d" % (prog_path,port_number))
+                if '.pyc' in prog_path:
+                    command = "python3 %s c %d localhost" % (prog_path, port_number)
+                else:
+                    command = "%s c %d localhost" % (prog_path, port_number)
+                client = pexpect.spawn(command)
                 print("client connect to", port_number)
                 try:
                     i = client.expect(["Enter message:", 'Connection refused'], timeout=4)
