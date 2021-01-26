@@ -15,7 +15,7 @@ class Server(threading.Thread):
         self.port_number = port_number
 
     def run(self):
-        if '.pyc' in prog_path:
+        if '.py' in prog_path:
             command = "python3 %s s %d" % (self.prog_path, self.port_number)
         else:
             command = "%s s %d" % (self.prog_path, self.port_number)
@@ -34,7 +34,7 @@ class Server(threading.Thread):
 
 
 def check_binary_valid(prog_path):
-    if '.pyc' in prog_path:
+    if '.py' in prog_path:
         command = "python3 %s" % prog_path
     else:
         command = prog_path
@@ -99,7 +99,7 @@ if __name__ == '__main__':
                         return 1
 
             def start_client(client_number):
-                if '.pyc' in prog_path:
+                if '.py' in prog_path:
                     command = "python3 %s c %d 127.0.0.1" % (prog_path, port_number)
                 else:
                     command = "%s c %d 127.0.0.1" % (prog_path, port_number)
