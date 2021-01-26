@@ -100,9 +100,9 @@ if __name__ == '__main__':
 
             def start_client(client_number):
                 if '.pyc' in prog_path:
-                    command = "python3 %s c %d localhost" % (prog_path, port_number)
+                    command = "python3 %s c %d 127.0.0.1" % (prog_path, port_number)
                 else:
-                    command = "%s c %d localhost" % (prog_path, port_number)
+                    command = "%s c %d 127.0.0.1" % (prog_path, port_number)
                 client = pexpect.spawn(command)
                 print("client connect to", port_number)
                 try:
