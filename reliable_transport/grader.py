@@ -20,13 +20,17 @@ def run(param):
 
     cmd = "%s/Receiver -p 50001 -s %d -d %d -f %d temp.txt" % (inpath,
                                                                param["synloss"], param["dataloss"], param["finloss"])
-    receiver = subprocess.Popen(cmd.split(), stdout=subprocess.DEVNULL)
+    receiver = subprocess.Popen(cmd.split(), stdout=subprocess.DEVNULL, stderr=subprocess.PIPE)
     cmd = "python3 %s/Sender.py a.txt -p 10000 -r 50001" % inpath
-    sender = subprocess.Popen(cmd.split(), stdout=subprocess.DEVNULL)
+    sender = subprocess.Popen(cmd.split(), stdout=subprocess.DEVNULL, stderr=subprocess.PIPE)
     try:
         start = time.time()
         out, err = receiver.communicate(timeout=param["timeout"])
+        if len(err) != 0:
+            print(err.decode())
         out, err = sender.communicate(timeout=param["timeout"])
+        if len(err) != 0:
+            print(err.decode())
         end = time.time()
         print("Finished in %.2f seconds" % (end-start))
     except Exception as e:
@@ -43,7 +47,7 @@ def run(param):
     res = 1
     with subprocess.Popen(("diff -q %s/a.txt %s/temp.txt" % (inpath, inpath)).split(), stdout=subprocess.PIPE) as proc:
         out, err = proc.communicate()
-        if len(out.decode()) != 0:
+        if len(out) != 0:
             res = 0
     return res
 
@@ -52,8 +56,8 @@ params = [
     {"dataloss": 0, "synloss": 0, "finloss": 0, "timeout": 30},
     {"dataloss": 1, "synloss": 0, "finloss": 0, "timeout": 45},
     {"dataloss": 5, "synloss": 0, "finloss": 0, "timeout": 60},
-    {"dataloss": 1, "synloss": 50, "finloss": 25, "timeout": 55},
-    {"dataloss": 5, "synloss": 50, "finloss": 25, "timeout": 65}
+    {"dataloss": 1, "synloss": 50, "finloss": 25, "timeout": 75},
+    {"dataloss": 5, "synloss": 50, "finloss": 25, "timeout": 90}
 ]
 
 cases = []

@@ -1,4 +1,5 @@
 import os
+import sys
 import time
 
 SegmentSize = 1024
@@ -14,7 +15,7 @@ HalfSeqNumSpace = (1 << 31)
 
 
 def ErrorHandler(msg):
-    print(msg)
+    print(msg, file=sys.stderr)
     os._exit(1)
 
 
