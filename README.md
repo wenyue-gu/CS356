@@ -1,4 +1,4 @@
-COMPSCI 356 Computer Network Architecture: Lab 2 Reliable Transport
+# COMPSCI 356 Computer Network Architecture: Lab 2 Reliable Transport
 
 Your task is to implement a reliable sliding window transport layer on top of the User Datagram Protocol (UDP).
 
