@@ -81,17 +81,26 @@ class Reliable:
     def send(self, task):
         return self.putTask(task)
 
-    def sendto(self, seg):
-        return self.__skt.sendto(seg, self.__dst)
-
     def recvfrom(self):
         (seg, addr) = self.__skt.recvfrom(SegmentSize)
         return seg
 
+    # Followings are APIs that you may need to use in ReliableImpl
+    # sendto: Send a well-formed segment to the destination.
+    # 'seg' should be an array of bytes (type(s)=<class 'bytes'>).
+    def sendto(self, seg):
+        return self.__skt.sendto(seg, self.__dst)
+
+    # updateRWND: Update the receive window size.
+    # 'rwnd' means the bytes of the receive window.
     def updateRWND(self, rwnd):
         self.rwnd = rwnd
         return self.rwnd
 
+    # setTimer: Set a timer. Its usage is similar to threading.Timer,
+    # but we implement our own Timer in this lab (See Util.py).
+    # The function 'callback' will be called with 'args' as arguments
+    # after 'timesec' seconds.
     def setTimer(self, timesec, callback, args):
         timer = Timer(timesec, callback, args)
         heapq.heappush(self.timerHeap, timer)

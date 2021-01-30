@@ -36,6 +36,8 @@ def run(param):
         out, err = sender.communicate()
         if Exception is subprocess.TimeoutExpired:
             print("Timed out after %d seconds" % param["timeout"])
+        else:
+            print(e)
         return 0
 
     res = 1
@@ -46,11 +48,13 @@ def run(param):
     return res
 
 
-params = [{"dataloss": 0, "synloss": 0, "finloss": 0, "timeout": 30},
-          {"dataloss": 1, "synloss": 0, "finloss": 0, "timeout": 45},
-          {"dataloss": 5, "synloss": 0, "finloss": 0, "timeout": 60},
-          {"dataloss": 1, "synloss": 50, "finloss": 25, "timeout": 45},
-          {"dataloss": 5, "synloss": 50, "finloss": 25, "timeout": 65}]
+params = [
+    {"dataloss": 0, "synloss": 0, "finloss": 0, "timeout": 30},
+    {"dataloss": 1, "synloss": 0, "finloss": 0, "timeout": 45},
+    {"dataloss": 5, "synloss": 0, "finloss": 0, "timeout": 60},
+    {"dataloss": 1, "synloss": 50, "finloss": 25, "timeout": 55},
+    {"dataloss": 5, "synloss": 50, "finloss": 25, "timeout": 65}
+]
 
 cases = []
 score = 0
