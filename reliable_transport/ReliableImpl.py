@@ -27,21 +27,25 @@ class ReliableImpl:
     # The checksum will be verified before calling this function, so you
     # do not need to verify checksum  again in this function.
     # Remember to call self.reli.updateRWND to update the receive window size.
+    # Note that this function should return reduction of bytes in flight 
+    # (a non-positive integer) so that class Reliable can update the bytes in flight.
     # 'seg' is an instance of class Segment (see Util.py)
     # 'isFin'=True means seg is a FINACK, otherwise it is an ACK.
     def recvAck(self, seg, isFin):
         # TODO: Your code here
-        pass
+        return 0
 
     # sendData: This function is called when a block of data should be sent out.
     # You can call Segment.pack in Util.py to encapsulate a segment and
     # call self.reli.setTimer (see Reliable.py) set a Timer for retransmission.
     # Use self.reli.sendto (see Reliable.py) to send a segment to the receiver.
+    # Note that this function should return increment of bytes in flight 
+    # (a non-negative integer) so that class Reliable can update the bytes in flight.
     # 'block' is an array of bytes (type(block)=<class 'bytes'>).
     # 'isFin'=True means a FIN segment should be sent out.
     def sendData(self, block, isFin):
         # TODO: Your code here
-        pass
+        return len(block)
 
     # retransmission: A callback function for retransmission when you call
     # self.reli.setTimer.
