@@ -15,6 +15,7 @@ class ReliableImpl:
         pass
 
     # checksum: 16-bit Internet checksum (refer to RFC 1071 for calculation)
+    # This function should return the value of checksum (an unsigned 16-bit integer).
     # You should calculate the checksum over 's', which is an array of bytes
     # (type(s)=<class 'bytes'>).
     @staticmethod
@@ -27,7 +28,7 @@ class ReliableImpl:
     # The checksum will be verified before calling this function, so you
     # do not need to verify checksum  again in this function.
     # Remember to call self.reli.updateRWND to update the receive window size.
-    # Note that this function should return reduction of bytes in flight 
+    # Note that this function should return reduction of bytes in flight
     # (a non-positive integer) so that class Reliable can update the bytes in flight.
     # 'seg' is an instance of class Segment (see Util.py)
     # 'isFin'=True means seg is a FINACK, otherwise it is an ACK.
@@ -39,7 +40,7 @@ class ReliableImpl:
     # You can call Segment.pack in Util.py to encapsulate a segment and
     # call self.reli.setTimer (see Reliable.py) set a Timer for retransmission.
     # Use self.reli.sendto (see Reliable.py) to send a segment to the receiver.
-    # Note that this function should return increment of bytes in flight 
+    # Note that this function should return increment of bytes in flight
     # (a non-negative integer) so that class Reliable can update the bytes in flight.
     # 'block' is an array of bytes (type(block)=<class 'bytes'>).
     # 'isFin'=True means a FIN segment should be sent out.
