@@ -62,6 +62,7 @@ int client(const char * addr, uint16_t port)
 	printf("Connected to server %s:%d\n", addr, port);
 	printf("Enter message: \n");
 	while (fgets(msg, MAX_MSG_LENGTH, stdin)) {
+		msg[strnlen(msg, MAX_MSG_LENGTH)-1]='\0';
 		if (send(sock, msg, strnlen(msg, MAX_MSG_LENGTH), 0) < 0) {
 			perror("Send error:");
 			return 1;
@@ -76,7 +77,7 @@ int client(const char * addr, uint16_t port)
 			break;
 		}
 		reply[recv_len] = '\0';
-		printf("Server reply:\n%s", reply);
+		printf("Server reply:\n%s\n", reply);
 		printf("Enter message: \n");
 	}
 	if (send(sock, "", 0, 0) < 0) {
