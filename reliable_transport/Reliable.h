@@ -69,7 +69,7 @@ public:
 
     // Followings are APIs that you may need to use in ReliableImpl
     // Sendto: Send a well-formed segment ('pkt') to the destination.
-    // 'seg' should not contain UDP header.
+    // 'pkt' is an array of char bytes. It should not contain UDP header.
     // 'len' is he length of 'seg'.
     ssize_t Sendto(const char *pkt, const size_t len)
     {

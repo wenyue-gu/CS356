@@ -27,7 +27,7 @@ static double get_current_time()
 {
     struct timeval current_t;
     gettimeofday(&current_t, NULL);
-    return current_t.tv_sec + current_t.tv_usec / 1000000;
+    return current_t.tv_sec + 1.0 * current_t.tv_usec / 1000000;
 }
 
 static uint32_t rand32()
