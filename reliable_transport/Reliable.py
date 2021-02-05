@@ -40,8 +40,11 @@ class Reliable:
     def getskt(self):
         return self.__skt
 
-    def connect(self):
-        seqNum = random.randint(0, (1 << 32)-1)
+    def connect(self, n=None):
+        if n is None:
+            seqNum = random.randint(0, (1 << 32)-1)
+        else:
+            seqNum = n % SeqNumSpace
         self.status = SYNSENT
         synretry = 0
         while self.status != CONNECTED:
@@ -87,7 +90,7 @@ class Reliable:
 
     # Followings are APIs that you may need to use in ReliableImpl
     # sendto: Send a well-formed segment to the destination.
-    # 'seg' should be an array of bytes (type(s)=<class 'bytes'>) and 
+    # 'seg' should be an array of bytes (type(s)=<class 'bytes'>) and
     # should not contain UDP header
     def sendto(self, seg):
         return self.__skt.sendto(seg, self.__dst)

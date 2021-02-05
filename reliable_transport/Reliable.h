@@ -48,7 +48,7 @@ public:
     Reliable(int hport = 10000, int rport = 50001);
     ~Reliable();
 
-    int connect();
+    int connect(bool nflag = false, uint32_t n = 0);
     void Close();
     void Free();
     void handler();

@@ -6,11 +6,13 @@ parser = argparse.ArgumentParser()
 parser.add_argument("-p", metavar='local_port', type=int, default=10000, help="port for the local end (default 10000)")
 parser.add_argument("-r", metavar='remote_port', type=int, default=50001,
                     help="port for the remote end (default 50001)")
+parser.add_argument("-n", metavar='sequence_number', type=int, default=None,
+                    help="initial sequence number in SYN (default at random)")
 parser.add_argument('filename', metavar='filename', type=str, nargs=1, help='file to be transferred')
 args = parser.parse_args()
 
 reli = Reliable.Reliable(args.p, args.r)
-reli.connect()
+reli.connect(args.n)
 
 filename = sys.argv[1]
 fin = open(args.filename[0], "rb")

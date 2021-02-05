@@ -32,6 +32,8 @@ def run(param):
             cmd = "%s/Sender a.txt -p 10000 -r 50001" % args.inpath
         else:
             cmd = "python3 %s/Sender.py a.txt -p 10000 -r 50001" % args.inpath
+        if "seqnum" in params:
+            cmd += ' -n %d' % params["seqnum"]
         sender = subprocess.Popen(cmd.split(), stdout=subprocess.DEVNULL, stderr=subprocess.PIPE)
     except Exception as e:
         print(e)
@@ -67,32 +69,36 @@ def run(param):
 
 
 params = [
-    {"dataloss": 0, "synloss": 0, "finloss": 0, "timeout": 35},
+    {"dataloss": 0, "synloss": 0, "finloss": 0, "timeout": 40},
+    {"dataloss": 0, "synloss": 0, "finloss": 0, "timeout": 40, 'seqnum': 4294967296},
     {"dataloss": 1, "synloss": 0, "finloss": 0, "timeout": 45},
+    {"dataloss": 1, "synloss": 0, "finloss": 0, "timeout": 45, 'seqnum': 4294957296},
     {"dataloss": 5, "synloss": 0, "finloss": 0, "timeout": 60},
+    {"dataloss": 5, "synloss": 0, "finloss": 0, "timeout": 60, 'seqnum': 4294864896},
     {"dataloss": 1, "synloss": 50, "finloss": 25, "timeout": 75},
-    {"dataloss": 5, "synloss": 50, "finloss": 25, "timeout": 90}
+    {"dataloss": 1, "synloss": 50, "finloss": 25, "timeout": 75, 'seqnum': 4293508096},
+    {"dataloss": 5, "synloss": 50, "finloss": 25, "timeout": 90},
+    {"dataloss": 5, "synloss": 50, "finloss": 25, "timeout": 90, 'seqnum': 4291637248}
 ]
 
 cases = []
 score = 0
 i = 0
 for param in params:
-    for j in range(0, 2):
-        i += 1
-        case = {
-            "score": 0,
-            "max_score": 10,
-            "visibility": "visible",
-            "output": json.dumps(param)
-        }
+    i += 1
+    case = {
+        "score": 0,
+        "max_score": 10,
+        "visibility": "visible",
+        "output": json.dumps(param)
+    }
 
-        print("Case %d: " % i, param)
-        sc = run(param)*10
-        case["score"] += sc
-        cases.append(case)
-        score += sc
-        print("Points: %d/10\n" % sc)
+    print("Case %d: " % i, param)
+    sc = run(param)*10
+    case["score"] += sc
+    cases.append(case)
+    score += sc
+    print("Points: %d/10\n" % sc)
 
 print("Total: %d/100" % score)
 

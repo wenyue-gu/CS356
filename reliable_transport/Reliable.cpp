@@ -38,12 +38,12 @@ void Reliable::setSktTimeout(int timesec)
     setsockopt(skt, SOL_SOCKET, SO_RCVTIMEO, (const char *)&tv, sizeof(tv));
 }
 
-int Reliable::connect()
+int Reliable::connect(bool nflag, uint32_t n)
 {
     setSktTimeout(1);
     pkt = (char *)malloc(sizeof(char) * PACKET_SIZE);
 
-    uint32_t seqNum = rand32();
+    uint32_t seqNum = nflag ? n : rand32();
     status = SYNSENT;
     int synretry = 0;
     while (status != CONNECTED)
