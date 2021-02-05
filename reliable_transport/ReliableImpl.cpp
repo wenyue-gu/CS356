@@ -37,7 +37,7 @@ uint16_t ReliableImpl::checksum(const char *buf, ssize_t len)
 // (a non-positive integer) so that class Reliable can update the bytes in flight.
 // 'seg' is an instance of class Segment (see Util.h)
 // 'isFin'=True means 'seg' is a FINACK, otherwise it is an ACK.
-uint32_t ReliableImpl::recvAck(const Segment *seg, bool isFin)
+int32_t ReliableImpl::recvAck(const Segment *seg, bool isFin)
 {
     //TODO: Your code here
     return 0;
@@ -52,7 +52,7 @@ uint32_t ReliableImpl::recvAck(const Segment *seg, bool isFin)
 // 'block' is an array of char bytes.
 // 'blocklen' is the length of block. 
 // 'isFin'=True means a FIN segment should be sent out.
-uint32_t ReliableImpl::sendData(char *block, uint16_t blocklen, bool isFin)
+int32_t ReliableImpl::sendData(char *block, uint16_t blocklen, bool isFin)
 {
     //TODO: Your code here
     return 0;

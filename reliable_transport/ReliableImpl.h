@@ -17,8 +17,8 @@ public:
     ~ReliableImpl();
 
     static uint16_t checksum(const char *buf, ssize_t len);
-    uint32_t recvAck(const Segment *seg, bool isFin);
-    uint32_t sendData(char *block, uint16_t len, bool isFin);
+    int32_t recvAck(const Segment *seg, bool isFin);
+    int32_t sendData(char *block, uint16_t len, bool isFin);
     static void *retransmission(void *args);
 };
 
