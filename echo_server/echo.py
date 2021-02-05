@@ -8,6 +8,30 @@ class Server:
         self.port_number = port_number
     def run(self):
         # Add your code here
+        serverSocket = socket(AF_INET,SOCK_STREAM)
+        serverSocket.bind(('',self.port_number))
+        serverSocket.listen(1)
+        print('The server is ready to receive')
+        while True:
+            print('here')
+            connectionSocket, addr = serverSocket.accept()
+            while True:
+                print('hey')
+                sentence = connectionSocket.recv(1024).decode()
+                if sentence =='':
+                    print("except")
+                    connectionSocket.close()
+                    break
+                
+                #if sys.getsizeof(sentence) <= 512:
+                connectionSocket.send(sentence.encode())
+                #else:
+                #    connectionSocket.send("sentence too long".encode())
+                
+                
+            #connectionSocket.close()
+            
+            
 
 
 class Client:
