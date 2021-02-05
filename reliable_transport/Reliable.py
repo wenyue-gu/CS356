@@ -31,7 +31,6 @@ class Reliable:
         self.cwnd = MaxBDP
 
         self.timerHeap = []
-        self.persistTimer = None
         self.handlerThread = None
         self.reliImpl = None
 
@@ -70,7 +69,8 @@ class Reliable:
 
     def close(self):
         self.putTask(None)
-        self.handlerThread.join()
+        if self.handlerThread is not None:
+            self.handlerThread.join()
 
     def getTask(self):
         return self.__buf.get()  # block if queue is empty
@@ -82,12 +82,13 @@ class Reliable:
         return self.putTask(task)
 
     def recvfrom(self):
-        (seg, addr) = self.__skt.recvfrom(SegmentSize)
+        (seg, addr) = self.__skt.recvfrom(PacketSize)
         return seg
 
     # Followings are APIs that you may need to use in ReliableImpl
     # sendto: Send a well-formed segment to the destination.
-    # 'seg' should be an array of bytes (type(s)=<class 'bytes'>).
+    # 'seg' should be an array of bytes (type(s)=<class 'bytes'>) and 
+    # should not contain UDP header
     def sendto(self, seg):
         return self.__skt.sendto(seg, self.__dst)
 

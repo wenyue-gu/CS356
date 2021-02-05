@@ -2,27 +2,41 @@ import os
 import sys
 import time
 import json
+import argparse
 import subprocess
 
 # inpath = "/autograder/submission"
 # outpath = "/autograder/results"
-inpath = "./"
-outpath = "./"
 
-if len(sys.argv) > 2:
-    inpath = sys.argv[1]
-    outpath = sys.argv[2]
+parser = argparse.ArgumentParser()
+parser.add_argument("-c", action='store_true', help="use C/C++ code")
+parser.add_argument('inpath', metavar='inpath', type=str, nargs='?', default='./', help='path to the code directory')
+parser.add_argument('outpath', metavar='outpath', type=str, nargs='?',
+                    default='./', help='path to the result directory')
+args = parser.parse_args()
+
+if args.c:
+    print("Running C/C++ code ...")
+else:
+    print("Running Python code ...")
 
 
 def run(param):
-    generator = subprocess.Popen("./generator 12582912 a.txt".split(), stdout=subprocess.DEVNULL)
-    generator.wait()
+    try:
+        generator = subprocess.Popen("./generator 12582912 a.txt".split(), stdout=subprocess.DEVNULL)
+        generator.wait()
+        cmd = "%s/Receiver -p 50001 -s %d -d %d -f %d temp.txt" % (args.inpath,
+                                                                   param["synloss"], param["dataloss"], param["finloss"])
+        receiver = subprocess.Popen(cmd.split(), stdout=subprocess.DEVNULL, stderr=subprocess.PIPE)
+        if args.c:
+            cmd = "%s/Sender a.txt -p 10000 -r 50001" % args.inpath
+        else:
+            cmd = "python3 %s/Sender.py a.txt -p 10000 -r 50001" % args.inpath
+        sender = subprocess.Popen(cmd.split(), stdout=subprocess.DEVNULL, stderr=subprocess.PIPE)
+    except Exception as e:
+        print(e)
+        return 0
 
-    cmd = "%s/Receiver -p 50001 -s %d -d %d -f %d temp.txt" % (inpath,
-                                                               param["synloss"], param["dataloss"], param["finloss"])
-    receiver = subprocess.Popen(cmd.split(), stdout=subprocess.DEVNULL, stderr=subprocess.PIPE)
-    cmd = "python3 %s/Sender.py a.txt -p 10000 -r 50001" % inpath
-    sender = subprocess.Popen(cmd.split(), stdout=subprocess.DEVNULL, stderr=subprocess.PIPE)
     try:
         start = time.time()
         out, err = receiver.communicate(timeout=param["timeout"])
@@ -45,7 +59,7 @@ def run(param):
         return 0
 
     res = 1
-    with subprocess.Popen(("diff -q %s/a.txt %s/temp.txt" % (inpath, inpath)).split(), stdout=subprocess.PIPE) as proc:
+    with subprocess.Popen(("diff -q %s/a.txt %s/temp.txt" % (args.inpath, args.inpath)).split(), stdout=subprocess.PIPE) as proc:
         out, err = proc.communicate()
         if len(out) != 0:
             res = 0
@@ -88,5 +102,5 @@ res = {
     "tests": cases
 }
 
-with open('%s/results.json' % outpath, 'w') as fout:
+with open('%s/results.json' % args.outpath, 'w') as fout:
     fout.write(json.dumps(res))

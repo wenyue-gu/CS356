@@ -72,4 +72,4 @@ class Timer:
         self.enable = False
 
     def run(self):
-        self.__callback(*self.__args)
+        return self.__callback(*self.__args)

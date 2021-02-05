@@ -3,7 +3,7 @@ import argparse
 import Reliable
 
 parser = argparse.ArgumentParser()
-parser.add_argument("-p", metavar='local_port', type=int, default=10001, help="port for the local end (default 10001)")
+parser.add_argument("-p", metavar='local_port', type=int, default=10000, help="port for the local end (default 10000)")
 parser.add_argument("-r", metavar='remote_port', type=int, default=50001,
                     help="port for the remote end (default 50001)")
 parser.add_argument('filename', metavar='filename', type=str, nargs=1, help='file to be transferred')
