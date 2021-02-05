@@ -71,8 +71,8 @@ def run(param):
 params = [
     {"dataloss": 0, "synloss": 0, "finloss": 0, "timeout": 40},
     {"dataloss": 0, "synloss": 0, "finloss": 0, "timeout": 40, 'seqnum': 4294967296},
-    {"dataloss": 1, "synloss": 0, "finloss": 0, "timeout": 45},
-    {"dataloss": 1, "synloss": 0, "finloss": 0, "timeout": 45, 'seqnum': 4294957296},
+    {"dataloss": 1, "synloss": 0, "finloss": 0, "timeout": 50},
+    {"dataloss": 1, "synloss": 0, "finloss": 0, "timeout": 50, 'seqnum': 4294957296},
     {"dataloss": 5, "synloss": 0, "finloss": 0, "timeout": 60},
     {"dataloss": 5, "synloss": 0, "finloss": 0, "timeout": 60, 'seqnum': 4294864896},
     {"dataloss": 1, "synloss": 50, "finloss": 25, "timeout": 75},
