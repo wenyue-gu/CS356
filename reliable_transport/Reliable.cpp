@@ -157,6 +157,7 @@ void Reliable::handler()
             }
             else
                 this->bytesInFly += reliImpl->sendData(block.buf, block.len, false);
+            usleep(1); // Avoid sending too fast and overflowing UDP buffer at the receiver
             block.Free();
         }
 
