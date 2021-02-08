@@ -1,15 +1,20 @@
-OBJECTS=Sender.o Reliable.o ReliableImpl.o
-DEPS=Reliable.h ReliableImpl.h Util.h SafeQueue.h
+OBJECTS=Sender.o Reliable.o ReliableImpl.o Util.o Queue.o
+DEPS=Reliable.h ReliableImpl.h Util.h Queue.h
 
 Sender: $(OBJECTS)
-	g++ Sender.o Reliable.o ReliableImpl.o -o Sender -lpthread
+	gcc $(OBJECTS) -o Sender -lpthread -std=gnu99
 
-Sender.o: Sender.cpp $(DEPS)
-	g++ Sender.cpp -c
+Sender.o: Sender.c $(DEPS)
+	gcc Sender.c -c -std=gnu99
 
-Reliable.o: Reliable.cpp $(DEPS)
-	g++ Reliable.cpp -c
+Reliable.o: Reliable.c $(DEPS)
+	gcc Reliable.c -c -std=gnu99
 
-ReliableImpl.o: ReliableImpl.cpp $(DEPS)
-	g++ ReliableImpl.cpp -c
+ReliableImpl.o: ReliableImpl.c $(DEPS)
+	gcc ReliableImpl.c -c -std=gnu99
 
+Util.o: Util.c Util.h Queue.h
+	gcc Util.c -c -std=gnu99
+
+Queue.o: Queue.c Queue.h
+	gcc Queue.c -c -std=gnu99

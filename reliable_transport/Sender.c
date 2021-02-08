@@ -1,7 +1,6 @@
-#include <iostream>
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <getopt.h>
 #include "Reliable.h"
 
@@ -50,19 +49,19 @@ int main(int argc, char *argv[])
     if (optind >= argc) //getopt() cannot permutate options on MacOS
         usage(argv[0]);
 
-    Reliable reli(local_port, remote_port);
-    reli.connect(nflag, n);
+    Reliable *reli = reliCreate(local_port, remote_port);
+    reliConnect(reli, nflag, n);
 
     FILE *fin = fopen(argv[optind], "r");
     while (true)
     {
-        Task block(BLOCK_SIZE);
-        block.len = fread(block.buf, 1, block.len, fin);
-        if (block.len == 0)
+        Task *block = taskCreate(BLOCK_SIZE, false);
+        block->len = fread(block->buf, 1, BLOCK_SIZE, fin);
+        if (block->len == 0)
             break;
-        reli.send(block);
+        reliSend(reli, block); //block.buf will be free in reli
     }
     fclose(fin);
-    reli.Close();
+    reliClose(reli);
     return 0;
 }
