@@ -9,14 +9,14 @@ import subprocess
 # outpath = "/autograder/results"
 
 parser = argparse.ArgumentParser()
-parser.add_argument("-c", action='store_true', help="use C/C++ code")
+parser.add_argument("-c", action='store_true', help="use C code")
 parser.add_argument('inpath', metavar='inpath', type=str, nargs='?', default='./', help='path to the code directory')
 parser.add_argument('outpath', metavar='outpath', type=str, nargs='?',
                     default='./', help='path to the result directory')
 args = parser.parse_args()
 
 if args.c:
-    print("Running C/C++ code ...")
+    print("Running C code ...")
 else:
     print("Running Python code ...")
 

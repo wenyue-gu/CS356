@@ -93,14 +93,12 @@ void reliClose(Reliable *reli)
     reliSend(reli, fin);                 //task.fin=true;
     pthread_join(reli->thHandler, NULL); //return error number if thHanlder is not initialized
 
-    queueLock(&reli->buffer);
     while (reli->buffer.count > 0)
     {
         Task *tsk = queueFront(&reli->buffer);
         queuePop(&reli->buffer);
         Free(tsk->buf);
     }
-    queueUnlock(&reli->buffer);
     queueClear(&reli->buffer);
 
     while (reli->timerHeap.count > 0)
