@@ -67,7 +67,7 @@ Reliable *reliCreate(int hport, int rport)
     reli->cwnd = MAX_BDP;
     reli->pkt = NULL;
     reli->reliImpl = NULL;
-    queueInit(&reli->buffer, MAX_BDP / BLOCK_SIZE);
+    queueInit(&reli->buffer, 10 * MAX_BDP / BLOCK_SIZE);
     heapInit(&reli->timerHeap, timerCmp);
 
     reli->skt = socket(AF_INET, SOCK_DGRAM, 0);
