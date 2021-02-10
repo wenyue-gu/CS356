@@ -16,6 +16,6 @@ struct ReliableImpl
 ReliableImpl *reliImplCreate(Reliable *_reli, uint32_t _seqNum);
 void reliImplClose(ReliableImpl *reliImpl);
 uint16_t reliImplChecksum(const char *buf, ssize_t len);
-int32_t reliImplRecvAck(ReliableImpl *reliImpl, const Segment *seg, bool isFin);
-int32_t reliImplSendData(ReliableImpl *reliImpl, char *block, uint16_t blocklen, bool isFin);
+uint32_t reliImplRecvAck(ReliableImpl *reliImpl, const Segment *seg, bool isFin);
+uint32_t reliImplSendData(ReliableImpl *reliImpl, char *payload, uint16_t payloadlen, bool isFin);
 void *reliImplRetransmission(void *args);

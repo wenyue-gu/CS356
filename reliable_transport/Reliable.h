@@ -17,15 +17,15 @@ typedef struct Reliable Reliable;
 #define FINWAIT 2
 #define CLOSED 3
 
-typedef struct Task
+typedef struct Payload
 {
     char *buf;
     uint16_t len;
     bool fin;
-} Task;
+} Payload;
 
-Task *taskCreate(uint16_t size, bool fin);
-void taskClose(Task *tsk);
+Payload *payloadCreate(uint16_t size, bool fin);
+void payloadClose(Payload *payload);
 
 struct Reliable
 {
@@ -38,24 +38,24 @@ struct Reliable
     SafeQueue buffer;
     Heap timerHeap;
 
-    char *pkt;
+    char *seg_str;
     ReliableImpl *reliImpl;
     pthread_t thHandler;
 };
 
-Reliable *reliCreate(int hport, int rport);
+Reliable *reliCreate(unsigned hport);
 void reliClose(Reliable *reli);
-int reliConnect(Reliable *reli, bool nflag, uint32_t n);
-void *reliGetTask(Reliable *reli);
-int reliSend(Reliable *reli, Task *block);
+int reliConnect(Reliable *reli, const char *ip, unsigned rport, bool nflag, uint32_t n);
+void *reliGetPayload(Reliable *reli);           //return NULL if queue is empty
+int reliSend(Reliable *reli, Payload *payload); // block if queue is full
 
-ssize_t reliRecvfrom(Reliable *reli, char *pkt, size_t size);
+ssize_t reliRecvfrom(Reliable *reli, char *seg_str, size_t size);
 
 // Followings are APIs that you may need to use in ReliableImpl
-// Sendto: Send a well-formed segment ('pkt') to the destination.
-// 'pkt' is an array of char bytes. It should not contain UDP header.
-// 'len' is he length of 'seg'.
-ssize_t reliSendto(Reliable *reli, const char *pkt, const size_t len);
+// Sendto: Send a well-formed segment ('seg_str') to the destination.
+// 'seg_str' is an array of char bytes. It should not contain UDP header.
+// 'len' is the length of 'seg_str'.
+ssize_t reliSendto(Reliable *reli, const char *seg_str, const size_t len);
 
 // updateRWND: Update the receive window size.
 //'rwnd' means the bytes of the receive window.

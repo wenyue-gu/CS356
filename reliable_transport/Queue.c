@@ -96,6 +96,20 @@ int queuePut(SafeQueue *sq, void *el, int timeout)
     return res;
 }
 
+int queuePutUnblock(SafeQueue *sq, void *el)
+{
+    pthread_mutex_lock(&sq->mtx);
+    if (sq->count == sq->size)
+    {
+        pthread_mutex_unlock(&sq->mtx);
+        return -1;
+    }
+    int res = queuePush(sq, el);
+    pthread_cond_signal(&sq->empty);
+    pthread_mutex_unlock(&sq->mtx);
+    return res;
+}
+
 void *queueGet(SafeQueue *sq, int timeout)
 {
     void *res = NULL;
@@ -120,6 +134,21 @@ void *queueGet(SafeQueue *sq, int timeout)
             pthread_cond_wait(&sq->empty, &sq->mtx);
     }
     res = queueFront(sq);
+    queuePop(sq);
+    pthread_cond_signal(&sq->full);
+    pthread_mutex_unlock(&sq->mtx);
+    return res;
+}
+
+void *queueGetUnblock(SafeQueue *sq)
+{
+    pthread_mutex_lock(&sq->mtx);
+    if (sq->count == 0)
+    {
+        pthread_mutex_unlock(&sq->mtx);
+        return NULL;
+    }
+    void *res = queueFront(sq);
     queuePop(sq);
     pthread_cond_signal(&sq->full);
     pthread_mutex_unlock(&sq->mtx);

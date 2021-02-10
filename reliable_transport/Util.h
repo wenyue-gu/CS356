@@ -12,13 +12,14 @@
 #include <arpa/inet.h>
 #include "Queue.h"
 
-#define SEGMENT_SIZE 1024
-#define PACKET_SIZE (1024 - 8) // UDP header: 8 bytes
-#define BLOCK_SIZE (PACKET_SIZE - 16)
+#define UDP_DATAGRAM_SIZE 1024
+#define SEGMENT_SIZE (UDP_DATAGRAM_SIZE - 8) // UDP header: 8 bytes
+#define PAYLOAD_SIZE (SEGMENT_SIZE - 16)
 #define MAX_BAND (50 * 1024 * 1024 / 8)
 #define MAX_DELAY 0.5
 #define MAX_BDP ((int)(MAX_BAND * MAX_DELAY))
 #define MAX_RTO 60.0
+#define BUFFER_SIZE (10 * MAX_BDP / PAYLOAD_SIZE)
 
 #define MIN(a, b) (((a) < (b)) ? (a) : (b))
 #define MAX(a, b) (((a) > (b)) ? (a) : (b))
@@ -35,12 +36,13 @@ typedef struct Segment
 {
     uint32_t seqNum, ackNum, rwnd;
     bool ack, syn, fin;
+    uint16_t checksum;
     char *payload;
     uint16_t len;
 } Segment;
 
 Segment *segParse(Segment *seg, char *buf, size_t _len);
-size_t segPack(const Segment *seg, uint16_t checksum, char *buf, size_t size);
+size_t segPack(const Segment *seg, char *buf, size_t size);
 void segPrint(const Segment *seg);
 
 typedef struct Timer

@@ -19,11 +19,13 @@ void queueInit(SafeQueue *sq, size_t size);
 void queueClear(SafeQueue *sq);
 void queueLock(SafeQueue *sq);
 void queueUnlock(SafeQueue *sq);
-void *queueFront(const SafeQueue *sq);  //unsafe
-int queuePush(SafeQueue *sq, void *el); //unsafe
-int queuePop(SafeQueue *sq);            //unsafe
-int queuePut(SafeQueue *sq, void *el, int timeout);
-void *queueGet(SafeQueue *sq, int timeout);
+void *queueFront(const SafeQueue *sq);  //thread-unsafe
+int queuePush(SafeQueue *sq, void *el); //thread-unsafe
+int queuePop(SafeQueue *sq);            //thread-unsafe
+int queuePut(SafeQueue *sq, void *el, int timeout);  //thread-safe
+int queuePutUnblock(SafeQueue *sq, void *el);  //thread-safe
+void *queueGet(SafeQueue *sq, int timeout); //thread-safe
+void *queueGetUnblock(SafeQueue *sq); //thread-safe
 
 // Adapted from https://github.com/willemt/heap
 // Copyright (c) 2011, Willem-Hendrik Thiart

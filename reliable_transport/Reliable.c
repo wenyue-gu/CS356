@@ -1,37 +1,37 @@
 #include "Reliable.h"
 
-Task *taskCreate(uint16_t size, bool fin)
+Payload *payloadCreate(uint16_t size, bool fin)
 {
-    Task *tsk = (Task *)malloc(sizeof(Task));
-    tsk->buf = (char *)malloc(sizeof(char) * size);
-    tsk->fin = fin;
-    return tsk;
+    Payload *payload = (Payload *)malloc(sizeof(Payload));
+    payload->buf = (char *)malloc(sizeof(char) * size);
+    payload->fin = fin;
+    return payload;
 }
 
-void taskClose(Task *tsk)
+void payloadClose(Payload *payload)
 {
-    Free(tsk->buf);
-    Free(tsk);
+    Free(payload->buf);
+    Free(payload);
 }
 
-void *reliGetTask(Reliable *reli)
+void *reliGetPayload(Reliable *reli)
 {
-    return queueGet(&reli->buffer, 0);
+    return queueGetUnblock(&reli->buffer);
 }
 
-int reliSend(Reliable *reli, Task *block)
+int reliSend(Reliable *reli, Payload *payload)
 {
-    return queuePut(&reli->buffer, block, 0);
+    return queuePut(&reli->buffer, payload, 0);
 }
 
-ssize_t reliRecvfrom(Reliable *reli, char *pkt, size_t size)
+ssize_t reliRecvfrom(Reliable *reli, char *seg_str, size_t size)
 {
-    return recvfrom(reli->skt, pkt, size, 0, (struct sockaddr *)&(reli->srvaddr), &(reli->srvlen));
+    return recvfrom(reli->skt, seg_str, size, 0, (struct sockaddr *)&(reli->srvaddr), &(reli->srvlen));
 }
 
-ssize_t reliSendto(Reliable *reli, const char *pkt, const size_t len)
+ssize_t reliSendto(Reliable *reli, const char *seg_str, const size_t len)
 {
-    return sendto(reli->skt, pkt, len, 0, (struct sockaddr *)&reli->srvaddr, reli->srvlen);
+    return sendto(reli->skt, seg_str, len, 0, (struct sockaddr *)&reli->srvaddr, reli->srvlen);
 }
 
 uint32_t reliUpdateRWND(Reliable *reli, uint32_t _rwnd)
@@ -58,16 +58,16 @@ static void setSktTimeout(int skt, int timesec)
 
 static void *reliHandler(void *args);
 
-Reliable *reliCreate(int hport, int rport)
+Reliable *reliCreate(unsigned hport)
 {
     Reliable *reli = (Reliable *)malloc(sizeof(Reliable));
     reli->status = CLOSED;
     reli->bytesInFly = 0;
     reli->rwnd = MAX_BDP;
     reli->cwnd = MAX_BDP;
-    reli->pkt = NULL;
+    reli->seg_str = NULL;
     reli->reliImpl = NULL;
-    queueInit(&reli->buffer, 10 * MAX_BDP / BLOCK_SIZE);
+    queueInit(&reli->buffer, BUFFER_SIZE);
     heapInit(&reli->timerHeap, timerCmp);
 
     reli->skt = socket(AF_INET, SOCK_DGRAM, 0);
@@ -78,26 +78,21 @@ Reliable *reliCreate(int hport, int rport)
     addr.sin_addr.s_addr = htonl(INADDR_ANY);
     bind(reli->skt, (struct sockaddr *)&addr, sizeof(addr));
 
-    reli->srvaddr.sin_family = AF_INET;
-    reli->srvaddr.sin_port = htons(rport);
-    reli->srvaddr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
-    reli->srvlen = sizeof(reli->srvaddr);
-
     srand((unsigned)time(NULL));
     return reli;
 }
 
 void reliClose(Reliable *reli)
 {
-    Task *fin = taskCreate(0, true);
-    reliSend(reli, fin);                 //task.fin=true;
+    Payload *fin = payloadCreate(0, true);
+    reliSend(reli, fin);                 //payload.fin=true;
     pthread_join(reli->thHandler, NULL); //return error number if thHanlder is not initialized
 
     while (reli->buffer.count > 0)
     {
-        Task *tsk = queueFront(&reli->buffer);
+        Payload *payload = queueFront(&reli->buffer);
         queuePop(&reli->buffer);
-        Free(tsk->buf);
+        Free(payload->buf);
     }
     queueClear(&reli->buffer);
 
@@ -110,28 +105,33 @@ void reliClose(Reliable *reli)
     heapClear(&reli->timerHeap);
 
     reliImplClose(reli->reliImpl);
-    Free(reli->pkt);
+    Free(reli->seg_str);
     Free(reli);
 }
 
-int reliConnect(Reliable *reli, bool nflag, uint32_t n)
+int reliConnect(Reliable *reli, const char *ip, unsigned rport, bool nflag, uint32_t n)
 {
+    reli->srvaddr.sin_family = AF_INET;
+    reli->srvaddr.sin_port = htons(rport);
+    reli->srvaddr.sin_addr.s_addr = inet_addr(ip);
+    reli->srvlen = sizeof(reli->srvaddr);
+
     setSktTimeout(reli->skt, 1);
-
-    reli->pkt = (char *)malloc(sizeof(char) * PACKET_SIZE);
-
+    reli->seg_str = (char *)malloc(sizeof(char) * SEGMENT_SIZE);
     uint32_t seqNum = nflag ? n : rand32();
-    reli->status = SYNSENT;
+
     int synretry = 0;
+    reli->status = SYNSENT;
     while (reli->status != CONNECTED)
     {
-        Segment seg = {seqNum, 0, 0, 0, 1, 0, NULL, 0};
-        ssize_t len = segPack(&seg, 0, reli->pkt, PACKET_SIZE);
-        len = segPack(&seg, reliImplChecksum(reli->pkt, len), reli->pkt, PACKET_SIZE);
-        reliSendto(reli, reli->pkt, len);
-
-        len = reliRecvfrom(reli, reli->pkt, PACKET_SIZE);
-        if (len < 0 || reliImplChecksum(reli->pkt, len) != 0)
+        Segment seg = {seqNum, 0, 0, 0, 1, 0, 0, NULL, 0};
+        ssize_t len = segPack(&seg, reli->seg_str, SEGMENT_SIZE);
+        seg.checksum = reliImplChecksum(reli->seg_str, len);
+        len = segPack(&seg, reli->seg_str, SEGMENT_SIZE);
+        reliSendto(reli, reli->seg_str, len);
+        
+        len = reliRecvfrom(reli, reli->seg_str, SEGMENT_SIZE);
+        if (len < 0 || reliImplChecksum(reli->seg_str, len) != 0)
         {
             if (synretry > 60)
             {
@@ -142,10 +142,11 @@ int reliConnect(Reliable *reli, bool nflag, uint32_t n)
             continue;
         }
 
-        segParse(&seg, reli->pkt, len);
+        segParse(&seg, reli->seg_str, len);
         if (seg.syn && seg.ack && seg.ackNum == (seqNum + 1))
             reli->status = CONNECTED;
     }
+
     setSktTimeout(reli->skt, 0);
     reli->reliImpl = reliImplCreate(reli, seqNum);
     pthread_create(&(reli->thHandler), NULL, reliHandler, reli);
@@ -166,23 +167,23 @@ static void *reliHandler(void *args)
 
         if (FD_ISSET(reli->skt, &inputs))
         {
-            ssize_t len = reliRecvfrom(reli, reli->pkt, PACKET_SIZE);
-            if (len <= 0 || reliImplChecksum(reli->pkt, len) != 0)
+            ssize_t len = reliRecvfrom(reli, reli->seg_str, SEGMENT_SIZE);
+            if (len <= 0 || reliImplChecksum(reli->seg_str, len) != 0)
                 goto outputLabel;
             Segment seg;
-            segParse(&seg, reli->pkt, len);
+            segParse(&seg, reli->seg_str, len);
             if (reli->status == CONNECTED)
             {
                 if (seg.ack && !seg.syn && !seg.fin)
-                    reli->bytesInFly += reliImplRecvAck(reli->reliImpl, &seg, false);
+                    reli->bytesInFly -= reliImplRecvAck(reli->reliImpl, &seg, false);
             }
             else if (reli->status == FINWAIT)
             {
                 if (seg.ack && !seg.syn && !seg.fin)
-                    reli->bytesInFly += reliImplRecvAck(reli->reliImpl, &seg, false);
+                    reli->bytesInFly -= reliImplRecvAck(reli->reliImpl, &seg, false);
                 else if (seg.ack && seg.fin)
                 {
-                    reli->bytesInFly += reliImplRecvAck(reli->reliImpl, &seg, true);
+                    reli->bytesInFly -= reliImplRecvAck(reli->reliImpl, &seg, true);
                     reli->status = CLOSED;
                 }
             }
@@ -193,16 +194,18 @@ static void *reliHandler(void *args)
         {
             if (reli->status != CONNECTED || reli->bytesInFly >= MIN(reli->rwnd, reli->cwnd))
                 goto timerLabel;
-            Task *block = reliGetTask(reli);
-            if (block->fin)
+            Payload *payload = reliGetPayload(reli);
+            if (payload == NULL)
+                goto timerLabel;
+            if (payload->fin)
             {
                 reli->bytesInFly += reliImplSendData(reli->reliImpl, NULL, 0, true);
                 reli->status = FINWAIT;
             }
             else
-                reli->bytesInFly += reliImplSendData(reli->reliImpl, block->buf, block->len, false);
+                reli->bytesInFly += reliImplSendData(reli->reliImpl, payload->buf, payload->len, false);
             usleep(1); // Avoid sending too fast and overflowing UDP buffer at the receiver
-            taskClose(block);
+            payloadClose(payload);
         }
 
     timerLabel:;

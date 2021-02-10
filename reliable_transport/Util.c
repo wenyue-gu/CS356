@@ -65,19 +65,19 @@ Segment *segParse(Segment *seg, char *buf, size_t _len)
     seg->ack = ((flags & 4) == 4);
     seg->syn = ((flags & 2) == 2);
     seg->fin = ((flags & 1) == 1);
-    // seg->checksum = ntohs(*(uint16_t *)(buf + 14));
+    seg->checksum = ntohs(*(uint16_t *)(buf + 14));
     seg->payload = buf + 16;
     seg->len = _len - 16;
     return seg;
 }
 
-size_t segPack(const Segment *seg, uint16_t checksum, char *buf, size_t size)
+size_t segPack(const Segment *seg, char *buf, size_t size)
 {
     uint32ToBytes(seg->seqNum, buf);
     uint32ToBytes(seg->ackNum, buf + 4);
     uint32ToBytes(seg->rwnd, buf + 8);
     uint16ToBytes(seg->ack * 4 + seg->syn * 2 + seg->fin, buf + 12);
-    uint16AddrBytes(checksum, buf + 14);
+    uint16AddrBytes(seg->checksum, buf + 14);
     if (seg->payload != NULL && size - 16 >= seg->len)
         memcpy(buf + 16, seg->payload, seg->len);
     return seg->len + 16;
