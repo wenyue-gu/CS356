@@ -9,7 +9,7 @@ void usage(char *name)
     printf("usage: %s [filename]\n", name);
     printf("    -h,                   show help message and exit\n");
     printf("    -d ip_address         IP address of remote end (default 127.0.0.1)\n");
-    printf("    -r remote_port,       port for the remote end (default 50001)\n");
+    printf("    -r remote_port,       port for the remote end (default 7090)\n");
     printf("    -p local_port,        port for the local end (default 10000)\n");
     printf("    -n sequence_number,   initial sequence number in SYN (default at random)\n");
     exit(0);
@@ -24,7 +24,7 @@ int main(int argc, char *argv[])
         {"sequence_number", required_argument, NULL, 'n'},
         {0, 0, 0, 0}};
 
-    int c, local_port = 10000, remote_port = 50001;
+    int c, local_port = 10000, remote_port = 7090;
     char *ip_address = "127.0.0.1";
     uint32_t n = 0;
     bool nflag = false;
