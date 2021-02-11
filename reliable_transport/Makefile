@@ -18,3 +18,6 @@ Util.o: Util.c Util.h Queue.h
 
 Queue.o: Queue.c Queue.h
 	gcc Queue.c -c -std=gnu99
+
+clean:
+	rm *.o

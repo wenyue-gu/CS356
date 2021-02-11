@@ -57,7 +57,16 @@ int main(int argc, char *argv[])
         usage(argv[0]);
 
     Reliable *reli = reliCreate(local_port);
-    reliConnect(reli, ip_address, remote_port, nflag, n);
+    if (reli == NULL)
+    {
+        fprintf(stderr, "Socket error");
+        return 0;
+    }
+    if (reliConnect(reli, ip_address, remote_port, nflag, n) == -1)
+    {
+        fprintf(stderr, "Connect error");
+        return 0;
+    }
 
     FILE *fin = fopen(argv[optind], "r");
     while (true)

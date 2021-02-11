@@ -10,6 +10,9 @@ Payload *payloadCreate(uint16_t size, bool fin)
 
 void payloadClose(Payload *payload)
 {
+    if (payload == NULL)
+        return;
+
     Free(payload->buf);
     Free(payload);
 }
@@ -71,6 +74,11 @@ Reliable *reliCreate(unsigned hport)
     heapInit(&reli->timerHeap, timerCmp);
 
     reli->skt = socket(AF_INET, SOCK_DGRAM, 0);
+    if (reli->skt == -1)
+    {
+        reliClose(reli);
+        return NULL;
+    }
 
     struct sockaddr_in addr;
     addr.sin_family = AF_INET;
@@ -84,6 +92,9 @@ Reliable *reliCreate(unsigned hport)
 
 void reliClose(Reliable *reli)
 {
+    if (reli == NULL)
+        return;
+
     Payload *fin = payloadCreate(0, true);
     reliSend(reli, fin);                 //payload.fin=true;
     pthread_join(reli->thHandler, NULL); //return error number if thHanlder is not initialized
@@ -111,6 +122,9 @@ void reliClose(Reliable *reli)
 
 int reliConnect(Reliable *reli, const char *ip, unsigned rport, bool nflag, uint32_t n)
 {
+    if (reli == NULL)
+        return -1;
+
     reli->srvaddr.sin_family = AF_INET;
     reli->srvaddr.sin_port = htons(rport);
     reli->srvaddr.sin_addr.s_addr = inet_addr(ip);
@@ -129,7 +143,7 @@ int reliConnect(Reliable *reli, const char *ip, unsigned rport, bool nflag, uint
         seg.checksum = reliImplChecksum(reli->seg_str, len);
         len = segPack(&seg, reli->seg_str, SEGMENT_SIZE);
         reliSendto(reli, reli->seg_str, len);
-        
+
         len = reliRecvfrom(reli, reli->seg_str, SEGMENT_SIZE);
         if (len < 0 || reliImplChecksum(reli->seg_str, len) != 0)
         {
