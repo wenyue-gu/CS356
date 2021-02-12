@@ -133,6 +133,7 @@ int reliConnect(Reliable *reli, const char *ip, unsigned rport, bool nflag, uint
     setSktTimeout(reli->skt, 1);
     reli->seg_str = (char *)malloc(sizeof(char) * SEGMENT_SIZE);
     uint32_t seqNum = nflag ? n : rand32();
+    uint32_t srvSeqNum = 0;
 
     int synretry = 0;
     reli->status = SYNSENT;
@@ -158,11 +159,14 @@ int reliConnect(Reliable *reli, const char *ip, unsigned rport, bool nflag, uint
 
         segParse(&seg, reli->seg_str, len);
         if (seg.syn && seg.ack && seg.ackNum == (seqNum + 1))
+        {
             reli->status = CONNECTED;
+            srvSeqNum = seg.seqNum;
+        }
     }
 
     setSktTimeout(reli->skt, 0);
-    reli->reliImpl = reliImplCreate(reli, seqNum);
+    reli->reliImpl = reliImplCreate(reli, seqNum, srvSeqNum);
     pthread_create(&(reli->thHandler), NULL, reliHandler, reli);
     return 0;
 }

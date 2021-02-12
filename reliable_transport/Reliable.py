@@ -39,7 +39,7 @@ class Reliable:
     def getskt(self):
         return self.__skt
 
-    def connect(self, ip='127.0.0.1', rport=50001, n=None):
+    def connect(self, ip='127.0.0.1', rport=7090, n=None):
         self.__dst = (ip, rport)
 
         self.__skt.settimeout(1)
@@ -70,7 +70,7 @@ class Reliable:
                 self.status = CONNECTED
 
         self.__skt.settimeout(None)
-        self.reliImpl = ReliableImpl(self, seqNum)
+        self.reliImpl = ReliableImpl(self, seqNum, seg.seqNum)
         self.handlerThread = Handler(self, self.reliImpl)
         self.handlerThread.start()
         return 0
@@ -81,7 +81,7 @@ class Reliable:
             self.handlerThread.join()
 
     def getPayload(self):
-        return self.__buf.get(block=False) #raise exception if queue is empty
+        return self.__buf.get(block=False)  # raise exception if queue is empty
 
     def send(self, payload):
         return self.__buf.put(payload)  # block if queue is full
