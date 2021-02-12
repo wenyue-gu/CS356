@@ -8,12 +8,12 @@ typedef struct ReliableImpl ReliableImpl;
 struct ReliableImpl
 {
     Reliable *reli;
-    uint32_t seqNum;
+    uint32_t seqNum, srvAckNum;
 
     // Variables for maintaining sliding window
 };
 
-ReliableImpl *reliImplCreate(Reliable *_reli, uint32_t _seqNum);
+ReliableImpl *reliImplCreate(Reliable *_reli, uint32_t _seqNum, uint32_t _srvSeqNum);
 void reliImplClose(ReliableImpl *reliImpl);
 uint16_t reliImplChecksum(const char *buf, ssize_t len);
 uint32_t reliImplRecvAck(ReliableImpl *reliImpl, const Segment *seg, bool isFin);

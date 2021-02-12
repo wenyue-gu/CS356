@@ -9,10 +9,12 @@ class ReliableImpl:
     # 'reli' (self.reli) provides an interface to call functions of
     # class Reliable in ReliableImpl.
     # 'seqNum' indicates the initail sequence number in the SYN segment.
-    def __init__(self, reli=None, seqNum=None):
+    # 'srvSeqNum' indicates the initial sequence number in the SYNACK segment.
+    def __init__(self, reli=None, seqNum=None, srvSeqNum=None):
         super().__init__()
         self.reli = reli
         self.seqNum = seqNum
+        self.srvAckNum = (srvSeqNum+1) % SeqNumSpace  # srvAckNum remains unchanged in this lab
         # TODO: Your code here
         pass
 

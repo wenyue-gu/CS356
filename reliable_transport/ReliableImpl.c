@@ -6,11 +6,13 @@
 // sliding window states.
 // 'reli' provides an interface to call functions of struct Reliable.
 // 'seqNum' indicates the initail sequence number in the SYN segment.
-ReliableImpl *reliImplCreate(Reliable *_reli, uint32_t _seqNum)
+// 'srvSeqNum' indicates the initial sequence number in the SYNACK segment.
+ReliableImpl *reliImplCreate(Reliable *_reli, uint32_t _seqNum, uint32_t _srvSeqNum)
 {
     ReliableImpl *reliImpl = (ReliableImpl *)malloc(sizeof(ReliableImpl));
     reliImpl->reli = _reli;
     reliImpl->seqNum = _seqNum;
+    reliImpl->srvAckNum = _srvSeqNum + 1; //srvAckNum remains unchanged in this lab
 
     //TODO: Your code here
 
