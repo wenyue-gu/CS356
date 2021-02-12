@@ -62,11 +62,13 @@ int main(int argc, char *argv[])
         fprintf(stderr, "Socket error");
         return 0;
     }
+    printf("Connecting...\n");
     if (reliConnect(reli, ip_address, remote_port, nflag, n) == -1)
     {
         fprintf(stderr, "Connect error");
         return 0;
     }
+    printf("Connected to %s:%d\n", ip_address, remote_port);
 
     FILE *fin = fopen(argv[optind], "r");
     while (true)

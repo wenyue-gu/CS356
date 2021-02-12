@@ -14,7 +14,9 @@ parser.add_argument('filename', metavar='filename', type=str, nargs=1, help='fil
 args = parser.parse_args()
 
 reli = Reliable.Reliable(args.p)
+print("Connecting...")
 reli.connect(args.d, args.r, args.n)
+print("Connected to %s:%d" % (args.d, args.r))
 
 filename = sys.argv[1]
 fin = open(args.filename[0], "rb")
