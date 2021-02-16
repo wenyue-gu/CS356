@@ -2,16 +2,16 @@ import os
 import sys
 import time
 
-SegmentSize = 1024
-PacketSize = SegmentSize-8
-BlockSize = PacketSize-16
+UDPDatagramSize = 1024
+SegmentSize = UDPDatagramSize - 8
+PayloadSize = SegmentSize-16
 MaxBandwidth = int(50*1024*1024/8)  # 50Mbps
 MaxDelay = 0.5  # 500ms
 MaxRTO = 60
 MaxBDP = int(MaxBandwidth*MaxDelay)
-MaxBufSize = int(MaxBDP/BlockSize)
 SeqNumSpace = (1 << 32)
 HalfSeqNumSpace = (1 << 31)
+BufferSize = int(10*MaxBDP/PayloadSize)
 
 
 def ErrorHandler(msg):

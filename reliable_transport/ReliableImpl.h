@@ -2,24 +2,20 @@
 
 #include "Util.h"
 
-class ReliableImpl;
+typedef struct ReliableImpl ReliableImpl;
 #include "Reliable.h"
 
-class ReliableImpl
+struct ReliableImpl
 {
     Reliable *reli;
-    uint32_t seqNum;
+    uint32_t seqNum, srvAckNum;
 
-    //TODO: Your code here
-
-public:
-    ReliableImpl(Reliable *_reli, uint32_t _seqNum);
-    ~ReliableImpl();
-
-    static uint16_t checksum(const char *buf, ssize_t len);
-    int32_t recvAck(const Segment *seg, bool isFin);
-    int32_t sendData(char *block, uint16_t len, bool isFin);
-    static void *retransmission(void *args);
+    // Variables for maintaining sliding window
 };
 
-//TODO: You can define additional class/struct here
+ReliableImpl *reliImplCreate(Reliable *_reli, uint32_t _seqNum, uint32_t _srvSeqNum);
+void reliImplClose(ReliableImpl *reliImpl);
+uint16_t reliImplChecksum(const char *buf, ssize_t len);
+uint32_t reliImplRecvAck(ReliableImpl *reliImpl, const Segment *seg, bool isFin);
+uint32_t reliImplSendData(ReliableImpl *reliImpl, char *payload, uint16_t payloadlen, bool isFin);
+void *reliImplRetransmission(void *args);

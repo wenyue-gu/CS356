@@ -9,14 +9,14 @@ import subprocess
 # outpath = "/autograder/results"
 
 parser = argparse.ArgumentParser()
-parser.add_argument("-c", action='store_true', help="use C/C++ code")
+parser.add_argument("-c", action='store_true', help="use C code")
 parser.add_argument('inpath', metavar='inpath', type=str, nargs='?', default='./', help='path to the code directory')
 parser.add_argument('outpath', metavar='outpath', type=str, nargs='?',
                     default='./', help='path to the result directory')
 args = parser.parse_args()
 
 if args.c:
-    print("Running C/C++ code ...")
+    print("Running C code ...")
 else:
     print("Running Python code ...")
 
@@ -69,8 +69,8 @@ def run(param):
 
 
 params = [
-    {"dataloss": 0, "synloss": 0, "finloss": 0, "timeout": 40},
-    {"dataloss": 0, "synloss": 0, "finloss": 0, "timeout": 40, 'seqnum': 4294967296},
+    {"dataloss": 0, "synloss": 0, "finloss": 0, "timeout": 35, 'seqnum': 0},
+    {"dataloss": 0, "synloss": 0, "finloss": 0, "timeout": 35, 'seqnum': 4294967296},
     {"dataloss": 1, "synloss": 0, "finloss": 0, "timeout": 50},
     {"dataloss": 1, "synloss": 0, "finloss": 0, "timeout": 50, 'seqnum': 4294957296},
     {"dataloss": 5, "synloss": 0, "finloss": 0, "timeout": 60},
