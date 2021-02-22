@@ -53,7 +53,11 @@ def run(param):
         receiver.kill()
         sender.kill()
         out, err = receiver.communicate()
+        if len(err) != 0:
+            print(err.decode())
         out, err = sender.communicate()
+        if len(err) != 0:
+            print(err.decode())
         if Exception is subprocess.TimeoutExpired:
             print("Timed out after %d seconds" % param["timeout"])
         else:
