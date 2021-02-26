@@ -43,6 +43,7 @@ uint16_t reliImplChecksum(const char *buf, ssize_t len)
 // The checksum will be verified before calling this function, so you
 // do not need to verify checksum again in this function.
 // Remember to call reliUpdateRWND to update the receive window size.
+// You should call reliImplFastRetransmission, updateRTO and updateCWND properly.
 // Note that this function should return the reduction of bytes in flight
 // (a non-negative integer) so that Reliable.h/c can update the bytes in flight.
 // 'seg' is an instance of struct Segment (see Util.h/c)
@@ -66,18 +67,22 @@ uint32_t reliImplRecvAck(ReliableImpl *reliImpl, const Segment *seg, bool isFin)
 uint32_t reliImplSendData(ReliableImpl *reliImpl, char *payload, uint16_t payloadlen, bool isFin)
 {
     //TODO: Your code here
-
     return 0;
 }
 
 // reliImplRetransmission: A callback function for retransmission
 // when you call reliSetTimer.
+// You should call updateCWND to update the congestion window size.
 void *reliImplRetransmission(void *args)
 {
     //TODO: Your code here
     return NULL;
 }
 
+// fastRetransmission: The reliImplRecvAck uses this function instead of 
+// reliImplRetransmission to do fast retransmission when reliImplRecvAck 
+// considers some segments should be fast retransmitted. 
+// You should call updateCWND to update the congestion window size.
 static void *reliImplFastRetransmission(void *args)
 {
     //TODO: Your code here

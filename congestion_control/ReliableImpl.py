@@ -32,6 +32,7 @@ class ReliableImpl:
     # The checksum will be verified before calling this function, so you
     # do not need to verify checksum again in this function.
     # Remember to call self.reli.updateRWND to update the receive window size.
+    # You should call fastRetransmission, Congestion.updateRTO and Congestion.updateCWND properly.
     # Note that this function should return the reduction of bytes in flight
     # (a non-negative integer) so that class Reliable can update the bytes in flight.
     # 'seg' is an instance of class Segment (see Util.py)
@@ -54,11 +55,15 @@ class ReliableImpl:
 
     # retransmission: A callback function for retransmission when you call
     # self.reli.setTimer.
+    # You should call Congestion.updateCWND to update the congestion window size.
     # In Python, you are allowed to modify the arguments of this function.
     def retransmission(self, seqNum):
         # TODO: Your code here
         pass
 
+    # fastRetransmission: The recvAck uses this function instead of retransmission to
+    # do fast retransmission when recvAck considers some segments should be fast retransmitted.
+    # You should call Congestion.updateCWND to update the congestion window size.
     # In Python, you are allowed to modify the arguments of this function.
     def fastRetransmission(self, seqNum):
         # TODO: Your code her

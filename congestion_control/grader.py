@@ -154,7 +154,7 @@ def gradeFairness(f):
 
 covg = 5
 wind = 30
-fairTestTime = covg+covg+wind+5+covg+covg
+fairTestTime = covg+covg+wind+covg+covg
 
 
 def getFairness(out1, out2):
@@ -170,14 +170,10 @@ def getFairness(out1, out2):
         seq2.append([int(t), float(x)])
     l2 = len(seq2)-covg
 
-    if l1 < covg+wind or l2 < covg+wind:
-        return 0.5  # fairnessIndex(0, 1)
     i = 0
     j = covg-1
     while i < l1 and seq1[i][0] < seq2[j][0]:
         i += 1
-    if i+wind > l1:
-        return 0.5
 
     s1 = 0
     s2 = 0
@@ -290,12 +286,12 @@ killprocs()
 params = [
     {"pairs": 1, "bandwidth": 2500, "delay": 40, "buffer": 25, "timeout": 60},
     {"pairs": 1, "bandwidth": 2000, "delay": 80, "buffer": 40, "timeout": 60},
-    {"pairs": 1, "bandwidth": 1200, "delay": 80, "buffer": 24, "timeout": 60},
+    {"pairs": 1, "bandwidth": 800, "delay": 125, "buffer": 25, "timeout": 60},
     {"pairs": 1, "bandwidth": 10000, "delay": 22, "buffer": 55, "timeout": 60},
     {"pairs": 1, "bandwidth": 15000, "delay": 20, "buffer": 75, "timeout": 60},
     {"pairs": 2, "bandwidth": 2500, "delay": 40, "buffer": 25, "timeout": 2*fairTestTime+20},
     {"pairs": 2, "bandwidth": 2000, "delay": 80, "buffer": 40, "timeout": 2*fairTestTime+20},
-    {"pairs": 2, "bandwidth": 1200, "delay": 80, "buffer": 24, "timeout": 2*fairTestTime+20},
+    {"pairs": 2, "bandwidth": 800, "delay": 125, "buffer": 25, "timeout": 2*fairTestTime+20},
     {"pairs": 2, "bandwidth": 10000, "delay": 22, "buffer": 55, "timeout": 2*fairTestTime+20},
     {"pairs": 2, "bandwidth": 15000, "delay": 20, "buffer": 75, "timeout": 2*fairTestTime+20}
 ]
