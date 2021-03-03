@@ -16,6 +16,8 @@ class ReliableImpl:
         self.seqNum = seqNum
         self.srvAckNum = (srvSeqNum+1) % SeqNumSpace  # srvAckNum remains unchanged in this lab
         # TODO: Your code here
+        self.lastcheck = seqNum
+        self.first = True
         pass
 
     # checksum: 16-bit Internet checksum (refer to RFC 1071 for calculation)
@@ -25,7 +27,6 @@ class ReliableImpl:
     @staticmethod
     def checksum(s):
         # TODO: Your code here
-        #s = '\x00\x01\xf2\x03\xf4\xf5\xf6\xf7'
         s1 = 0
         s2 = 0
         for i in range(len(s)):
@@ -52,8 +53,11 @@ class ReliableImpl:
                 if s2<256:
                     a = False
         ret = s1*256 + s2
-        print(hex(ret))
-        return ret
+        while (ret>>16):
+           ret = (ret & 0xffff) + (ret >> 16)
+        r = ~ret+16**4
+        #print(r)
+        return r
 
 
 
@@ -70,9 +74,16 @@ class ReliableImpl:
     # 'isFin'=True means 'seg' is a FINACK, otherwise it is an ACK.
     def recvAck(self, seg, isFin):
         # TODO: Your code here
-        return 0
-# scp -oProxyCommand="ssh -W %h:%p wg74@vcm-18887.vm.duke.edu"  /home/vcm/compsci_ece356_spring2021_labs/reliable_transport/Receiver  wg74@cs356.cs.duke.edu:~/
-# ssh -oProxyCommand="ssh -W %h:%p wg74@vcm-18887.vm.duke.edu"  wg74@cs356.cs.duke.edu "pkill -u wg74 Receiver; ./Receiver temp.txt -p 7017 -s 50 -f 25"
+        self.reli.updateRWND(seg.rwnd)
+        n=0
+        if seg.ackNum>=self.lastcheck:
+            n = seg.ackNum - self.lastcheck
+        else:
+            n = 16**4 - self.lastcheck + seg.ackNum
+        if isFin:
+            print(seg.ackNum)
+        self.lastcheck = seg.ackNum
+        return n
 
     # sendData: This function is called when a piece of payload should be sent out.
     # You can call Segment.pack in Util.py to encapsulate a segment and
@@ -84,14 +95,38 @@ class ReliableImpl:
     # 'isFin'=True means a FIN segment should be sent out.
     def sendData(self, payload, isFin):
         # TODO: Your code here
-        return 0
+        fin=0
+        if isFin:
+            fin=1
+        if self.first:
+            self.first = False
+            self.seqNum+=1
+            print(self.seqNum)
+
+        ret = len(payload)
+        seq = self.seqNum
+        k = Segment.pack(seq, self.srvAckNum, 0, 0, 0, fin, 0, payload)
+        s = self.checksum(k)
+        actual = Segment.pack(seq, self.srvAckNum, 0, 0, 0, fin, s, payload)
+        self.reli.sendto(actual)
+        self.seqNum+=ret
+        
+        self.reli.setTimer(0.3, self.retransmission, (0.6, seq, s, payload, fin))
+
+        return ret
 
     # retransmission: A callback function for retransmission when you call
     # self.reli.setTimer.
     # In Python, you are allowed to modify the arguments of this function.
-    def retransmission(self, seqNum):
+    def retransmission(self, time, seq, s, payload, fin):
         # TODO: Your code here
+        if seq<self.lastcheck:
+            return
+        actual = Segment.pack(seq, self.srvAckNum, 0, 0, 0, fin, s, payload)
+        self.reli.sendto(actual)
+        self.reli.setTimer(time, self.retransmission, (time*2,seq, s, payload, fin))
         pass
+
 
 
 # scp -oProxyCommand="ssh -W %h:%p wg74@vcm-18887.vm.duke.edu" /home/vcm/compsci_ece356_spring2021_labs/reliable_transport/trace1.pcap ~/Documents/ECE356
