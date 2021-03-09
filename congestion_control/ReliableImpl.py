@@ -77,14 +77,12 @@ class ReliableImpl:
         r = ~ret+16**4
         return r
 
-    def checkInWrap(head, tail, index){
+    def checkInWrap(head, tail, index):
         if(head<=tail and (index<head or tail<=index)):
             return False
         if(head>tail and (index<head and tail<=index)):
             return False
         return True
-        
-    }
 
     # recvAck: When an ACK or FINACK segment is received, the framework will
     # call this function to handle the segment.
