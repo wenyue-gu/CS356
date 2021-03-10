@@ -23,7 +23,7 @@ def updateCWND(reli, reliImpl, acked=False, loss=False, fast=False):
     if reliImpl.congestionStatus==1:
         if acked:
             reli.cwnd = reli.cwnd+PayloadSize
-        else if loss:
+        elif loss:
             ssthresh = max(reli.cwnd/2, PayloadSize)
             reli.cwnd=ssthresh
             reliImpl.congestionStatus=2

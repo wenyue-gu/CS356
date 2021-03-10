@@ -125,7 +125,7 @@ class ReliableImpl:
         ts = self.queue[0].timestamp
         # call updateRTO if the segment is not retransmitted (resendFlag is false)
         if(resendFlag==False):
-            updateRTO(self.reli, self, ts):
+            updateRTO(self.reli, self, ts)
 
         # while queue that stores the sent segments is not empty
         while(self.queue.empty()==False):
