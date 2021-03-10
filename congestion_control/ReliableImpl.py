@@ -107,7 +107,7 @@ class ReliableImpl:
                 return 0
         
         # check whether the segment has ever been acked
-        wrap = checkInWrap(self.lastcheck+1, self.seqNum+2, seq.ackNum)
+        wrap = self.checkInWrap(self.lastcheck+1, self.seqNum+2, seg.ackNum)
         # return 0 if the segment is already acked before # ie not wraparound and acknum smaller
         if wrap==False and seg.ackNum < self.lastcheck:
             return 0
