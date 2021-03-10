@@ -30,7 +30,7 @@ def updateCWND(reli, reliImpl, acked=False, loss=False, fast=False):
         if reli.cwnd>ssthresh:
             reliImpl.congestionStatus=2
 
-    else if reliImpl.congestionStatus==2:
+    elif reliImpl.congestionStatus==2:
 
     pass
 
