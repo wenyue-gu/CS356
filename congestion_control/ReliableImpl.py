@@ -5,7 +5,7 @@ from Congestion import *
 
 # You can add necessary functions here
 class sgm:
-  def __init__(self, timer, segnum, resendFlag, timestamp, value, rtp):
+  def __init__(self, timer, segnum, resendFlag, timestamp, value, rto):
       self.timer = timer
       self.segnum = segnum
       self.resendFlag = resendFlag
@@ -34,7 +34,7 @@ class ReliableImpl:
         self.congestionStatus = 1 #slow start, 2=avoidance
         self.srtt=0
         self.ssthresh=30000
-        self.rto=MIN_RTO
+        self.rto=MinRTO
         self.rttvar=0
         self.FRCount = 0
         pass
@@ -180,9 +180,9 @@ class ReliableImpl:
         # create a resendFlag (false) for the segment
         flag = False
         # call get_current_time(C)/time.time(Python) to get current timestamp
-        time = time.time()
+        t = time.time()
         # push a struct including the timer, resendFlag, current timestamp, and necessary variables into the sent segment queue
-        sgment = sgm(timer, seq, flag, time, actual,0.3)
+        sgment = sgm(timer, seq, flag, t, actual,0.3)
         self.queue.append(sgment)
         # update largestSent
         self.seqNum+=ret
