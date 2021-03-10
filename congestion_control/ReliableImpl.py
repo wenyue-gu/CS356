@@ -28,7 +28,7 @@ class ReliableImpl:
         self.srvAckNum = (srvSeqNum+1) % SeqNumSpace  # srvAckNum remains unchanged in this lab
         # TODO: Your code here
         self.lastcheck = seqNum
-        self.largestsent = seqNum
+        #self.largestsent = seqNum
         self.first = True
         self.queue = deque([])
         self.congestionStatus = 1 #slow start, 2=avoidance
