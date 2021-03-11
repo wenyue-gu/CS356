@@ -9,7 +9,6 @@ alpha = 0.125
 beta = 0.25
 
 # You can add variables here
-first = True
 
 
 # updateCWND: Update reli.cwnd according to the congestion control algorithm.
@@ -30,14 +29,14 @@ def updateCWND(reli, reliImpl, acked=False, loss=False, fast=False):
         #     else if a segment is lost
         elif loss:
         #         set ssthresh as maximum of half of current CWND and PAYLOAD_SIZE
-            ssthresh = max(reli.cwnd/2, PayloadSize)
+            reliImpl.ssthresh = max(reli.cwnd/2, PayloadSize)
         #         set CWND as updated ssthresh
-            reli.cwnd=ssthresh
+            reli.cwnd=reliImpl.ssthresh
         #         set congestionStatus as congestion avoidance
             reliImpl.congestionStatus=2
 
         #     if CWND is larger than ssthresh
-        if reli.cwnd>ssthresh:
+        if reli.cwnd>reliImpl.ssthresh:
         #        set congestionStatus as congestion avoidance
             reliImpl.congestionStatus=2
 
@@ -50,9 +49,9 @@ def updateCWND(reli, reliImpl, acked=False, loss=False, fast=False):
         #     else if a segment is lost
         elif loss:
         #         set ssthresh as maximum of half of current CWND and PAYLOAD_SIZE
-            ssthresh = max(reli.cwnd/2, PayloadSize)
+            reliImpl.ssthresh = max(reli.cwnd/2, PayloadSize)
         #         set CWND as updated ssthresh
-            reli.cwnd=ssthresh
+            reli.cwnd=reliImpl.ssthresh
 
     pass
 
@@ -68,11 +67,11 @@ def updateRTO(reli, reliImpl, timestamp):
     # call get_current_time(C)/time.time(Python) and calculate the RTT
     rtt = time.time()-timestamp
     # if it is the first RTT measurement
-    if(first==True):
+    if(reliImpl.first2==True):
         #     calculate rttvar
         #     calculate srtt
         #     calculate rto
-        first=False
+        reliImpl.first2==False
         reliImpl.srtt = rtt
         reliImpl.rttvar = rtt/2
         reliImpl.rto = reliImpl.srtt+max(G, 4*reliImpl.rttvar)

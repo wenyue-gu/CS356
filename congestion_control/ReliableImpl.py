@@ -5,9 +5,9 @@ from Congestion import *
 
 # You can add necessary functions here
 class sgm:
-  def __init__(self, timer, segnum, resendFlag, timestamp, value, rto):
+  def __init__(self, timer, seqnum, resendFlag, timestamp, value, rto):
       self.timer = timer
-      self.segnum = segnum
+      self.seqnum = seqnum
       self.resendFlag = resendFlag
       self.timestamp = timestamp
       self.value = value
@@ -37,6 +37,8 @@ class ReliableImpl:
         self.rto=MinRTO
         self.rttvar=0
         self.FRCount = 0
+
+        self.first2 = True
         pass
 
     # checksum: 16-bit Internet checksum (refer to RFC 1071 for calculation)
@@ -77,7 +79,7 @@ class ReliableImpl:
         r = ~ret+16**4
         return r
 
-    def checkInWrap(head, tail, index):
+    def checkInWrap(self, head, tail, index):
         if(head<=tail and (index<head or tail<=index)):
             return False
         if(head>tail and (index<head and tail<=index)):
@@ -124,15 +126,15 @@ class ReliableImpl:
         fl = self.queue[0].resendFlag
         ts = self.queue[0].timestamp
         # call updateRTO if the segment is not retransmitted (resendFlag is false)
-        if(resendFlag==False):
+        if(fl==False):
             updateRTO(self.reli, self, ts)
 
         # while queue that stores the sent segments is not empty
-        while(self.queue.empty()==False):
+        while(self.queue):
             # check the head element of the queue
             a = self.queue[0]
             # break the while loop if the seqNum of the head element is not acked
-            if a.segnum>seg.ackNum:
+            if a.seqnum>seg.ackNum:
                 break
             # cancel the timer of the head element 
             a.timer.cancel()
@@ -176,7 +178,7 @@ class ReliableImpl:
         # segPack again (See connect() in Reliable)
         actual = Segment.pack(seq, self.srvAckNum, 0, 0, 0, fin, s, payload)
         # set a timer
-        timer = self.reli.setTimer(0.3, self.retransmission, (seq))
+        timer = self.reli.setTimer(0.3, self.retransmission, [seq])
         # create a resendFlag (false) for the segment
         flag = False
         # call get_current_time(C)/time.time(Python) to get current timestamp
@@ -208,7 +210,7 @@ class ReliableImpl:
                 # double the rto
                 a.rto=a.rto*2
                 # set timer again with the new rto
-                a.timer = self.reli.setTimer(a.rto, self.retransmission, (seq))    
+                a.timer = self.reli.setTimer(a.rto, self.retransmission, [seq])    
                 # call updateCWND if the segment is the next expected one
                 if(seq==self.lastcheck):
                     updateCWND(self.reli, self, False, True, False)
@@ -234,7 +236,7 @@ class ReliableImpl:
                 # double the rto
                 a.rto=a.rto*2
                 # set timer again with the new rto
-                a.timer = self.reli.setTimer(a.rto, self.retransmission, (seq))  
+                a.timer = self.reli.setTimer(a.rto, self.retransmission, [seq])  
                 #call updateCWND   
                 updateCWND(self.reli, self, False, True, True)  
                 # set resendFlag as true
