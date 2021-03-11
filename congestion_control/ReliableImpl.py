@@ -5,14 +5,14 @@ from Congestion import *
 
 # You can add necessary functions here
 class sgm:
-  def __init__(self, timer, seqnum, resendFlag, timestamp, value, rto):
-      self.timer = timer
-      self.seqnum = seqnum
-      self.resendFlag = resendFlag
-      self.timestamp = timestamp
-      self.value = value
-      self.rto=rto
-
+    def __init__(self, timer=None, seqnum, resendFlag, timestamp, value, rto):
+        self.timer = timer
+        self.seqnum = seqnum
+        self.resendFlag = resendFlag
+        self.timestamp = timestamp
+        self.value = value
+        self.rto=rto
+    
 
 class ReliableImpl:
 
@@ -186,14 +186,15 @@ class ReliableImpl:
         s = self.checksum(k)
         # segPack again (See connect() in Reliable)
         actual = Segment.pack(seq, self.srvAckNum, 0, 0, 0, fin, s, payload)
-        # set a timer
-        timer = self.reli.setTimer(0.3, self.retransmission, [seq])
         # create a resendFlag (false) for the segment
         flag = False
         # call get_current_time(C)/time.time(Python) to get current timestamp
         t = time.time()
         # push a struct including the timer, resendFlag, current timestamp, and necessary variables into the sent segment queue
-        sgment = sgm(timer, seq, flag, t, actual,0.3)
+        sgment = sgm(None, seq, flag, t, actual,0.3)
+        # set a timer
+        tmer = self.reli.setTimer(0.3, self.retransmission, [sgment])
+        sgment.timer=tmer
         self.queue.append(sgment)
         # update largestSent
         self.seqNum+=ret
@@ -208,50 +209,75 @@ class ReliableImpl:
     # self.reli.setTimer.
     # You should call Congestion.updateCWND to update the congestion window size.
     # In Python, you are allowed to modify the arguments of this function.
-    def retransmission(self, seq):
+    def retransmission(self, sgment):
         # TODO: Your code here
         if seq<self.lastcheck:
             return
-
-        for i in range(len(self.queue)):
-            if(self.queue[i].seqnum==seq):
-                a = self.queue[i]
-                # double the rto
-                a.rto=a.rto*2
-                # set timer again with the new rto
-                a.timer = self.reli.setTimer(a.rto, self.retransmission, [seq])    
-                # call updateCWND if the segment is the next expected one
-                if(seq==self.lastcheck):
-                    updateCWND(self.reli, self, False, True, False)
-                # set resendFlag as true
-                a.resendFlag=True
-                # call sendto to resend the segment
-                self.reli.sendto(a.value)
-                break
+        
+        # double the rto
+        sgment.rto=sgment.rto*2
+        # set timer again with the new rto
+        sgment.timer = self.reli.setTimer(sgment.rto, self.retransmission, [sgment])    
+        # call updateCWND if the segment is the next expected one
+        if(sgment.seqnum==self.lastcheck):
+            updateCWND(self.reli, self, False, True, False)
+        # set resendFlag as true
+        sgment.resendFlag=True
+        # call sendto to resend the segment
+        self.reli.sendto(sgment.value)
+        # for i in range(len(self.queue)):
+        #     if(self.queue[i].seqnum==seq):
+        #         a = self.queue[i]
+        #         # double the rto
+        #         a.rto=a.rto*2
+        #         # set timer again with the new rto
+        #         a.timer = self.reli.setTimer(a.rto, self.retransmission, [seq])    
+        #         # call updateCWND if the segment is the next expected one
+        #         if(seq==self.lastcheck):
+        #             updateCWND(self.reli, self, False, True, False)
+        #         # set resendFlag as true
+        #         a.resendFlag=True
+        #         # call sendto to resend the segment
+        #         self.reli.sendto(a.value)
+        #         break
         pass
 
     # fastRetransmission: The recvAck uses this function instead of retransmission to
     # do fast retransmission when recvAck considers some segments should be fast retransmitted.
     # You should call Congestion.updateCWND to update the congestion window size.
     # In Python, you are allowed to modify the arguments of this function.
-    def fastRetransmission(self, seqNum):
+    def fastRetransmission(self, sgment):
         # TODO: Your code her
         #print("fast")
-        for i in range(len(self.queue)):
-            if(self.queue[i].seqnum==seqNum):
-                #print("hey")
-                a = self.queue[i]
-                # cancel the previous timer
-                a.timer.cancel()
-                # double the rto
-                a.rto=a.rto*2
-                # set timer again with the new rto
-                a.timer = self.reli.setTimer(a.rto, self.retransmission, [seqNum])  
-                #call updateCWND   
-                updateCWND(self.reli, self, False, True, True)  
-                # set resendFlag as true
-                a.resendFlag=True
-                # call sendto to resend the segment
-                self.reli.sendto(a.value)
-                break
+        # cancel the previous timer
+        sgment.timer.cancel()
+        # double the rto
+        sgment.rto=sgment.rto*2
+        # set timer again with the new rto
+        sgment.timer = self.reli.setTimer(sgment.rto, self.retransmission, [sgment])    
+        # call updateCWND if the segment is the next expected one
+        if(sgment.seqnum==self.lastcheck):
+            updateCWND(self.reli, self, False, True, False)
+        # set resendFlag as true
+        sgment.resendFlag=True
+        # call sendto to resend the segment
+        self.reli.sendto(sgment.value)
+
+        # for i in range(len(self.queue)):
+        #     if(self.queue[i].seqnum==seqNum):
+        #         #print("hey")
+        #         a = self.queue[i]
+        #         # cancel the previous timer
+        #         a.timer.cancel()
+        #         # double the rto
+        #         a.rto=a.rto*2
+        #         # set timer again with the new rto
+        #         a.timer = self.reli.setTimer(a.rto, self.retransmission, [seqNum])  
+        #         #call updateCWND   
+        #         updateCWND(self.reli, self, False, True, True)  
+        #         # set resendFlag as true
+        #         a.resendFlag=True
+        #         # call sendto to resend the segment
+        #         self.reli.sendto(a.value)
+        #         break
         pass
