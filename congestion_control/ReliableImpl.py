@@ -33,7 +33,7 @@ class ReliableImpl:
         self.queue = deque([])
         self.congestionStatus = 1 #slow start, 2=avoidance
         self.srtt=0
-        self.ssthresh=30000
+        self.ssthresh=35000
         self.rto=MinRTO
         self.rttvar=0
         self.FRCount = 0
