@@ -105,6 +105,7 @@ class ReliableImpl:
         if seg.ackNum==self.lastcheck:
             # increase FRCount if it is duplicate ack
             self.FRCount+=1
+            print(FRCount)
             if self.FRCount>=3:
                 # call fastRetransmission and return 0 if FRCount equals to 3
                 fastRetransmission(seg.ackNum)
