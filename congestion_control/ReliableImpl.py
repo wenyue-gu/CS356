@@ -246,7 +246,7 @@ class ReliableImpl:
                 # double the rto
                 a.rto=a.rto*2
                 # set timer again with the new rto
-                a.timer = self.reli.setTimer(a.rto, self.retransmission, [seq])  
+                a.timer = self.reli.setTimer(a.rto, self.retransmission, [seqNum])  
                 #call updateCWND   
                 updateCWND(self.reli, self, False, True, True)  
                 # set resendFlag as true
