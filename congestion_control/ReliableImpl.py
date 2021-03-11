@@ -99,14 +99,14 @@ class ReliableImpl:
     def recvAck(self, seg, isFin):
         # TODO: Your code here
         # check whether the segment is a duplicate ack (seg.ackNum is largestAcked)
-        print("within")
-        print(isFin)
-        print(self.lastcheck)
-        print(seg.ackNum)
+        # print("within")
+        # print(isFin)
+        # print(self.lastcheck)
+        # print(seg.ackNum)
         if seg.ackNum==self.lastcheck:
             # increase FRCount if it is duplicate ack
             self.FRCount+=1
-            print(self.FRCount)
+            # print(self.FRCount)
             if self.FRCount>=3:
                 # call fastRetransmission and return 0 if FRCount equals to 3
                 self.fastRetransmission(seg.ackNum)
@@ -121,7 +121,7 @@ class ReliableImpl:
         self.FRCount=0
         # calculate the reduction of bytes in flight (See @230 to handle wrap around)
         n=0
-        print(wrap)
+        # print(wrap)
         if seg.ackNum >= self.lastcheck:
             n = seg.ackNum - self.lastcheck
         else:
@@ -150,9 +150,9 @@ class ReliableImpl:
             self.queue.popleft()
             
         # update the largestAcked
-        print(self.lastcheck)
-        print(seg.ackNum)
-        print(n)
+        # print(self.lastcheck)
+        # print(seg.ackNum)
+        # print(n)
         self.lastcheck = seg.ackNum    
         # updateRWND(seg.rwnd)
         self.reli.updateRWND(seg.rwnd)  
@@ -236,10 +236,10 @@ class ReliableImpl:
     # In Python, you are allowed to modify the arguments of this function.
     def fastRetransmission(self, seqNum):
         # TODO: Your code her
-        print("fast")
+        #print("fast")
         for i in range(len(self.queue)):
             if(self.queue[i].seqnum==seqNum):
-                print("hey")
+                #print("hey")
                 a = self.queue[i]
                 # cancel the previous timer
                 a.timer.cancel()
