@@ -122,7 +122,7 @@ class ReliableImpl:
         # calculate the reduction of bytes in flight (See @230 to handle wrap around)
         n=0
         print(wrap)
-        if seg.ackNum > self.lastcheck:
+        if seg.ackNum >= self.lastcheck:
             n = seg.ackNum - self.lastcheck
         else:
             n = 16**4 - self.lastcheck + seg.ackNum
@@ -236,9 +236,10 @@ class ReliableImpl:
     # In Python, you are allowed to modify the arguments of this function.
     def fastRetransmission(self, seqNum):
         # TODO: Your code her
-
+        print("fast")
         for i in range(len(self.queue)):
             if(self.queue[i].seqnum==seqNum):
+                print("hey")
                 a = self.queue[i]
                 # cancel the previous timer
                 a.timer.cancel()
