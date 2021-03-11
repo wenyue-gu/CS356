@@ -99,7 +99,6 @@ class ReliableImpl:
     def recvAck(self, seg, isFin):
         # TODO: Your code here
         # check whether the segment is a duplicate ack (seg.ackNum is largestAcked)
-        print(self.queue)
         if seg.ackNum==self.lastcheck:
             # increase FRCount if it is duplicate ack
             self.FRCount+=1
