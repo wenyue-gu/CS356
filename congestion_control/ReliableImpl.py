@@ -111,6 +111,7 @@ class ReliableImpl:
                 # call fastRetransmission and return 0 if FRCount equals to 3
                 fastRetransmission(seg.ackNum)
                 return 0
+            return 0
         # check whether the segment has ever been acked
         wrap = self.checkInWrap(self.lastcheck+1, self.seqNum+2, seg.ackNum)
         # return 0 if the segment is already acked before # ie not wraparound and acknum smaller
