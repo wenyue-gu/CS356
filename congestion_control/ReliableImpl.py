@@ -211,7 +211,7 @@ class ReliableImpl:
     # In Python, you are allowed to modify the arguments of this function.
     def retransmission(self, sgment):
         # TODO: Your code here
-        if seq<self.lastcheck:
+        if sgment.seqnum<self.lastcheck:
             return
         
         # double the rto
