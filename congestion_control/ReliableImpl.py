@@ -140,7 +140,7 @@ class ReliableImpl:
             # check the head element of the queue
             a = self.queue[0]
             # break the while loop if the seqNum of the head element is not acked
-            if a.seqnum>seg.ackNum:
+            if a.seqnum>=seg.ackNum:
                 break
             # cancel the timer of the head element 
             a.timer.cancel()
