@@ -116,7 +116,8 @@ class ReliableImpl:
         self.FRCount=0
         # calculate the reduction of bytes in flight (See @230 to handle wrap around)
         n=0
-        if wrap==False and seg.ackNum > self.lastcheck:
+        print(wrap)
+        if seg.ackNum > self.lastcheck:
             n = seg.ackNum - self.lastcheck
         else:
             n = 16**4 - self.lastcheck + seg.ackNum
