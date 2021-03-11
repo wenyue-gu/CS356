@@ -5,7 +5,7 @@ from Congestion import *
 
 # You can add necessary functions here
 class sgm:
-    def __init__(self, timer=None, seqnum, resendFlag, timestamp, value, rto):
+    def __init__(self, timer=None, seqnum=None, resendFlag=None, timestamp=None, value=None, rto=None):
         self.timer = timer
         self.seqnum = seqnum
         self.resendFlag = resendFlag
