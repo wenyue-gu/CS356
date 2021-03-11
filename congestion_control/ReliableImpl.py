@@ -123,11 +123,12 @@ class ReliableImpl:
             n = 16**4 - self.lastcheck + seg.ackNum
 
         # get resendFlag and timestamp from the queue
-        fl = self.queue[0].resendFlag
-        ts = self.queue[0].timestamp
-        # call updateRTO if the segment is not retransmitted (resendFlag is false)
-        if(fl==False):
-            updateRTO(self.reli, self, ts)
+        if(self.queue):
+            fl = self.queue[0].resendFlag
+            ts = self.queue[0].timestamp
+            # call updateRTO if the segment is not retransmitted (resendFlag is false)
+            if(fl==False):
+                updateRTO(self.reli, self, ts)
 
         # while queue that stores the sent segments is not empty
         while(self.queue):
