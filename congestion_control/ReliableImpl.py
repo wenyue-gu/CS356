@@ -100,17 +100,17 @@ class ReliableImpl:
         # TODO: Your code here
         # check whether the segment is a duplicate ack (seg.ackNum is largestAcked)
         print("within")
+        print(isFin)
         print(self.lastcheck)
         print(seg.ackNum)
         if seg.ackNum==self.lastcheck:
             # increase FRCount if it is duplicate ack
             self.FRCount+=1
-            print(FRCount)
+            print(self.FRCount)
             if self.FRCount>=3:
                 # call fastRetransmission and return 0 if FRCount equals to 3
                 fastRetransmission(seg.ackNum)
                 return 0
-        
         # check whether the segment has ever been acked
         wrap = self.checkInWrap(self.lastcheck+1, self.seqNum+2, seg.ackNum)
         # return 0 if the segment is already acked before # ie not wraparound and acknum smaller
