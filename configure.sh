@@ -1,5 +1,5 @@
 sudo apt update
-sudo apt-get install software-properties-common
+sudo apt-get install -y software-properties-common
 sudo add-apt-repository -y ppa:wireshark-dev/stable
 sudo apt update 
 sudo DEBIAN_FRONTEND=noninteractive apt install -y --no-install-recommends tshark sudo arping git iputils-ping vim-nox python-setuptools python-all-dev flex bison traceroute openvswitch-testcontroller screen curl patch
