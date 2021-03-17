@@ -2,7 +2,7 @@ sudo apt update
 sudo apt-get install software-properties-common
 sudo add-apt-repository -y ppa:wireshark-dev/stable
 sudo apt update 
-sudo DEBIAN_FRONTEND=noninteractive apt install -y --no-install-recommends tshark sudo git iputils-ping vim-nox python-setuptools python-all-dev flex bison traceroute openvswitch-testcontroller screen curl patch
+sudo DEBIAN_FRONTEND=noninteractive apt install -y --no-install-recommends tshark sudo arping git iputils-ping vim-nox python-setuptools python-all-dev flex bison traceroute openvswitch-testcontroller screen curl patch
 sudo cp /usr/bin/ovs-testcontroller /usr/bin/ovs-controller
 curl https://bootstrap.pypa.io/pip/2.7/get-pip.py --output get-pip.py
 sudo python2 get-pip.py
