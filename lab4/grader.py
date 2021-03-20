@@ -11,7 +11,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('-t', metavar='test', type=int, nargs=1, default=None, help='test cases')
 args = parser.parse_args()
 
-path = '../router/sr'
+path = './router/sr'
 if __name__ == '__main__':
     if not os.path.exists(path):
         print("File not exist: %s" % path)
