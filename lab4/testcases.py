@@ -20,7 +20,8 @@ import argparse
 
 
 parser = argparse.ArgumentParser()
-parser.add_argument('-t', metavar='test', type=int, nargs=1, default=None, help='test cases')
+parser.add_argument('-t', metavar='test', type=int, default=None, help='test cases')
+parser.add_argument('-d', metavar='debug', type=int, default=0, help='debug')
 args = parser.parse_args()
 
 IPBASE = '10.3.0.0/16'
@@ -192,14 +193,18 @@ def run_tests(net):
     node_infos = [client, server1, server2]
     node_names = ['Client', 'Server1', 'Server2']
 
+    if args.d == 1:
+        client[0].cmd("tshark -i client-eth0 -w ./pcap_files/client.pcap &")
+        server2[0].cmd("tshark -i server2-eth0 -w ../pcap_files/server2.pcap &")
+        server1[0].cmd("tshark -i server1-eth0 -w ../pcap_files/server1.pcap &")
     total_scores = 0
 
     if args.t is None:
         testcases = range(1, 12)
         max_score = 25
     else:
-        testcases = [args.t[0]]
-        max_score = testcases_scores[args.t[0]-1]
+        testcases = [args.t]
+        max_score = testcases_scores[args.t-1]
     
     # testcase 1 - arping
     testcase = 1
@@ -371,6 +376,8 @@ def run_tests(net):
     os.system("rm -rf index.html*")
     output.close()
 
+    if args.d == 1:
+        os.system("chmod 777 ./pcap_files/*")
 
 def cs144net():
     stophttp()

@@ -8,10 +8,11 @@ import argparse
 
 
 parser = argparse.ArgumentParser()
-parser.add_argument('-t', metavar='test', type=int, nargs=1, default=None, help='test cases')
+parser.add_argument('-t', metavar='test', type=int, default=None, help='test cases', choices=range(1, 12))
+parser.add_argument('-d', metavar='debug', type=int, default=0, help='debug', choices=range(0, 2))
 args = parser.parse_args()
 
-path = '../router/sr'
+path = './router/sr'
 if __name__ == '__main__':
     if not os.path.exists(path):
         print("File not exist: %s" % path)
@@ -20,10 +21,10 @@ if __name__ == '__main__':
             pox_proc = subprocess.Popen("./pox/pox.py cs144.ofhandler cs144.srhandler".split(), stdout=devnull, stderr=devnull)
             time.sleep(3)
             if args.t is None:
-                mininet_proc = subprocess.Popen("sudo python2 ./testcases.py".split(), stdout=sys.stdout, stderr=sys.stdout)
+                command = "sudo python2 ./testcases.py -d %d" % args.d
             else:
-                command = "sudo python2 ./testcases.py -t %d"  % args.t[0]
-                mininet_proc = subprocess.Popen(command.split(), stdout=sys.stdout, stderr=sys.stdout)
+                command = "sudo python2 ./testcases.py -t %d -d %d"  % (args.t, args.d)
+            mininet_proc = subprocess.Popen(command.split(), stdout=sys.stdout, stderr=sys.stdout)
             time.sleep(3)
             sr_proc = subprocess.Popen("%s" % path, stdout=devnull, stderr=devnull)
             mininet_proc.communicate()
