@@ -252,7 +252,7 @@ def run_tests(net):
         for ip in ip_lists:
             if 'eth' not in ip_lists[ip]:
                 continue
-            if not send_command_and_check(node, node_name, "wget http://%s" % ip, "connection refused"):
+            if not send_command_and_check(node, node_name, "wget -T 10 --tries=3 http://%s" % ip, "connection refused"):
                 passed = False
                 break
         total_scores += check_correctness(passed, testcase, testcases_scores, records)
@@ -327,7 +327,7 @@ def run_tests(net):
         for ip in ip_lists:
             if 'server' not in ip_lists[ip]:
                 continue
-            if not send_command_and_check(node, node_name, "wget http://%s" % ip, "saved"):
+            if not send_command_and_check(node, node_name, "wget -T 10 --tries=3 http://%s" % ip, "saved"):
                 passed = False
                 break
         total_scores += check_correctness(passed, testcase, testcases_scores, records)
