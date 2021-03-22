@@ -116,16 +116,16 @@ void sr_handle_arp(struct sr_instance* sr, uint8_t * buf, unsigned int len, char
       }
 			break;
 		case arp_op_reply :
-			/* add mac and ip mapping */
-			// printf("Updating arp cache\n");
-			// struct sr_arpreq* pending = sr_arpcache_insert(&sr->cache, arphdr->ar_sha, arphdr->ar_sip); /* store mapping in arpcache */
-      // while(pending != NULL){
-      //   if(pending->ip == arphdr->ar_sip){
-      //     sr_arpreq_send_packets(sr, pending);
-      //   }
-      //   pending = pending->next;
-      // }
-			/* sr_arpreq_destroy is handled in arpcache */
+			/* add mac and ip mapping 
+			printf("Updating arp cache\n");
+			struct sr_arpreq* pending = sr_arpcache_insert(&sr->cache, arphdr->ar_sha, arphdr->ar_sip); store mapping in arpcache
+      while(pending != NULL){
+        if(pending->ip == arphdr->ar_sip){
+          sr_arpreq_send_packets(sr, pending);
+        }
+        pending = pending->next;
+      }
+			sr_arpreq_destroy is handled in arpcache */
 			break;
 	}
 }
