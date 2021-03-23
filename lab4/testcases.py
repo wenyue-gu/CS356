@@ -399,7 +399,7 @@ def cs144net():
     starthttp( server1 )
     starthttp( server2 )
 
-    time.sleep(5)
+    time.sleep(10)
     run_tests(net)
     stophttp()
     net.stop()
