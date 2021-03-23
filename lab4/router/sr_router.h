@@ -54,6 +54,8 @@ struct sr_instance
     struct sr_if_status_cache * if_cache; /* interfaces' status cache*/
     pthread_mutex_t rt_lock; 
     pthread_mutexattr_t rt_lock_attr;
+    pthread_mutex_t rt_locker;
+    pthread_mutexattr_t rt_locker_attr;
     struct sr_arpcache cache;   /* ARP cache */
     pthread_attr_t attr;
     pthread_attr_t rt_attr;

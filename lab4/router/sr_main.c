@@ -245,6 +245,11 @@ static void sr_init_instance(struct sr_instance* sr)
     sr->if_cache = 0;
     sr->routing_table = 0;
     sr->logfile = 0;
+
+    srand(time(NULL));
+    pthread_mutexattr_init(&(sr->rt_locker_attr));
+    pthread_mutexattr_settype(&(sr->rt_locker_attr), PTHREAD_MUTEX_RECURSIVE);
+    pthread_mutex_init(&(sr->rt_locker), &(sr->rt_locker_attr));
 } /* -- sr_init_instance -- */
 
 /*-----------------------------------------------------------------------------
