@@ -19,13 +19,13 @@ if __name__ == '__main__':
     else:
         with open(os.devnull, 'w') as devnull:
             pox_proc = subprocess.Popen("./pox/pox.py cs144.ofhandler cs144.srhandler".split(), stdout=devnull, stderr=devnull)
-            time.sleep(3)
+            time.sleep(5)
             if args.t is None:
                 command = "sudo python2 ./testcases.py -d %d" % args.d
             else:
                 command = "sudo python2 ./testcases.py -t %d -d %d"  % (args.t, args.d)
             mininet_proc = subprocess.Popen(command.split(), stdout=sys.stdout, stderr=sys.stdout)
-            time.sleep(3)
+            time.sleep(5)
             sr_proc = subprocess.Popen("%s" % path, stdout=devnull, stderr=devnull)
             mininet_proc.communicate()
             sr_proc.kill()
