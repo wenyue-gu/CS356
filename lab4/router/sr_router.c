@@ -94,11 +94,14 @@ void sr_handlepacket(struct sr_instance* sr,
 
   /* Lab4: Fill your code here */
   uint16_t ethtype = ethertype(packet);
+
   switch(ethtype) {
  		case ethertype_arp:
+      /* case1 */
 			sr_handle_arp(sr, packet+sizeof(sr_ethernet_hdr_t), len-sizeof(sr_ethernet_hdr_t), interface);
       break;
     case ethertype_ip:
+      /* case2 */
       break;
   }
 }/* end sr_ForwardPacket */
@@ -109,28 +112,30 @@ void sr_handle_arp(struct sr_instance* sr, uint8_t * buf, unsigned int len, char
 	struct sr_if* iface = sr_get_interface(sr, interface);
 	switch(op) {
 		case arp_op_request : 
-			printf("Sending ARP reply\n");
-			send_arp_rep(sr, iface, arp);
+      /* case 1a */
+      sr_arpcache_insert(&sr->cache, arp->ar_sha, arp->ar_sip); /*1a1 Insert the Sender MAC in this packet to your ARP cache*/
+      /* TODO: 1a2: optimization? */
+			send_arp_rep(sr, iface, arp); /*1a3,4*/
 			break;
 		case arp_op_reply :
-			/* add mac and ip mapping */
-			printf("Updating arp cache\n");
-			sr_arpcache_insert(&sr->cache, arp->ar_sha, arp->ar_sip);
-			/* sr_arpreq_destroy is handled in arpcache */
+      /* case 1b */
+			sr_arpcache_insert(&sr->cache, arp->ar_tha, arp->ar_tip); /* 1b1 Insert the Target MAC to your ARP cache*/
+      /* TODO: 1b2 */
 			break;
 	}
 }
 
 
-int send_arp_rep(struct sr_instance* sr, struct sr_if* req_if, sr_arp_hdr_t* req){
-    printf("sending arp_reply\n");
-    uint8_t* block = malloc(sizeof(sr_arp_hdr_t)+sizeof(sr_ethernet_hdr_t));
-	sr_arp_hdr_t* arp_hdr = (sr_arp_hdr_t*)(block+sizeof(sr_ethernet_hdr_t));
-    sr_ethernet_hdr_t* eth_hdr = (sr_ethernet_hdr_t*)(block);
+void send_arp_rep(struct sr_instance* sr, struct sr_if* req_if, sr_arp_hdr_t* req){
 
-    /* modify/populate ARP header */
-    arp_hdr->ar_hrd = htons(arp_hrd_ethernet);
-    arp_hdr->ar_pro = htons(0x0800);
+  /* 1 Malloc a space to store an Ethernet header and ARP header */
+  uint8_t* block = malloc(sizeof(sr_arp_hdr_t)+sizeof(sr_ethernet_hdr_t));
+	sr_arp_hdr_t* arp_hdr = (sr_arp_hdr_t*)(block+sizeof(sr_ethernet_hdr_t));
+  sr_ethernet_hdr_t* eth_hdr = (sr_ethernet_hdr_t*)(block);
+
+  /* 2 ill the ARP opcode, Sender IP, Sender MAC, Target IP, Target MAC in ARP header*/
+  arp_hdr->ar_hrd = htons(arp_hrd_ethernet);
+  arp_hdr->ar_pro = htons(0x0800);
 	arp_hdr->ar_hln = ETHER_ADDR_LEN;
 	arp_hdr->ar_pln = sizeof(uint32_t);
 	arp_hdr->ar_op  = htons(arp_op_reply);
@@ -139,13 +144,13 @@ int send_arp_rep(struct sr_instance* sr, struct sr_if* req_if, sr_arp_hdr_t* req
 	memcpy(arp_hdr->ar_tha, req->ar_sha, ETHER_ADDR_LEN);
 	arp_hdr->ar_tip = req->ar_sip;
 
-    /* modify/populate MAC header */
-    memcpy(eth_hdr->ether_dhost, req->ar_sha, ETHER_ADDR_LEN);
-    memcpy(eth_hdr->ether_shost, req_if->addr, ETHER_ADDR_LEN);
-    eth_hdr->ether_type = htons(ethertype_arp);
+  /* 3 Fill the Source MAC Address, Destination MAC Address, Ethernet Type in the Ethernet header */
+  memcpy(eth_hdr->ether_dhost, req->ar_sha, ETHER_ADDR_LEN);
+  memcpy(eth_hdr->ether_shost, req_if->addr, ETHER_ADDR_LEN);
+  eth_hdr->ether_type = htons(ethertype_arp);
 
-	int ret = sr_send_packet(sr, block, sizeof(sr_arp_hdr_t)+sizeof(sr_ethernet_hdr_t), req_if->name);
-    if(ret != 0) { printf("ARP failed to send\n"); }
+  /* Send this ARP response back to the Sender */
+	sr_send_packet(sr, block, sizeof(sr_arp_hdr_t)+sizeof(sr_ethernet_hdr_t), req_if->name);
 	free(block);
-	return ret;
+	return;
 }
