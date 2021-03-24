@@ -192,6 +192,7 @@ def run_tests(net):
     server2 = [net.get('server2'), '172.64.3.10']
     node_infos = [client, server1, server2]
     node_names = ['Client', 'Server1', 'Server2']
+    node_to_interface = ['10.0.1.1', '192.168.2.1', '172.64.3.1']
 
     if args.d == 1:
         client[0].cmd("tshark -i client-eth0 -w ./pcap_files/client.pcap &")
@@ -226,11 +227,15 @@ def run_tests(net):
         if testcase in testcases:
             node_info = node_infos[testcase-2]
             node_name = node_names[testcase-2]
+
             output_info("Test Case %d: %s pings all interfaces of router Start" % (testcase, node_name))
             passed = True
 
             node_ip = node_info[1]
             node = node_info[0]
+
+            arp_target = node_to_interface[testcase-2]
+            return_info = node.cmd("arping -c 1 %s" % arp_target)
             for ip in ip_lists:
                 if 'eth' not in ip_lists[ip]:
                     continue
@@ -247,6 +252,8 @@ def run_tests(net):
         node_name = node_names[0]
         node_ip = node_info[1]
         node = node_info[0]
+        arp_target = node_to_interface[0]
+        return_info = node.cmd("arping -c 1 %s" % arp_target)
         passed = True
 
         for ip in ip_lists:
@@ -263,7 +270,8 @@ def run_tests(net):
         node_name = node_names[0]
         node_ip = node_info[1]
         node = node_info[0]
-        passed = True
+        arp_target = node_to_interface[0]
+        return_info = node.cmd("arping -c 1 %s" % arp_target)
         ips = ['192.168.2.2', '172.64.3.10']
         output_info("Test Case %d: Time to live exceeded" % testcase)
         passed = True
@@ -280,7 +288,8 @@ def run_tests(net):
         node_name = node_names[0]
         node_ip = node_info[1]
         node = node_info[0]
-        passed = True
+        arp_target = node_to_interface[0]
+        return_info = node.cmd("arping -c 1 %s" % arp_target)
         output_info("Test Case %d: Destination Net Unreachable" % testcase)
         wrong_ips = ['10.0.1.2', '192.168.2.3', '172.64.3.9']
         passed = True
@@ -297,7 +306,8 @@ def run_tests(net):
         node_name = node_names[0]
         node_ip = node_info[1]
         node = node_info[0]
-        passed = True
+        arp_target = node_to_interface[0]
+        return_info = node.cmd("arping -c 1 %s" % arp_target)
         output_info("Test Case %d: Handle TTL correctly" % testcase)
         passed = True
 
