@@ -259,6 +259,11 @@ def run_tests(net):
     
     testcase = 6
     if testcase in testcases:
+        node_info = node_infos[0]
+        node_name = node_names[0]
+        node_ip = node_info[1]
+        node = node_info[0]
+        passed = True
         ips = ['192.168.2.2', '172.64.3.10']
         output_info("Test Case %d: Time to live exceeded" % testcase)
         passed = True
@@ -271,6 +276,11 @@ def run_tests(net):
 
     testcase = 7
     if testcase in testcases:
+        node_info = node_infos[0]
+        node_name = node_names[0]
+        node_ip = node_info[1]
+        node = node_info[0]
+        passed = True
         output_info("Test Case %d: Destination Net Unreachable" % testcase)
         wrong_ips = ['10.0.1.2', '192.168.2.3', '172.64.3.9']
         passed = True
@@ -283,6 +293,11 @@ def run_tests(net):
 
     testcase = 8
     if testcase in testcases:
+        node_info = node_infos[0]
+        node_name = node_names[0]
+        node_ip = node_info[1]
+        node = node_info[0]
+        passed = True
         output_info("Test Case %d: Handle TTL correctly" % testcase)
         passed = True
 
