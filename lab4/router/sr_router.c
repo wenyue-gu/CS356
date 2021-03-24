@@ -126,31 +126,31 @@ void sr_handle_arp(struct sr_instance* sr, uint8_t * buf, unsigned int len, char
 }
 
 
-void send_arp_rep(struct sr_instance* sr, struct sr_if* req_if, sr_arp_hdr_t* req){
+void send_arp_rep(struct sr_instance* sr, struct sr_if* iface, sr_arp_hdr_t* arp){
 
   /* 1 Malloc a space to store an Ethernet header and ARP header */
   uint8_t* block = malloc(sizeof(sr_arp_hdr_t)+sizeof(sr_ethernet_hdr_t));
-	sr_arp_hdr_t* arp_hdr = (sr_arp_hdr_t*)(block+sizeof(sr_ethernet_hdr_t));
-  sr_ethernet_hdr_t* eth_hdr = (sr_ethernet_hdr_t*)(block);
+	sr_arp_hdr_t* arphdr = (sr_arp_hdr_t*)(block+sizeof(sr_ethernet_hdr_t));
+  sr_ethernet_hdr_t* ethhdr = (sr_ethernet_hdr_t*)(block);
 
   /* 2 ill the ARP opcode, Sender IP, Sender MAC, Target IP, Target MAC in ARP header*/
-  arp_hdr->ar_hrd = htons(arp_hrd_ethernet);
-  arp_hdr->ar_pro = htons(0x0800);
-	arp_hdr->ar_hln = ETHER_ADDR_LEN;
-	arp_hdr->ar_pln = sizeof(uint32_t);
-	arp_hdr->ar_op  = htons(arp_op_reply);
-	memcpy(arp_hdr->ar_sha, req_if->addr, ETHER_ADDR_LEN);
-	arp_hdr->ar_sip = req_if->ip;
-	memcpy(arp_hdr->ar_tha, req->ar_sha, ETHER_ADDR_LEN);
-	arp_hdr->ar_tip = req->ar_sip;
+  arphdr->ar_hrd = htons(arp_hrd_ethernet);
+  arphdr->ar_pro = htons(0x0800);
+	arphdr->ar_hln = ETHER_ADDR_LEN;
+	arphdr->ar_pln = sizeof(uint32_t);
+	arphdr->ar_op  = htons(arp_op_reply);
+	memcpy(arphdr->ar_sha, iface->addr, ETHER_ADDR_LEN);
+	arphdr->ar_sip = iface->ip;
+	memcpy(arphdr->ar_tha, arp->ar_sha, ETHER_ADDR_LEN);
+	arphdr->ar_tip = arp->ar_sip;
 
   /* 3 Fill the Source MAC Address, Destination MAC Address, Ethernet Type in the Ethernet header */
-  memcpy(eth_hdr->ether_dhost, req->ar_sha, ETHER_ADDR_LEN);
-  memcpy(eth_hdr->ether_shost, req_if->addr, ETHER_ADDR_LEN);
-  eth_hdr->ether_type = htons(ethertype_arp);
+  memcpy(ethhdr->ether_dhost, arp->ar_sha, ETHER_ADDR_LEN);
+  memcpy(ethhdr->ether_shost, iface->addr, ETHER_ADDR_LEN);
+  ethhdr->ether_type = htons(ethertype_arp);
 
   /* Send this ARP response back to the Sender */
-	sr_send_packet(sr, block, sizeof(sr_arp_hdr_t)+sizeof(sr_ethernet_hdr_t), req_if->name);
+	sr_send_packet(sr, block, sizeof(sr_arp_hdr_t)+sizeof(sr_ethernet_hdr_t), iface->name);
 	free(block);
 	return;
 }
