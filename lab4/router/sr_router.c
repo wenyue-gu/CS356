@@ -151,7 +151,9 @@ void sr_handle_ip(struct sr_instance* sr, uint8_t * buf, unsigned int len,char* 
       /*If you can not find this destination IP in your routing table, 
       you should send an ICMP DEST_NET_UNREACHABLE message back to the Sender. 
       You should implement a Longest Prefix Matching here.*/
-      struct sr_rt * match = prefix_match(sr,&(ip->ip_dst));
+      struct in_addr in_ip;
+      in_ip.s_addr = ip->ip_dst;
+      struct sr_rt * match = prefix_match(sr,in_ip);
       if(match==NULL){
         icmp_unreachable(sr, Unreachable_net_code, ip, interface);
       }
@@ -165,14 +167,14 @@ void sr_handle_ip(struct sr_instance* sr, uint8_t * buf, unsigned int len,char* 
 
 
 
-struct sr_rt *prefix_match(struct sr_instance * sr, in_addr_t * addr){
+struct sr_rt *prefix_match(struct sr_instance * sr, in_addr * addr){
   struct sr_rt * table = sr->routing_table;
   int max_len = -1;
 	struct sr_rt * ans = NULL;
 
   while (table != NULL) {
-		in_addr_t left = (table->mask.s_addr & *addr);
-		in_addr_t right = (table->dest.s_addr & table->mask.s_addr);
+		in_addr left = (table->mask.s_addr & *addr);
+		in_addr right = (table->dest.s_addr & table->mask.s_addr);
 		if (left == right) {
       uint8_t size = 0;
       uint32_t checker = 1 << 31;
