@@ -293,12 +293,13 @@ void sr_icmp_send_message(struct sr_instance* sr, uint8_t type, uint8_t code, sr
 
   printf("\n %p block \n",block);
   
+  sr_ethernet_hdr_t * frame = (sr_ethernet_hdr_t *) malloc(sizeof(sr_ethernet_hdr_t) + sizeof(sr_ip_hdr_t) + sizeof(sr_icmp_hdr_t));
 
-  memcpy(block->ether_dhost, entry->mac, ETHER_ADDR_LEN);
-  memcpy(block->ether_shost, iface->addr, ETHER_ADDR_LEN);
-  block->ether_type = htons(ethertype_ip);
+  memcpy(frame->ether_dhost, entry->mac, ETHER_ADDR_LEN);
+  memcpy(frame->ether_shost, iface->addr, ETHER_ADDR_LEN);
+  frame->ether_type = htons(ethertype_ip);
 
-  printf("%p\n",block);
+  printf("%p\n",frame);
   
   
   void * ptr = (void *) block;
