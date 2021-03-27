@@ -123,6 +123,7 @@ void sr_handle_ip(struct sr_instance* sr, uint8_t * buf, unsigned int len,char* 
   /*2a Check whether the checksum in the IP header is correct. 
   If the checksum is not correct, just ignore this packet and return. 
   Recall the Internet checksum algorithm returns zero if there is no bit error*/
+  printf("handle_ip");
   sr_ip_hdr_t* ip = (sr_ip_hdr_t*)buf;
   uint16_t received = ip->ip_sum;
   ip->ip_sum = 0;
@@ -139,13 +140,16 @@ void sr_handle_ip(struct sr_instance* sr, uint8_t * buf, unsigned int len,char* 
 
   /*2b If the destination IP of this packet is router’s own IP */
   if(is_own_ip(sr,ip)){
+    printf("is own ip");
     uint8_t ip_proto = ip_protocol(buf);
     /*2b1 */
     if (ip_proto == ip_protocol_icmp) {
+      printf("isicmp");
       handle_icmp(sr, buf , len , interface);
     }
     /*2b2 */
     else{
+      printf("is unreachable");
       icmp_unreachable(sr, Unreachable_port_code, ip, interface);
     }
 
@@ -260,9 +264,11 @@ void handle_icmp(struct sr_instance* sr, uint8_t * buf, unsigned int len, char* 
   uint8_t type = ntohs(icmp_hdr->icmp_type);
   if(type==Echorequest){
     /*2b12*/
+    printf("is echo request");
     sr_icmp_send_message(sr, Echoreply, Echoreply, ip_hdr, interface);
   }
   /*2b11 If this is not an ICMP ECHO packet, your router can ignore this packet*/
+  printf("ignoring packet");
 }
 
 /*void fillin(struct sr_instance* sr,sr_ip_hdr_t * ip, char* interface,sr_ethernet_hdr_t * block)*/
