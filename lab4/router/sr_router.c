@@ -294,6 +294,17 @@ void sr_icmp_send_message(struct sr_instance* sr, uint8_t type, uint8_t code, sr
   memcpy((void *) block->ether_dhost, (void *) ether_dhost, sizeof(uint8_t) * ETHER_ADDR_LEN);
   memcpy((void *) block->ether_shost, (void *) ether_shost, sizeof(uint8_t) * ETHER_ADDR_LEN);
   block->ether_type = htons(ethertype_ip);
+
+  printf("%p\n",block);
+
+
+  sr_ethernet_hdr_t * frame = (sr_ethernet_hdr_t *) malloc(sizeof(sr_ethernet_hdr_t) + sizeof(sr_ip_hdr_t) + sizeof(sr_icmp_hdr_t));
+
+  memcpy(frame->ether_dhost, entry->mac, ETHER_ADDR_LEN);
+  memcpy(frame->ether_shost, iface->addr, ETHER_ADDR_LEN);
+  frame->ether_type = htons(ethertype_ip);
+
+  printf("%p\n",frame);
   
   
   void * ptr = (void *) block;
@@ -317,9 +328,9 @@ void sr_icmp_send_message(struct sr_instance* sr, uint8_t type, uint8_t code, sr
   /*2b12b Fill the ICMP code, type in ICMP header*/
   ptr += sizeof(sr_ip_hdr_t);
   sr_icmp_hdr_t* icmp_hdr = (sr_icmp_hdr_t*)ptr;
-  icmp_hdr->icmp_type = htons(type);
-  icmp_hdr->icmp_code = htons(code);
-  icmp_hdr->icmp_sum  = 0 ;
+  icmp_hdr->icmp_type = type;
+  icmp_hdr->icmp_code = code;
+  icmp_hdr->icmp_sum  = 0;
   icmp_hdr->icmp_sum = cksum((void *)icmp_hdr, sizeof(sr_icmp_hdr_t));
 
 
