@@ -210,7 +210,7 @@ void icmp_unreachable(struct sr_instance * sr, uint8_t code, sr_ip_hdr_t * ip, c
   ptr += sizeof(sr_ethernet_hdr_t);
   uint32_t ip_src = ntohl(ip->ip_dst);
   uint32_t ip_dst= ntohl(ip->ip_src);
-  sr_ip_hdr_t pkt = (sr_ip_hdr_t *)ptr
+  sr_ip_hdr_t pkt = (sr_ip_hdr_t *)ptr;
   pkt->ip_tos = 0;
   pkt->ip_len = htons((uint16_t) (sizeof(sr_ip_hdr_t) + payload_size));
   pkt->ip_id = htons(0);
@@ -259,7 +259,7 @@ void sr_icmp_send_message(struct sr_instance* sr, uint8_t type, uint8_t code, sr
   /*2b12a Malloc a space to store ethernet header and IP header and ICMP header*/
   sr_ethernet_hdr_t * block = (sr_ethernet_hdr_t *) malloc(sizeof(sr_ethernet_hdr_t) + sizeof(sr_ip_hdr_t) + sizeof(sr_icmp_hdr_t));
   
-  fillin( sr,ip, interface,block);
+  /*fillin( sr,ip, interface,block);*/
 
   /*2b12d,e Fill the Source MAC Address, Destination MAC Address, Ethernet Type in ethernet header*/
   uint8_t * ether_shost = malloc(sizeof(unsigned char) * ETHER_ADDR_LEN);
@@ -281,7 +281,7 @@ void sr_icmp_send_message(struct sr_instance* sr, uint8_t type, uint8_t code, sr
   ptr += sizeof(sr_ethernet_hdr_t);
   uint32_t ip_src = ntohl(ip->ip_dst);
   uint32_t ip_dst= ntohl(ip->ip_src);
-  sr_ip_hdr_t pkt = (sr_ip_hdr_t *)ptr
+  sr_ip_hdr_t pkt = (sr_ip_hdr_t *)ptr;
   pkt->ip_tos = iptos;
   pkt->ip_len = htons((uint16_t) (sizeof(sr_ip_hdr_t) + payload_size));
   pkt->ip_id = htons(ipid);
@@ -295,7 +295,7 @@ void sr_icmp_send_message(struct sr_instance* sr, uint8_t type, uint8_t code, sr
 
   /*2b12b Fill the ICMP code, type in ICMP header*/
   ptr += sizeof(sr_ip_hdr_t);
-  sr_icmp_hdr_t icmp_hdr = (sr_icmp_hdr_t*)ptr
+  sr_icmp_hdr_t icmp_hdr = (sr_icmp_hdr_t*)ptr;
   icmp_hdr->icmp_type = htons(type);
   icmp_hdr->icmp_code = htons(code);
   icmp_hdr->icmp_sum  = 0 ;
