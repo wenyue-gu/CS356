@@ -262,26 +262,26 @@ void handle_icmp(struct sr_instance* sr, uint8_t * buf, unsigned int len, char* 
   sr_ip_hdr_t * ip_hdr = (sr_ip_hdr_t *)(buf);
   sr_icmp_hdr_t * icmp_hdr = (sr_icmp_hdr_t *) (((void *) buf)+ sizeof(sr_ip_hdr_t));
   uint8_t type = icmp_hdr->icmp_type;
-  printf("%i ",type);
-  printf("%i ",ntohs(type));
-  printf("%i ",Echorequest);
   if(type==Echorequest){
     /*2b12*/
     printf("is echo request");
     sr_icmp_send_message(sr, Echoreply, Echoreply, ip_hdr, interface);
   }
   /*2b11 If this is not an ICMP ECHO packet, your router can ignore this packet*/
-  printf("ignoring packet");
+  else{
+    printf("ignoring packet");
+  }
 }
 
 /*void fillin(struct sr_instance* sr,sr_ip_hdr_t * ip, char* interface,sr_ethernet_hdr_t * block)*/
 
 void sr_icmp_send_message(struct sr_instance* sr, uint8_t type, uint8_t code, sr_ip_hdr_t * ip, char* interface){
+  printf("sending icmp");
   /*2b12a Malloc a space to store ethernet header and IP header and ICMP header*/
   sr_ethernet_hdr_t * block = (sr_ethernet_hdr_t *) malloc(sizeof(sr_ethernet_hdr_t) + sizeof(sr_ip_hdr_t) + sizeof(sr_icmp_hdr_t));
   
   /*fillin( sr,ip, interface,block);*/
-
+  printf("filling in");
   /*2b12d,e Fill the Source MAC Address, Destination MAC Address, Ethernet Type in ethernet header*/
   uint8_t * ether_shost = malloc(sizeof(unsigned char) * ETHER_ADDR_LEN);
   struct sr_if * iface = sr_get_interface(sr, interface);
@@ -323,6 +323,7 @@ void sr_icmp_send_message(struct sr_instance* sr, uint8_t type, uint8_t code, sr
   icmp_hdr->icmp_sum = cksum((void *)icmp_hdr, sizeof(sr_icmp_hdr_t));
 
 
+  printf("sending");
   unsigned int packet_len = sizeof(sr_ethernet_hdr_t) + sizeof(sr_ip_hdr_t) + sizeof(sr_icmp_hdr_t);
   /*2b13 Send this ICMP Reply packet back to the Sender*/
   sr_send_packet(sr, (uint8_t*) block, packet_len, interface );
