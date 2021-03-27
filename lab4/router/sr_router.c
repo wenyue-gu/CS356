@@ -261,7 +261,7 @@ void icmp_unreachable(struct sr_instance * sr, uint8_t code, sr_ip_hdr_t * ip, c
 void handle_icmp(struct sr_instance* sr, uint8_t * buf, unsigned int len, char* interface){
   sr_ip_hdr_t * ip_hdr = (sr_ip_hdr_t *)(buf);
   sr_icmp_hdr_t * icmp_hdr = (sr_icmp_hdr_t *) (((void *) buf)+ sizeof(sr_ip_hdr_t));
-  uint8_t type = ntohs(icmp_hdr->icmp_type);
+  uint8_t type = icmp_hdr->icmp_type;
   if(type==Echorequest){
     /*2b12*/
     printf("is echo request");
