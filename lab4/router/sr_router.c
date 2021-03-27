@@ -293,8 +293,7 @@ void sr_icmp_send_message(struct sr_instance* sr, uint8_t type, uint8_t code, sr
 
   printf("\n %p block \n",block);
   
-  struct sr_arpentry * entry = sr_arpcache_lookup( &(sr->cache), ip->ip_src);
-  struct sr_if * iface = sr_get_interface(sr, interface);
+
   memcpy(block->ether_dhost, entry->mac, ETHER_ADDR_LEN);
   memcpy(block->ether_shost, iface->addr, ETHER_ADDR_LEN);
   block->ether_type = htons(ethertype_ip);
