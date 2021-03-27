@@ -209,6 +209,7 @@ void icmp_unreachable(struct sr_instance * sr, uint8_t code, sr_ip_hdr_t * ip, c
   /*malloc*/
   sr_ethernet_hdr_t * block = (sr_ethernet_hdr_t *) malloc(sizeof(sr_ethernet_hdr_t) + sizeof(sr_ip_hdr_t) + sizeof(sr_icmp_hdr_t));
   /*ethernet header*/
+  struct sr_if * iface = sr_get_interface(sr, interface);
   memcpy(block->ether_dhost, entry->mac, ETHER_ADDR_LEN);
   memcpy(block->ether_shost, iface->addr, ETHER_ADDR_LEN);
   block->ether_type = htons(ethertype_ip);
@@ -291,7 +292,7 @@ void sr_icmp_send_message(struct sr_instance* sr, uint8_t type, uint8_t code, sr
 
   printf("%p\n",block);
   */
-
+  struct sr_if * iface = sr_get_interface(sr, interface);
   memcpy(block->ether_dhost, entry->mac, ETHER_ADDR_LEN);
   memcpy(block->ether_shost, iface->addr, ETHER_ADDR_LEN);
   block->ether_type = htons(ethertype_ip);
