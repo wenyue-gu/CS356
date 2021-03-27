@@ -25,6 +25,17 @@
 #include "sr_utils.h"
 #include "vnscommand.h"
 
+
+void sr_handle_ip(struct sr_instance* sr, uint8_t * buf, unsigned int len,char* interface);
+struct sr_rt *prefix_match(struct sr_instance * sr, uint32_t addr);
+void icmp_unreachable(struct sr_instance * sr, uint8_t code, sr_ip_hdr_t * ip, char* interface);
+void handle_icmp(struct sr_instance* sr, uint8_t * buf, unsigned int len, char* interface);
+void sr_icmp_send_message(struct sr_instance* sr, uint8_t type, uint8_t code, sr_ip_hdr_t * ip, char* interface);
+bool is_own_ip(struct sr_instance* sr, sr_ip_hdr_t* current);
+void sr_handle_arp(struct sr_instance* sr, uint8_t * buf, unsigned int len, char* interface);
+void send_arp_rep(struct sr_instance* sr, struct sr_if* iface, sr_arp_hdr_t* arp);
+
+
 /*---------------------------------------------------------------------
  * Method: sr_init(void)
  * Scope:  Global
