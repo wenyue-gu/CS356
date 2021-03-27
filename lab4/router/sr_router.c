@@ -209,17 +209,11 @@ void icmp_unreachable(struct sr_instance * sr, uint8_t code, sr_ip_hdr_t * ip, c
   /*malloc*/
   sr_ethernet_hdr_t * block = (sr_ethernet_hdr_t *) malloc(sizeof(sr_ethernet_hdr_t) + sizeof(sr_ip_hdr_t) + sizeof(sr_icmp_hdr_t));
   /*ethernet header*/
-  uint8_t * ether_shost = malloc(sizeof(unsigned char) * ETHER_ADDR_LEN);
-  struct sr_if * iface = sr_get_interface(sr, interface);
-  memcpy((void*) ether_shost, iface->addr, sizeof(unsigned char) * ETHER_ADDR_LEN);
-
-  uint8_t * ether_dhost = malloc(sizeof(unsigned char) * ETHER_ADDR_LEN);
-  struct sr_arpentry * entry = sr_arpcache_lookup( &(sr->cache), ip->ip_src);
-  memcpy(ether_dhost, entry->mac, sizeof(unsigned char) * ETHER_ADDR_LEN);
-
-  memcpy((void *) block->ether_dhost, (void *) ether_dhost, sizeof(uint8_t) * ETHER_ADDR_LEN);
-  memcpy((void *) block->ether_shost, (void *) ether_shost, sizeof(uint8_t) * ETHER_ADDR_LEN);
+  memcpy(block->ether_dhost, entry->mac, ETHER_ADDR_LEN);
+  memcpy(block->ether_shost, iface->addr, ETHER_ADDR_LEN);
   block->ether_type = htons(ethertype_ip);
+
+  printf("%p\n",block);
   
   /*ip header*/
   void * ptr = (void *) block;
@@ -283,7 +277,7 @@ void sr_icmp_send_message(struct sr_instance* sr, uint8_t type, uint8_t code, sr
   /*fillin( sr,ip, interface,block);*/
   printf("filling in");
   /*2b12d,e Fill the Source MAC Address, Destination MAC Address, Ethernet Type in ethernet header*/
-  uint8_t * ether_shost = malloc(sizeof(unsigned char) * ETHER_ADDR_LEN);
+  /*uint8_t * ether_shost = malloc(sizeof(unsigned char) * ETHER_ADDR_LEN);
   struct sr_if * iface = sr_get_interface(sr, interface);
   memcpy((void*) ether_shost, iface->addr, sizeof(unsigned char) * ETHER_ADDR_LEN);
 
@@ -296,15 +290,13 @@ void sr_icmp_send_message(struct sr_instance* sr, uint8_t type, uint8_t code, sr
   block->ether_type = htons(ethertype_ip);
 
   printf("%p\n",block);
+  */
 
+  memcpy(block->ether_dhost, entry->mac, ETHER_ADDR_LEN);
+  memcpy(block->ether_shost, iface->addr, ETHER_ADDR_LEN);
+  block->ether_type = htons(ethertype_ip);
 
-  sr_ethernet_hdr_t * frame = (sr_ethernet_hdr_t *) malloc(sizeof(sr_ethernet_hdr_t) + sizeof(sr_ip_hdr_t) + sizeof(sr_icmp_hdr_t));
-
-  memcpy(frame->ether_dhost, entry->mac, ETHER_ADDR_LEN);
-  memcpy(frame->ether_shost, iface->addr, ETHER_ADDR_LEN);
-  frame->ether_type = htons(ethertype_ip);
-
-  printf("%p\n",frame);
+  printf("%p\n",block);
   
   
   void * ptr = (void *) block;
