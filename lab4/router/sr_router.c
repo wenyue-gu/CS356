@@ -212,7 +212,7 @@ void icmp_unreachable(struct sr_instance * sr, uint8_t code, sr_ip_hdr_t * ip, c
   uint32_t ip_dst= ntohl(ip->ip_src);
   sr_ip_hdr_t *pkt = (sr_ip_hdr_t *)ptr;
   pkt->ip_tos = 0;
-  pkt->ip_len = htons((uint16_t) (sizeof(sr_ip_hdr_t) + payload_size));
+  pkt->ip_len = htons((uint16_t) (sizeof(sr_ip_hdr_t) + sizeof(sr_icmp_hdr_t)));
   pkt->ip_id = htons(0);
   pkt->ip_off = htons(0);
   pkt->ip_ttl = 15;
@@ -231,7 +231,7 @@ void icmp_unreachable(struct sr_instance * sr, uint8_t code, sr_ip_hdr_t * ip, c
   icmp_t3_hdr->icmp_sum = 0;
   icmp_t3_hdr->unused = Unused;
 
-  memcpy((icmp_t3_hdr->data), data, sizeof(uint8_t) * ICMP_DATA_SIZE);
+  memcpy((icmp_t3_hdr->data), (uint8_t *) ip, sizeof(uint8_t) * ICMP_DATA_SIZE);
   icmp_t3_hdr->icmp_sum = cksum(icmp_t3_hdr, sizeof(sr_icmp_t3_hdr_t));
 
 
@@ -283,7 +283,7 @@ void sr_icmp_send_message(struct sr_instance* sr, uint8_t type, uint8_t code, sr
   uint32_t ip_dst= ntohl(ip->ip_src);
   sr_ip_hdr_t* pkt = (sr_ip_hdr_t *)ptr;
   pkt->ip_tos = iptos;
-  pkt->ip_len = htons((uint16_t) (sizeof(sr_ip_hdr_t) + payload_size));
+  pkt->ip_len = htons((uint16_t) (sizeof(sr_ip_hdr_t) + sizeof(sr_icmp_hdr_t)));
   pkt->ip_id = htons(ipid);
   pkt->ip_off = htons(ipoff);
   pkt->ip_ttl = ipttl;
