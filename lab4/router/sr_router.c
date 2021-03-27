@@ -263,7 +263,7 @@ void handle_icmp(struct sr_instance* sr, uint8_t * buf, unsigned int len, char* 
   sr_icmp_hdr_t * icmp_hdr = (sr_icmp_hdr_t *) (((void *) buf)+ sizeof(sr_ip_hdr_t));
   uint8_t type = icmp_hdr->icmp_type;
   printf("%i",type);
-  printf(ntohs("%i",type));
+  printf("%i",ntohs(type));
   printf("%i",Echorequest);
   if(type==Echorequest){
     /*2b12*/
