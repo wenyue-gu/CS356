@@ -190,6 +190,7 @@ def run_tests(net):
     client = [net.get('client'), '10.0.1.100']
     server1 = [net.get('server1'), '192.168.2.2']
     server2 = [net.get('server2'), '172.64.3.10']
+    defalut_switch = net.get("sw0")
     node_infos = [client, server1, server2]
     node_names = ['Client', 'Server1', 'Server2']
     node_to_interface = ['10.0.1.1', '192.168.2.1', '172.64.3.1']
@@ -198,6 +199,7 @@ def run_tests(net):
         client[0].cmd("tshark -i client-eth0 -w ./pcap_files/client.pcap &")
         server2[0].cmd("tshark -i server2-eth0 -w ../pcap_files/server2.pcap &")
         server1[0].cmd("tshark -i server1-eth0 -w ../pcap_files/server1.pcap &")
+        defalut_switch.cmd("tshark -i sw0-eth1 -i sw0-eth2 -i sw0-eth3 -w ./pcap_files/router.pcap &")
     total_scores = 0
 
     if args.t is None:
