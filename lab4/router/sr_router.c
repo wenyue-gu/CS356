@@ -296,9 +296,6 @@ void sr_icmp_send_message(struct sr_instance* sr, uint8_t type, uint8_t code, sr
   /*memcpy(block->ether_dhost, entry->mac, ETHER_ADDR_LEN);
   memcpy(block->ether_shost, iface->addr, ETHER_ADDR_LEN);
   block->ether_type = htons(ethertype_ip);*/
-
-  printf(" %p block \n",block);
-
   
   /*2b12cFill the source IP address, destination IP address, ttl, protocol, length, checksum in IP header*/
   uint32_t ip_src = ntohl(ip->ip_dst);
@@ -322,10 +319,12 @@ void sr_icmp_send_message(struct sr_instance* sr, uint8_t type, uint8_t code, sr
   icmp_hdr->icmp_sum  = 0;
   icmp_hdr->icmp_sum = cksum((void *)icmp_hdr, sizeof(sr_icmp_hdr_t));
 
-
-  printf("sending icmp, %p\n", (uint8_t*)block);
   unsigned int packet_len = sizeof(sr_ethernet_hdr_t) + sizeof(sr_ip_hdr_t) + sizeof(sr_icmp_hdr_t);
   /*2b13 Send this ICMP Reply packet back to the Sender*/
+
+  print_hdr_eth((uint8_t *)block);
+  print_hdr_ip((uint8_t *)block);
+  print_hdr_icmp((uint8_t *)block);
   sr_send_packet(sr, (uint8_t*) block, packet_len, interface );
   free(block);
 
