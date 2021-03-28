@@ -311,7 +311,7 @@ void sr_icmp_send_message(struct sr_instance* sr, uint8_t type, uint8_t code, sr
   uint32_t ip_src = ntohl(ip->ip_dst);
   uint32_t ip_dst= ntohl(ip->ip_src);
   sr_ip_hdr_t* pkt = (sr_ip_hdr_t *)(block + sizeof(sr_ethernet_hdr_t));
-  printf("%i, ipid", ip->ip_id)
+  printf("%i, ipid", ip->ip_id);
   pkt->ip_hl = 0x5;
   pkt->ip_v  = 4;
   pkt->ip_tos = iptos;
