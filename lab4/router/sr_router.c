@@ -227,7 +227,7 @@ void icmp_unreachable(struct sr_instance * sr, uint8_t code, sr_ip_hdr_t * ip, c
   uint32_t ip_src = ntohl(ip->ip_dst);
   uint32_t ip_dst= ntohl(ip->ip_src);
   sr_ip_hdr_t* pkt = (sr_ip_hdr_t *)(block + sizeof(sr_ethernet_hdr_t));
-  pkt->ip_hl = sizeof(sr_ip_hdr_t);
+  pkt->ip_hl = 0x5;
   pkt->ip_v  = 4;
   pkt->ip_tos = 0;
   pkt->ip_len = htons((uint16_t) (sizeof(sr_ip_hdr_t) + sizeof(sr_icmp_hdr_t)));
@@ -285,7 +285,7 @@ void sr_icmp_send_message(struct sr_instance* sr, uint8_t type, uint8_t code, sr
   printf("filling in\n");
   /*fillin( sr,ip, interface,block);*/
   /*2b12d,e Fill the Source MAC Address, Destination MAC Address, Ethernet Type in ethernet header*/
-  /*uint8_t * ether_shost = malloc(sizeof(unsigned char) * ETHER_ADDR_LEN);
+  uint8_t * ether_shost = malloc(sizeof(unsigned char) * ETHER_ADDR_LEN);
   struct sr_if * iface = sr_get_interface(sr, interface);
   memcpy((void*) ether_shost, iface->addr, sizeof(unsigned char) * ETHER_ADDR_LEN);
   printf("shost finished\n");
@@ -299,19 +299,19 @@ void sr_icmp_send_message(struct sr_instance* sr, uint8_t type, uint8_t code, sr
 
   memcpy((void *) block->ether_dhost, (void *) ether_dhost, sizeof(uint8_t) * ETHER_ADDR_LEN);
   memcpy((void *) block->ether_shost, (void *) ether_shost, sizeof(uint8_t) * ETHER_ADDR_LEN);
-  block->ether_type = htons(ethertype_ip);*/
+  block->ether_type = htons(ethertype_ip);
 
-  struct sr_if * iface = sr_get_interface(sr, interface);
+  /*struct sr_if * iface = sr_get_interface(sr, interface);
   struct sr_arpentry * entry = sr_arpcache_lookup( &(sr->cache), ip->ip_src);
   memcpy(block->ether_dhost, entry->mac, ETHER_ADDR_LEN);
   memcpy(block->ether_shost, iface->addr, ETHER_ADDR_LEN);
   block->ether_type = htons(ethertype_ip);
-  printf("ip\n");
+  printf("ip\n");*/
   /*2b12cFill the source IP address, destination IP address, ttl, protocol, length, checksum in IP header*/
   uint32_t ip_src = ntohl(ip->ip_dst);
   uint32_t ip_dst= ntohl(ip->ip_src);
   sr_ip_hdr_t* pkt = (sr_ip_hdr_t *)(block + sizeof(sr_ethernet_hdr_t));
-  pkt->ip_hl = sizeof(sr_ip_hdr_t);
+  pkt->ip_hl = 0x5;
   pkt->ip_v  = 4;
   pkt->ip_tos = iptos;
   pkt->ip_len = htons((uint16_t) (sizeof(sr_ip_hdr_t) + sizeof(sr_icmp_hdr_t)));
@@ -339,8 +339,8 @@ void sr_icmp_send_message(struct sr_instance* sr, uint8_t type, uint8_t code, sr
   print_hdr_icmp((uint8_t *)(block + sizeof(sr_ethernet_hdr_t) + sizeof(sr_ip_hdr_t)));
   sr_send_packet(sr, (uint8_t*) block, packet_len, interface );
   free(block);
-  /*free(ether_shost);
-  free(ether_dhost);*/
+  free(ether_shost);
+  free(ether_dhost);
 }
 
 
