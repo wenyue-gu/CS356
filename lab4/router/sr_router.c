@@ -291,10 +291,12 @@ void sr_icmp_send_message(struct sr_instance* sr, uint8_t type, uint8_t code, sr
   printf("shost finished\n");
 
   uint8_t * ether_dhost = malloc(sizeof(unsigned char) * ETHER_ADDR_LEN);
+  printf("print1\n");
   struct sr_arpentry * entry = sr_arpcache_lookup( &(sr->cache), ip->ip_src);
+  printf("print2\n");
   memcpy(ether_dhost, entry->mac, sizeof(unsigned char) * ETHER_ADDR_LEN);
   printf("dhost finished\n");
-  
+
   memcpy((void *) block->ether_dhost, (void *) ether_dhost, sizeof(uint8_t) * ETHER_ADDR_LEN);
   memcpy((void *) block->ether_shost, (void *) ether_shost, sizeof(uint8_t) * ETHER_ADDR_LEN);
   block->ether_type = htons(ethertype_ip);
