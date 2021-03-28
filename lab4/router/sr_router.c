@@ -281,7 +281,7 @@ void handle_icmp(struct sr_instance* sr, uint8_t * buf, unsigned int len, char* 
 void sr_icmp_send_message(struct sr_instance* sr, uint8_t type, uint8_t code, sr_ip_hdr_t * ip, char* interface){
   printf("sending icmp\n");
   /*2b12a Malloc a space to store ethernet header and IP header and ICMP header*/
-  uint8_t * block = (uint8_t *) malloc(sizeof(sr_ethernet_hdr_t) + sizeof(sr_ip_hdr_t) + sizeof(sr_icmp_t8_hdr_t));
+  uint8_t * block = (uint8_t *) malloc(sizeof(sr_ethernet_hdr_t) + ntohs(ip->ip_len));
   sr_ethernet_hdr_t* ethernet_hdr = (sr_ethernet_hdr_t*)block;
   printf("filling in\n");
   /*fillin( sr,ip, interface,block);*/
@@ -312,14 +312,15 @@ void sr_icmp_send_message(struct sr_instance* sr, uint8_t type, uint8_t code, sr
   uint32_t ip_src = ntohl(ip->ip_dst);
   uint32_t ip_dst= ntohl(ip->ip_src);
   sr_ip_hdr_t* pkt = (sr_ip_hdr_t *)(block + sizeof(sr_ethernet_hdr_t));
-  pkt->ip_hl = 0x5;
+  memcpy(pkt, ip, ntohs(ip->ip_len));
+  /*pkt->ip_hl = 0x5;
   pkt->ip_v  = 0x4;
   pkt->ip_tos = iptos;
   pkt->ip_len = htons((uint16_t) (sizeof(sr_ip_hdr_t) + sizeof(sr_icmp_t8_hdr_t)));
   pkt->ip_id = htons(ipid);
   pkt->ip_off = htons(ipoff);
   pkt->ip_ttl = ipttl;
-  pkt->ip_p = ip_protocol_icmp;
+  pkt->ip_p = ip_protocol_icmp;*/
   pkt->ip_sum = 0;
   pkt->ip_src = htonl(ip_src);
   pkt->ip_dst = htonl(ip_dst);
@@ -327,14 +328,14 @@ void sr_icmp_send_message(struct sr_instance* sr, uint8_t type, uint8_t code, sr
 
   /*2b12b Fill the ICMP code, type in ICMP header*/
   sr_icmp_t8_hdr_t* icmp_hdr = (sr_icmp_t8_hdr_t*)(block + sizeof(sr_ethernet_hdr_t) + sizeof(sr_ip_hdr_t));
-  sr_icmp_t8_hdr_t* icmp = (sr_icmp_t8_hdr_t*)(ip+1);
-  memcpy(icmp_hdr, icmp, 8);
+  /*sr_icmp_t8_hdr_t* icmp = (sr_icmp_t8_hdr_t*)(ip+1);
+  memcpy(icmp_hdr, icmp, 8);*/
   icmp_hdr->icmp_type = type;
   icmp_hdr->icmp_code = code;
   icmp_hdr->icmp_sum  = 0;
   icmp_hdr->icmp_sum = cksum((void *)icmp_hdr, sizeof(sr_icmp_t8_hdr_t));
 
-  unsigned int packet_len = sizeof(sr_ethernet_hdr_t) + sizeof(sr_ip_hdr_t) + sizeof(sr_icmp_t8_hdr_t);
+  unsigned int packet_len = sizeof(sr_ethernet_hdr_t) + ntohs(ip->ip_len);
   /*2b13 Send this ICMP Reply packet back to the Sender*/
 
   print_hdr_eth((uint8_t *)block);
