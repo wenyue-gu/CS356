@@ -278,7 +278,7 @@ void sr_icmp_send_message(struct sr_instance* sr, uint8_t type, uint8_t code, sr
   printf("sending icmp\n");
   /*2b12a Malloc a space to store ethernet header and IP header and ICMP header*/
   sr_ethernet_hdr_t * block = (sr_ethernet_hdr_t *) malloc(sizeof(sr_ethernet_hdr_t) + sizeof(sr_ip_hdr_t) + sizeof(sr_icmp_hdr_t));
-  
+  printf("filling in\n");
   /*fillin( sr,ip, interface,block);*/
   /*2b12d,e Fill the Source MAC Address, Destination MAC Address, Ethernet Type in ethernet header*/
   uint8_t * ether_shost = malloc(sizeof(unsigned char) * ETHER_ADDR_LEN);
@@ -301,6 +301,7 @@ void sr_icmp_send_message(struct sr_instance* sr, uint8_t type, uint8_t code, sr
   uint32_t ip_src = ntohl(ip->ip_dst);
   uint32_t ip_dst= ntohl(ip->ip_src);
   sr_ip_hdr_t* pkt = (sr_ip_hdr_t *)(block + sizeof(sr_ethernet_hdr_t));
+  pkt->ip_hl = sizeof(sr_ip_hdr_t);
   pkt->ip_tos = iptos;
   pkt->ip_len = htons((uint16_t) (sizeof(sr_ip_hdr_t) + sizeof(sr_icmp_hdr_t)));
   pkt->ip_id = htons(ipid);
