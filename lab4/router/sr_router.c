@@ -323,10 +323,10 @@ void sr_icmp_send_message(struct sr_instance* sr, uint8_t type, uint8_t code, sr
   pkt->ip_sum = 0;
   pkt->ip_src = htonl(ip_src);
   pkt->ip_dst = htonl(ip_dst);
-  pkt->ip_sum = cksum(((void *) pkt), sizeof(sr_ip_hdr_t));
+  pkt->ip_sum = cksum((void *) pkt, sizeof(sr_ip_hdr_t));
 
   /*2b12b Fill the ICMP code, type in ICMP header*/
-  sr_icmp_t3_hdr_t* icmp_hdr = (sr_icmp_t3_hdr_t*)(block + sizeof(sr_ethernet_hdr_t) + sizeof(sr_ip_hdr_t));
+  sr_icmp_hdr_t* icmp_hdr = (sr_icmp_hdr_t*)(block + sizeof(sr_ethernet_hdr_t) + sizeof(sr_ip_hdr_t));
   icmp_hdr->icmp_type = type;
   icmp_hdr->icmp_code = code;
   icmp_hdr->icmp_sum  = 0;
