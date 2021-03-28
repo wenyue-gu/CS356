@@ -110,10 +110,12 @@ void sr_handlepacket(struct sr_instance* sr,
   switch(ethtype) {
  		case ethertype_arp:
       /* case1 */
+      printf("handle_arp\n");
 			sr_handle_arp(sr, packet+sizeof(sr_ethernet_hdr_t), len-sizeof(sr_ethernet_hdr_t), interface);
       break;
     case ethertype_ip:
       /* case2 */
+      printf("handle_ip\n");
       sr_handle_ip(sr, packet+sizeof(sr_ethernet_hdr_t), len-sizeof(sr_ethernet_hdr_t), interface);
       break;
   }
@@ -123,7 +125,6 @@ void sr_handle_ip(struct sr_instance* sr, uint8_t * buf, unsigned int len,char* 
   /*2a Check whether the checksum in the IP header is correct. 
   If the checksum is not correct, just ignore this packet and return. 
   Recall the Internet checksum algorithm returns zero if there is no bit error*/
-  printf("handle_ip");
   sr_ip_hdr_t* ip = (sr_ip_hdr_t*)buf;
   uint16_t received = ip->ip_sum;
   ip->ip_sum = 0;
@@ -326,7 +327,7 @@ void sr_icmp_send_message(struct sr_instance* sr, uint8_t type, uint8_t code, sr
   icmp_hdr->icmp_sum = cksum((void *)icmp_hdr, sizeof(sr_icmp_hdr_t));
 
 
-  printf("sending");
+  printf("sending icmp, %p\n",block);
   unsigned int packet_len = sizeof(sr_ethernet_hdr_t) + sizeof(sr_ip_hdr_t) + sizeof(sr_icmp_hdr_t);
   /*2b13 Send this ICMP Reply packet back to the Sender*/
   sr_send_packet(sr, (uint8_t*) block, packet_len, interface );
