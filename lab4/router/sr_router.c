@@ -255,6 +255,8 @@ void icmp_unreachable(struct sr_instance * sr, uint8_t code, sr_ip_hdr_t * ip, c
   unsigned int packet_len = sizeof(sr_ethernet_hdr_t) + sizeof(sr_ip_hdr_t) + sizeof(sr_icmp_hdr_t);
   sr_send_packet(sr, (uint8_t*) block, packet_len, interface );
   free(block);
+  free(ether_shost);
+  free(ether_dhost);
   
 }
 
@@ -286,13 +288,13 @@ void sr_icmp_send_message(struct sr_instance* sr, uint8_t type, uint8_t code, sr
   uint8_t * ether_shost = malloc(sizeof(unsigned char) * ETHER_ADDR_LEN);
   struct sr_if * iface = sr_get_interface(sr, interface);
   memcpy((void*) ether_shost, iface->addr, sizeof(unsigned char) * ETHER_ADDR_LEN);
-  free(ether_shost);
   printf("shost finished\n");
+
   uint8_t * ether_dhost = malloc(sizeof(unsigned char) * ETHER_ADDR_LEN);
   struct sr_arpentry * entry = sr_arpcache_lookup( &(sr->cache), ip->ip_src);
   memcpy(ether_dhost, entry->mac, sizeof(unsigned char) * ETHER_ADDR_LEN);
-  free(ether_dhost);
   printf("dhost finished\n");
+  
   memcpy((void *) block->ether_dhost, (void *) ether_dhost, sizeof(uint8_t) * ETHER_ADDR_LEN);
   memcpy((void *) block->ether_shost, (void *) ether_shost, sizeof(uint8_t) * ETHER_ADDR_LEN);
   block->ether_type = htons(ethertype_ip);
@@ -333,7 +335,8 @@ void sr_icmp_send_message(struct sr_instance* sr, uint8_t type, uint8_t code, sr
   print_hdr_icmp((uint8_t *)(block + sizeof(sr_ethernet_hdr_t) + sizeof(sr_ip_hdr_t)));
   sr_send_packet(sr, (uint8_t*) block, packet_len, interface );
   free(block);
-
+  free(ether_shost);
+  free(ether_dhost);
 }
 
 
