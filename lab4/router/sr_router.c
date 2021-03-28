@@ -30,7 +30,7 @@ void sr_handle_ip(struct sr_instance* sr, uint8_t * buf, unsigned int len,char* 
 struct sr_rt *prefix_match(struct sr_instance * sr, uint32_t addr);
 void icmp_unreachable(struct sr_instance * sr, uint8_t code, sr_ip_hdr_t * ip, char* interface);
 void handle_icmp(struct sr_instance* sr, uint8_t * buf, unsigned int len, char* interface);
-void sr_icmp_send_message(struct sr_instance* sr, uint8_t type, uint8_t code, sr_ip_hdr_t * ip, char* interface);
+void sr_icmp_send_message(struct sr_instance* sr, uint8_t type, uint8_t code, uint8_t * buf, char* interface);
 bool is_own_ip(struct sr_instance* sr, sr_ip_hdr_t* current);
 void sr_handle_arp(struct sr_instance* sr, uint8_t * buf, unsigned int len, char* interface);
 void send_arp_rep(struct sr_instance* sr, struct sr_if* iface, sr_arp_hdr_t* arp);
@@ -262,7 +262,7 @@ void icmp_unreachable(struct sr_instance * sr, uint8_t code, sr_ip_hdr_t * ip, c
 
 /*2b1*/
 void handle_icmp(struct sr_instance* sr, uint8_t * buf, unsigned int len, char* interface){
-  sr_ip_hdr_t * ip_hdr = (sr_ip_hdr_t *)(buf);
+  sr_icmp_hdr_t * icmp_hdr = (sr_icmp_hdr_t *) (((void *) packet)+ sizeof(sr_ip_hdr_t));
   uint8_t type = icmp_hdr->icmp_type;
   if(type==Echorequest){
     /*2b12*/
@@ -278,7 +278,7 @@ void handle_icmp(struct sr_instance* sr, uint8_t * buf, unsigned int len, char* 
 /*void fillin(struct sr_instance* sr,sr_ip_hdr_t * ip, char* interface,sr_ethernet_hdr_t * block)*/
 
 void sr_icmp_send_message(struct sr_instance* sr, uint8_t type, uint8_t code, uint8_t * buf, char* interface, uint32_t unused){
-  sr_ip_hdr_t * ip_hdr = (sr_ip_hdr_t *)(buf);
+  sr_ip_hdr_t * ip = (sr_ip_hdr_t *)(buf);
   sr_icmp_t8_hdr_t * or_icmp = (sr_icmp_t8_hdr_t *) (((void *) buf)+ sizeof(sr_ip_hdr_t));
 
   printf("sending icmp\n");
