@@ -315,7 +315,7 @@ void sr_icmp_send_message(struct sr_instance* sr, uint8_t type, uint8_t code, sr
   pkt->ip_hl = 0x5;
   pkt->ip_v  = 4;
   pkt->ip_tos = iptos;
-  pkt->ip_len = sizeof(sr_ip_hdr_t) + sizeof(sr_icmp_hdr_t);
+  pkt->ip_len = (uint16_t) (sizeof(sr_ip_hdr_t) + sizeof(sr_icmp_hdr_t));
   pkt->ip_id = htons(ipid);
   pkt->ip_off = htons(ipoff);
   pkt->ip_ttl = ipttl;
