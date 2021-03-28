@@ -339,8 +339,8 @@ void sr_icmp_send_message(struct sr_instance* sr, uint8_t type, uint8_t code, sr
   print_hdr_icmp((uint8_t *)(block + sizeof(sr_ethernet_hdr_t) + sizeof(sr_ip_hdr_t)));
   sr_send_packet(sr, (uint8_t*) block, packet_len, interface );
   free(block);
-  free(ether_shost);
-  free(ether_dhost);
+  /*free(ether_shost);
+  free(ether_dhost);*/
 }
 
 
