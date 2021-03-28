@@ -159,6 +159,7 @@ void sr_handle_ip(struct sr_instance* sr, uint8_t * buf, unsigned int len,char* 
   else{
     /*2c1 Check whether the TTL in the IP header equals 1. 
     If TTL=1, your router should reply an ICMP Time Exceeded message back to the Sender*/
+    printf("\n******ttl is %i*******\n", ip->ip_ttl);
     if(ip->ip_ttl == 1){
       sr_icmp_send_message(sr, TimeExceededType, TimeExceededCode, (sr_ip_hdr_t *)ip, interface);
     }
