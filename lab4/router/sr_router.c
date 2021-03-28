@@ -295,7 +295,10 @@ void sr_icmp_send_message(struct sr_instance* sr, uint8_t type, uint8_t code, sr
   memcpy(block->ether_shost, iface->addr, ETHER_ADDR_LEN);
   block->ether_type = htons(ethertype_ip);
 
-  printf("\n %p block \n",block);
+  printf("\n %i ether_dhost \n",block->ether_dhost);
+  printf(" %i ether_shost \n",block->ether_shost);
+  printf(" %i ether_type \n",block->ether_type);
+  printf(" %p block \n",block);
   
   sr_ethernet_hdr_t * frame = (sr_ethernet_hdr_t *) malloc(sizeof(sr_ethernet_hdr_t) + sizeof(sr_ip_hdr_t) + sizeof(sr_icmp_hdr_t));
   /*struct sr_if * iface = sr_get_interface(sr, interface);
@@ -305,6 +308,9 @@ void sr_icmp_send_message(struct sr_instance* sr, uint8_t type, uint8_t code, sr
   memcpy(frame->ether_shost, iface->addr, ETHER_ADDR_LEN);
   frame->ether_type = htons(ethertype_ip);
 
+  printf("\n %i ether_dhost \n",frame->ether_dhost);
+  printf(" %i ether_shost \n",frame->ether_shost);
+  printf(" %i ether_type \n",frame->ether_type);
   printf("%p\n",frame);
   
   
