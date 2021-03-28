@@ -228,7 +228,7 @@ void icmp_unreachable(struct sr_instance * sr, uint8_t code, sr_ip_hdr_t * ip, c
   uint32_t ip_dst= ntohl(ip->ip_src);
   sr_ip_hdr_t* pkt = (sr_ip_hdr_t *)(block + sizeof(sr_ethernet_hdr_t));
   pkt->ip_hl = sizeof(sr_ip_hdr_t);
-  pkt->ip_ip_v  = 4;
+  pkt->ip_v  = 4;
   pkt->ip_tos = 0;
   pkt->ip_len = htons((uint16_t) (sizeof(sr_ip_hdr_t) + sizeof(sr_icmp_hdr_t)));
   pkt->ip_id = htons(0);
@@ -304,7 +304,7 @@ void sr_icmp_send_message(struct sr_instance* sr, uint8_t type, uint8_t code, sr
   uint32_t ip_dst= ntohl(ip->ip_src);
   sr_ip_hdr_t* pkt = (sr_ip_hdr_t *)(block + sizeof(sr_ethernet_hdr_t));
   pkt->ip_hl = sizeof(sr_ip_hdr_t);
-  pkt->ip_ip_v  = 4;
+  pkt->ip_v  = 4;
   pkt->ip_tos = iptos;
   pkt->ip_len = htons((uint16_t) (sizeof(sr_ip_hdr_t) + sizeof(sr_icmp_hdr_t)));
   pkt->ip_id = htons(ipid);
