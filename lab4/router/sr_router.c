@@ -287,31 +287,19 @@ void sr_icmp_send_message(struct sr_instance* sr, uint8_t type, uint8_t code, sr
   struct sr_arpentry * entry = sr_arpcache_lookup( &(sr->cache), ip->ip_src);
   memcpy(ether_dhost, entry->mac, sizeof(unsigned char) * ETHER_ADDR_LEN);
 
-  /*memcpy((void *) block->ether_dhost, (void *) ether_dhost, sizeof(uint8_t) * ETHER_ADDR_LEN);
+  memcpy((void *) block->ether_dhost, (void *) ether_dhost, sizeof(uint8_t) * ETHER_ADDR_LEN);
   memcpy((void *) block->ether_shost, (void *) ether_shost, sizeof(uint8_t) * ETHER_ADDR_LEN);
-  block->ether_type = htons(ethertype_ip);*/
-
-  memcpy(block->ether_dhost, entry->mac, ETHER_ADDR_LEN);
-  memcpy(block->ether_shost, iface->addr, ETHER_ADDR_LEN);
   block->ether_type = htons(ethertype_ip);
+
+  /*memcpy(block->ether_dhost, entry->mac, ETHER_ADDR_LEN);
+  memcpy(block->ether_shost, iface->addr, ETHER_ADDR_LEN);
+  block->ether_type = htons(ethertype_ip);*/
 
   printf("\n %hhn ether_dhost \n",block->ether_dhost);
   printf(" %hhn ether_shost \n",block->ether_shost);
   printf(" %i ether_type \n",block->ether_type);
   printf(" %p block \n",block);
-  
-  sr_ethernet_hdr_t * frame = (sr_ethernet_hdr_t *) malloc(sizeof(sr_ethernet_hdr_t) + sizeof(sr_ip_hdr_t) + sizeof(sr_icmp_hdr_t));
-  /*struct sr_if * iface = sr_get_interface(sr, interface);
-  struct sr_arpentry * entry = sr_arpcache_lookup( &(sr->cache), ip->ip_src);*/
 
-  memcpy(frame->ether_dhost, entry->mac, ETHER_ADDR_LEN);
-  memcpy(frame->ether_shost, iface->addr, ETHER_ADDR_LEN);
-  frame->ether_type = htons(ethertype_ip);
-
-  printf("\n %hhn ether_dhost \n",frame->ether_dhost);
-  printf(" %hhn ether_shost \n",frame->ether_shost);
-  printf(" %i ether_type \n",frame->ether_type);
-  printf("%p\n",frame);
   
   
   void * ptr = (void *) block;
