@@ -161,7 +161,7 @@ void sr_handle_ip(struct sr_instance* sr, uint8_t * buf, unsigned int len,char* 
     If TTL=1, your router should reply an ICMP Time Exceeded message back to the Sender*/
     printf("\n******ttl is %i*******\n", ip->ip_ttl);
     if(ip->ip_ttl == 1){
-      sr_icmp_send_message(sr, TimeExceededType, TimeExceededCode, (sr_ip_hdr_t *)ip, interface);
+      icmp_time(sr, TimeExceededType, TimeExceededCode, (sr_ip_hdr_t *)ip, interface);
     }
     else{
       /*2c2 Otherwise, check whether the destination IP address is in your routing table.*/
@@ -180,6 +180,65 @@ void sr_handle_ip(struct sr_instance* sr, uint8_t * buf, unsigned int len,char* 
   }
 }
 
+
+void icmp_time(struct sr_instance * sr, uint8_t type, uint8_t code, sr_ip_hdr_t * ip, char* interface){
+  
+  uint8_t * block = (uint8_t *) malloc(sizeof(sr_ethernet_hdr_t) + ntohs(ip->ip_len));
+
+  /*ethernet header*/
+  sr_ethernet_hdr_t* ethernet_hdr = (sr_ethernet_hdr_t*)block;
+    
+  uint8_t * ether_shost = malloc(sizeof(unsigned char) * ETHER_ADDR_LEN);
+  struct sr_if * iface = sr_get_interface(sr, interface);
+  memcpy((void*) ether_shost, iface->addr, sizeof(unsigned char) * ETHER_ADDR_LEN);
+
+  uint8_t * ether_dhost = malloc(sizeof(unsigned char) * ETHER_ADDR_LEN);
+  struct sr_arpentry * entry = sr_arpcache_lookup( &(sr->cache), ip->ip_src);
+  memcpy(ether_dhost, entry->mac, sizeof(unsigned char) * ETHER_ADDR_LEN);
+
+  memcpy(ethernet_hdr->ether_dhost, ether_dhost, ETHER_ADDR_LEN);
+  memcpy(ethernet_hdr->ether_shost, ether_shost, ETHER_ADDR_LEN);
+  ethernet_hdr->ether_type = htons(ethertype_ip);
+
+  
+  /*ip header*/
+  uint32_t ip_src = ntohl(ip->ip_dst);
+  uint32_t ip_dst= ntohl(ip->ip_src);
+  sr_ip_hdr_t* pkt = (sr_ip_hdr_t *)(block + sizeof(sr_ethernet_hdr_t));
+  memcpy(pkt, ip, ntohs(ip->ip_len));
+  pkt->ip_hl = 0x5;
+  pkt->ip_v  = 0x4;
+  pkt->ip_tos = iptos;
+  pkt->ip_len = htons((uint16_t) (sizeof(sr_ip_hdr_t) + sizeof(sr_icmp_t11_hdr_t)));
+  pkt->ip_id = htons(ipid);
+  pkt->ip_off = htons(ipoff);
+  pkt->ip_ttl = ipttl;
+  pkt->ip_p = ip_protocol_icmp;
+  pkt->ip_sum = 0;
+  pkt->ip_src = htonl(ip_src);
+  pkt->ip_dst = htonl(ip_dst);
+  pkt->ip_sum = cksum(((void *) pkt), sizeof(sr_ip_hdr_t));
+
+  /*icmp header*/
+  sr_icmp_t11_hdr_t* icmp_t11_hdr = (sr_icmp_t11_hdr_t*)(block + sizeof(sr_ethernet_hdr_t) + sizeof(sr_ip_hdr_t));
+  icmp_t11_hdr->icmp_type = type;
+  icmp_t11_hdr->icmp_code = code;
+  icmp_t11_hdr->icmp_sum = 0;
+  icmp_t11_hdr->unused = Unused;
+  memcpy((icmp_t11_hdr->data), (uint8_t *) ip, sizeof(uint8_t) * ICMP_DATA_SIZE);
+  icmp_t11_hdr->icmp_sum = cksum((void *)icmp_t11_hdr, sizeof(sr_icmp_t11_hdr_t));
+
+
+  
+  /*Send this ICMP Reply packet back to the Sender*/
+  unsigned int packet_len = sizeof(sr_ethernet_hdr_t) + sizeof(sr_ip_hdr_t) + sizeof(sr_icmp_t11_hdr_t);
+  print_hdrs((uint8_t*) block, packet_len);
+  sr_send_packet(sr, block, packet_len, interface );
+  free(block);
+  free(ether_shost);
+  free(ether_dhost);
+  
+}
 
 
 struct sr_rt *prefix_match(struct sr_instance * sr, uint32_t addr){
@@ -206,6 +265,8 @@ struct sr_rt *prefix_match(struct sr_instance * sr, uint32_t addr){
 	}
   return ans;
 }
+
+
 
 void icmp_unreachable(struct sr_instance * sr, uint8_t code, sr_ip_hdr_t * ip, char* interface){
   
@@ -266,6 +327,7 @@ void icmp_unreachable(struct sr_instance * sr, uint8_t code, sr_ip_hdr_t * ip, c
   free(ether_dhost);
   
 }
+
 
 /*2b1*/
 void handle_icmp(struct sr_instance* sr, uint8_t * buf, unsigned int len, char* interface){
