@@ -239,7 +239,7 @@ void icmp_unreachable(struct sr_instance * sr, uint8_t code, sr_ip_hdr_t * ip, c
   pkt->ip_sum = cksum(((void *) pkt), sizeof(sr_ip_hdr_t));
 
   /*icmp header*/
-  sr_icmp_t3_hdr_t* icmp_hdr = (sr_icmp_t3_hdr_t*)(block + sizeof(sr_ethernet_hdr_t) + sizeof(sr_ip_hdr_t));
+  sr_icmp_t3_hdr_t* icmp_t3_hdr = (sr_icmp_t3_hdr_t*)(block + sizeof(sr_ethernet_hdr_t) + sizeof(sr_ip_hdr_t));
   icmp_t3_hdr->icmp_type = htons(t3_type);
   icmp_t3_hdr->icmp_code = htons(code);
   icmp_t3_hdr->next_mtu = Next_mtu;
