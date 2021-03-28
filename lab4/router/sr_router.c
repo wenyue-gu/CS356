@@ -317,13 +317,14 @@ void sr_icmp_send_message(struct sr_instance* sr, uint8_t type, uint8_t code, sr
   pkt->ip_tos = iptos;
   pkt->ip_len = htons((uint16_t) (sizeof(sr_ip_hdr_t) + sizeof(sr_icmp_hdr_t)));
   pkt->ip_id = htons(ip->ip_id);
-  pkt->ip_off = htons(ipoff);
+  pkt->ip_off = htons(IP_DF);
   pkt->ip_ttl = ipttl;
   pkt->ip_p = ip_protocol_icmp;
   pkt->ip_sum = 0;
   pkt->ip_src = htonl(ip_src);
   pkt->ip_dst = htonl(ip_dst);
   pkt->ip_sum = cksum((void *) pkt, sizeof(sr_ip_hdr_t));
+  printf("%i,ipsum\n",pkt->ip_sum);
 
   /*2b12b Fill the ICMP code, type in ICMP header*/
   sr_icmp_hdr_t* icmp_hdr = (sr_icmp_hdr_t*)(block + sizeof(sr_ethernet_hdr_t) + sizeof(sr_ip_hdr_t));
