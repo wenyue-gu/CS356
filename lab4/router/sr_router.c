@@ -138,19 +138,19 @@ void sr_handle_ip(struct sr_instance* sr, uint8_t * buf, unsigned int len,char* 
     printf("something went wrong with checksum");
     return;
   }*/
-  printf("checksum fine");
+  printf("checksum fine\n");
   /*2b If the destination IP of this packet is router’s own IP */
   if(is_own_ip(sr,ip)){
-    printf("is own ip");
+    printf("is own ip\n");
     uint8_t ip_proto = ip_protocol(buf);
     /*2b1 */
     if (ip_proto == ip_protocol_icmp) {
-      printf("isicmp");
+      printf("isicmp\n");
       handle_icmp(sr, buf , len , interface);
     }
     /*2b2 */
     else{
-      printf("is unreachable");
+      printf("is unreachable\n");
       icmp_unreachable(sr, Unreachable_port_code, ip, interface);
     }
 
@@ -263,24 +263,23 @@ void handle_icmp(struct sr_instance* sr, uint8_t * buf, unsigned int len, char* 
   uint8_t type = icmp_hdr->icmp_type;
   if(type==Echorequest){
     /*2b12*/
-    printf("is echo request");
+    printf("is echo request\n");
     sr_icmp_send_message(sr, Echoreply, Echoreply, ip_hdr, interface);
   }
   /*2b11 If this is not an ICMP ECHO packet, your router can ignore this packet*/
   else{
-    printf("ignoring packet");
+    printf("ignoring packet\n");
   }
 }
 
 /*void fillin(struct sr_instance* sr,sr_ip_hdr_t * ip, char* interface,sr_ethernet_hdr_t * block)*/
 
 void sr_icmp_send_message(struct sr_instance* sr, uint8_t type, uint8_t code, sr_ip_hdr_t * ip, char* interface){
-  printf("sending icmp");
+  printf("sending icmp\n");
   /*2b12a Malloc a space to store ethernet header and IP header and ICMP header*/
   sr_ethernet_hdr_t * block = (sr_ethernet_hdr_t *) malloc(sizeof(sr_ethernet_hdr_t) + sizeof(sr_ip_hdr_t) + sizeof(sr_icmp_hdr_t));
   
   /*fillin( sr,ip, interface,block);*/
-  printf("filling in");
   /*2b12d,e Fill the Source MAC Address, Destination MAC Address, Ethernet Type in ethernet header*/
   uint8_t * ether_shost = malloc(sizeof(unsigned char) * ETHER_ADDR_LEN);
   struct sr_if * iface = sr_get_interface(sr, interface);
@@ -338,6 +337,7 @@ bool is_own_ip(struct sr_instance* sr, sr_ip_hdr_t* current) {
 	struct sr_if * iface = sr->if_list;
   printf("iface established\n");
 	while (iface != NULL) {
+    printf("not null\n");
 		if (current->ip_dst == iface->ip) {
 			return true;
 		}
