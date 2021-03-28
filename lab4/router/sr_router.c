@@ -227,6 +227,8 @@ void icmp_unreachable(struct sr_instance * sr, uint8_t code, sr_ip_hdr_t * ip, c
   uint32_t ip_src = ntohl(ip->ip_dst);
   uint32_t ip_dst= ntohl(ip->ip_src);
   sr_ip_hdr_t* pkt = (sr_ip_hdr_t *)(block + sizeof(sr_ethernet_hdr_t));
+  pkt->ip_hl = sizeof(sr_ip_hdr_t);
+  pkt->ip_ip_v  = 4;
   pkt->ip_tos = 0;
   pkt->ip_len = htons((uint16_t) (sizeof(sr_ip_hdr_t) + sizeof(sr_icmp_hdr_t)));
   pkt->ip_id = htons(0);
@@ -284,11 +286,11 @@ void sr_icmp_send_message(struct sr_instance* sr, uint8_t type, uint8_t code, sr
   uint8_t * ether_shost = malloc(sizeof(unsigned char) * ETHER_ADDR_LEN);
   struct sr_if * iface = sr_get_interface(sr, interface);
   memcpy((void*) ether_shost, iface->addr, sizeof(unsigned char) * ETHER_ADDR_LEN);
-
+  printf("shost finished\n");
   uint8_t * ether_dhost = malloc(sizeof(unsigned char) * ETHER_ADDR_LEN);
   struct sr_arpentry * entry = sr_arpcache_lookup( &(sr->cache), ip->ip_src);
   memcpy(ether_dhost, entry->mac, sizeof(unsigned char) * ETHER_ADDR_LEN);
-
+  printf("dhost finished\n");
   memcpy((void *) block->ether_dhost, (void *) ether_dhost, sizeof(uint8_t) * ETHER_ADDR_LEN);
   memcpy((void *) block->ether_shost, (void *) ether_shost, sizeof(uint8_t) * ETHER_ADDR_LEN);
   block->ether_type = htons(ethertype_ip);
@@ -296,12 +298,13 @@ void sr_icmp_send_message(struct sr_instance* sr, uint8_t type, uint8_t code, sr
   /*memcpy(block->ether_dhost, entry->mac, ETHER_ADDR_LEN);
   memcpy(block->ether_shost, iface->addr, ETHER_ADDR_LEN);
   block->ether_type = htons(ethertype_ip);*/
-  
+  printf("ip\n");
   /*2b12cFill the source IP address, destination IP address, ttl, protocol, length, checksum in IP header*/
   uint32_t ip_src = ntohl(ip->ip_dst);
   uint32_t ip_dst= ntohl(ip->ip_src);
   sr_ip_hdr_t* pkt = (sr_ip_hdr_t *)(block + sizeof(sr_ethernet_hdr_t));
   pkt->ip_hl = sizeof(sr_ip_hdr_t);
+  pkt->ip_ip_v  = 4;
   pkt->ip_tos = iptos;
   pkt->ip_len = htons((uint16_t) (sizeof(sr_ip_hdr_t) + sizeof(sr_icmp_hdr_t)));
   pkt->ip_id = htons(ipid);
