@@ -30,7 +30,7 @@ void sr_handle_ip(struct sr_instance* sr, uint8_t * buf, unsigned int len,char* 
 struct sr_rt *prefix_match(struct sr_instance * sr, uint32_t addr);
 void icmp_unreachable(struct sr_instance * sr, uint8_t code, sr_ip_hdr_t * ip, char* interface);
 void handle_icmp(struct sr_instance* sr, uint8_t * buf, unsigned int len, char* interface);
-void sr_icmp_send_message(struct sr_instance* sr, uint8_t type, uint8_t code, uint8_t * buf, char* interface);
+void sr_icmp_send_message(struct sr_instance* sr, uint8_t type, uint8_t code, sr_ip_hdr_t * ip, char* interface);
 bool is_own_ip(struct sr_instance* sr, sr_ip_hdr_t* current);
 void sr_handle_arp(struct sr_instance* sr, uint8_t * buf, unsigned int len, char* interface);
 void send_arp_rep(struct sr_instance* sr, struct sr_if* iface, sr_arp_hdr_t* arp);
@@ -160,7 +160,7 @@ void sr_handle_ip(struct sr_instance* sr, uint8_t * buf, unsigned int len,char* 
     /*2c1 Check whether the TTL in the IP header equals 1. 
     If TTL=1, your router should reply an ICMP Time Exceeded message back to the Sender*/
     if(ip->ip_ttl == 1){
-      sr_icmp_send_message(sr, TimeExceededType, TimeExceededCode, buf, interface);
+      sr_icmp_send_message(sr, TimeExceededType, TimeExceededCode, (sr_ip_hdr_t *)ip, interface);
     }
     else{
       /*2c2 Otherwise, check whether the destination IP address is in your routing table.*/
@@ -262,12 +262,13 @@ void icmp_unreachable(struct sr_instance * sr, uint8_t code, sr_ip_hdr_t * ip, c
 
 /*2b1*/
 void handle_icmp(struct sr_instance* sr, uint8_t * buf, unsigned int len, char* interface){
+  sr_ip_hdr_t * ip_hdr = (sr_ip_hdr_t *)(buf);
   sr_icmp_hdr_t * icmp_hdr = (sr_icmp_hdr_t *) (((void *) buf)+ sizeof(sr_ip_hdr_t));
   uint8_t type = icmp_hdr->icmp_type;
   if(type==Echorequest){
     /*2b12*/
     printf("is echo request\n");
-    sr_icmp_send_message(sr, Echoreply, Echoreply, buf, interface);
+    sr_icmp_send_message(sr, Echoreply, Echoreply, ip_hdr, interface);
   }
   /*2b11 If this is not an ICMP ECHO packet, your router can ignore this packet*/
   else{
@@ -277,10 +278,7 @@ void handle_icmp(struct sr_instance* sr, uint8_t * buf, unsigned int len, char* 
 
 /*void fillin(struct sr_instance* sr,sr_ip_hdr_t * ip, char* interface,sr_ethernet_hdr_t * block)*/
 
-void sr_icmp_send_message(struct sr_instance* sr, uint8_t type, uint8_t code, uint8_t * buf, char* interface){
-  sr_ip_hdr_t * ip = (sr_ip_hdr_t *)(buf);
-  sr_icmp_t8_hdr_t * or_icmp = (sr_icmp_t8_hdr_t *) (((void *) buf)+ sizeof(sr_ip_hdr_t));
-
+void sr_icmp_send_message(struct sr_instance* sr, uint8_t type, uint8_t code, sr_ip_hdr_t * ip, char* interface){
   printf("sending icmp\n");
   /*2b12a Malloc a space to store ethernet header and IP header and ICMP header*/
   uint8_t * block = (uint8_t *) malloc(sizeof(sr_ethernet_hdr_t) + sizeof(sr_ip_hdr_t) + sizeof(sr_icmp_t8_hdr_t));
@@ -318,7 +316,7 @@ void sr_icmp_send_message(struct sr_instance* sr, uint8_t type, uint8_t code, ui
   pkt->ip_v  = 0x4;
   pkt->ip_tos = iptos;
   pkt->ip_len = htons((uint16_t) (sizeof(sr_ip_hdr_t) + sizeof(sr_icmp_t8_hdr_t)));
-  pkt->ip_id = htons(ipid);
+  pkt->ip_id = ip->ip_id;
   pkt->ip_off = htons(IP_DF);
   pkt->ip_ttl = ipttl;
   pkt->ip_p = ip_protocol_icmp;
@@ -330,11 +328,11 @@ void sr_icmp_send_message(struct sr_instance* sr, uint8_t type, uint8_t code, ui
   /*2b12b Fill the ICMP code, type in ICMP header*/
   sr_icmp_t8_hdr_t* icmp_hdr = (sr_icmp_t8_hdr_t*)(block + sizeof(sr_ethernet_hdr_t) + sizeof(sr_ip_hdr_t));
   sr_icmp_t8_hdr_t* icmp = (sr_icmp_t8_hdr_t*)(ip+1);
+  
   memcpy(icmp_hdr, icmp, 8);
   icmp_hdr->icmp_type = type;
   icmp_hdr->icmp_code = code;
   icmp_hdr->icmp_sum  = 0;
-  icmp_hdr->unused = or_icmp->unused;
   icmp_hdr->icmp_sum = cksum((void *)icmp_hdr, sizeof(sr_icmp_t8_hdr_t));
 
   unsigned int packet_len = sizeof(sr_ethernet_hdr_t) + sizeof(sr_ip_hdr_t) + sizeof(sr_icmp_t8_hdr_t);
@@ -343,7 +341,6 @@ void sr_icmp_send_message(struct sr_instance* sr, uint8_t type, uint8_t code, ui
   print_hdr_eth((uint8_t *)block);
   print_hdr_ip((uint8_t *)(block + sizeof(sr_ethernet_hdr_t) ));
   print_hdr_icmp((uint8_t *)(block + sizeof(sr_ethernet_hdr_t) + sizeof(sr_ip_hdr_t)));
-  print_hdrs((uint8_t*) block, packet_len);
   print_hdrs((uint8_t*) block, packet_len);
   sr_send_packet(sr, block, packet_len, interface );
   free(block);
