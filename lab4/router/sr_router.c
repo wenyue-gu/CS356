@@ -34,7 +34,7 @@ void sr_icmp_send_message(struct sr_instance* sr, uint8_t type, uint8_t code, sr
 bool is_own_ip(struct sr_instance* sr, sr_ip_hdr_t* current);
 void sr_handle_arp(struct sr_instance* sr, uint8_t * buf, unsigned int len, char* interface);
 void send_arp_rep(struct sr_instance* sr, struct sr_if* iface, sr_arp_hdr_t* arp);
-
+void icmp_time(struct sr_instance * sr, uint8_t type, uint8_t code, sr_ip_hdr_t * ip, char* interface);
 
 /*---------------------------------------------------------------------
  * Method: sr_init(void)
