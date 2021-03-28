@@ -328,7 +328,7 @@ void sr_icmp_send_message(struct sr_instance* sr, uint8_t type, uint8_t code, sr
   /*2b12b Fill the ICMP code, type in ICMP header*/
   sr_icmp_t8_hdr_t* icmp_hdr = (sr_icmp_t8_hdr_t*)(block + sizeof(sr_ethernet_hdr_t) + sizeof(sr_ip_hdr_t));
   sr_icmp_t8_hdr_t* icmp = (sr_icmp_t8_hdr_t*)(ip+1);
-  memcpy(icmp_hdr->unused, icmp->unused, 8);
+  memcpy(icmp_hdr, icmp, 8);
   icmp_hdr->icmp_type = type;
   icmp_hdr->icmp_code = code;
   icmp_hdr->icmp_sum  = 0;
