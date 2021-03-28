@@ -210,20 +210,23 @@ void icmp_unreachable(struct sr_instance * sr, uint8_t code, sr_ip_hdr_t * ip, c
   /*malloc*/
   sr_ethernet_hdr_t * block = (sr_ethernet_hdr_t *) malloc(sizeof(sr_ethernet_hdr_t) + sizeof(sr_ip_hdr_t) + sizeof(sr_icmp_hdr_t));
   /*ethernet header*/
+  uint8_t * ether_shost = malloc(sizeof(unsigned char) * ETHER_ADDR_LEN);
   struct sr_if * iface = sr_get_interface(sr, interface);
+  memcpy((void*) ether_shost, iface->addr, sizeof(unsigned char) * ETHER_ADDR_LEN);
+
+  uint8_t * ether_dhost = malloc(sizeof(unsigned char) * ETHER_ADDR_LEN);
   struct sr_arpentry * entry = sr_arpcache_lookup( &(sr->cache), ip->ip_src);
-  memcpy(block->ether_dhost, entry->mac, ETHER_ADDR_LEN);
-  memcpy(block->ether_shost, iface->addr, ETHER_ADDR_LEN);
+  memcpy(ether_dhost, entry->mac, sizeof(unsigned char) * ETHER_ADDR_LEN);
+
+  memcpy((void *) block->ether_dhost, (void *) ether_dhost, sizeof(uint8_t) * ETHER_ADDR_LEN);
+  memcpy((void *) block->ether_shost, (void *) ether_shost, sizeof(uint8_t) * ETHER_ADDR_LEN);
   block->ether_type = htons(ethertype_ip);
 
-  printf("%p\n",block);
   
   /*ip header*/
-  void * ptr = (void *) block;
-  ptr += sizeof(sr_ethernet_hdr_t);
   uint32_t ip_src = ntohl(ip->ip_dst);
   uint32_t ip_dst= ntohl(ip->ip_src);
-  sr_ip_hdr_t *pkt = (sr_ip_hdr_t *)ptr;
+  sr_ip_hdr_t* pkt = (sr_ip_hdr_t *)(block + sizeof(sr_ethernet_hdr_t));
   pkt->ip_tos = 0;
   pkt->ip_len = htons((uint16_t) (sizeof(sr_ip_hdr_t) + sizeof(sr_icmp_hdr_t)));
   pkt->ip_id = htons(0);
@@ -236,8 +239,7 @@ void icmp_unreachable(struct sr_instance * sr, uint8_t code, sr_ip_hdr_t * ip, c
   pkt->ip_sum = cksum(((void *) pkt), sizeof(sr_ip_hdr_t));
 
   /*icmp header*/
-  ptr += sizeof(sr_ip_hdr_t);
-  sr_icmp_t3_hdr_t *icmp_t3_hdr = (sr_icmp_t3_hdr_t *) ptr;
+  sr_icmp_t3_hdr_t* icmp_hdr = (sr_icmp_t3_hdr_t*)(block + sizeof(sr_ethernet_hdr_t) + sizeof(sr_ip_hdr_t));
   icmp_t3_hdr->icmp_type = htons(t3_type);
   icmp_t3_hdr->icmp_code = htons(code);
   icmp_t3_hdr->next_mtu = Next_mtu;
@@ -299,14 +301,12 @@ void sr_icmp_send_message(struct sr_instance* sr, uint8_t type, uint8_t code, sr
   printf(" %p block \n",block);
 
   
-  
-  void * ptr = (void *) block;
-
   /*2b12cFill the source IP address, destination IP address, ttl, protocol, length, checksum in IP header*/
-  ptr += sizeof(sr_ethernet_hdr_t);
   uint32_t ip_src = ntohl(ip->ip_dst);
   uint32_t ip_dst= ntohl(ip->ip_src);
-  sr_ip_hdr_t* pkt = (sr_ip_hdr_t *)ptr;
+  sr_ip_hdr_t* pkt = (sr_ip_hdr_t *)(block + sizeof(sr_ethernet_hdr_t));
+  pkt->ip_hl = sizeof(sr_ip_hdr_t);
+	pkt->ip_v  = 4;
   pkt->ip_tos = iptos;
   pkt->ip_len = htons((uint16_t) (sizeof(sr_ip_hdr_t) + sizeof(sr_icmp_hdr_t)));
   pkt->ip_id = htons(ipid);
@@ -319,8 +319,7 @@ void sr_icmp_send_message(struct sr_instance* sr, uint8_t type, uint8_t code, sr
   pkt->ip_sum = cksum(((void *) pkt), sizeof(sr_ip_hdr_t));
 
   /*2b12b Fill the ICMP code, type in ICMP header*/
-  ptr += sizeof(sr_ip_hdr_t);
-  sr_icmp_hdr_t* icmp_hdr = (sr_icmp_hdr_t*)ptr;
+  sr_icmp_t3_hdr_t* icmp_hdr = (sr_icmp_t3_hdr_t*)(block + sizeof(sr_ethernet_hdr_t) + sizeof(sr_ip_hdr_t));
   icmp_hdr->icmp_type = type;
   icmp_hdr->icmp_code = code;
   icmp_hdr->icmp_sum  = 0;
