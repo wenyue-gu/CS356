@@ -118,7 +118,7 @@ struct in_addr gw, struct in_addr mask, uint32_t metric, char* if_name)
     assert(if_name);
     assert(sr);
 
-    pthread_mutex_lock(&(sr->rt_lock));
+    pthread_mutex_lock(&(sr->rt_locker));
     /* -- empty list special case -- */
     if(sr->routing_table == 0)
     {
@@ -134,7 +134,7 @@ struct in_addr gw, struct in_addr mask, uint32_t metric, char* if_name)
         time(&now);
         sr->routing_table->updated_time = now;
 
-        pthread_mutex_unlock(&(sr->rt_lock));
+        pthread_mutex_unlock(&(sr->rt_locker));
         return;
     }
 
@@ -158,7 +158,7 @@ struct in_addr gw, struct in_addr mask, uint32_t metric, char* if_name)
     time(&now);
     rt_walker->updated_time = now;
     
-     pthread_mutex_unlock(&(sr->rt_lock));
+     pthread_mutex_unlock(&(sr->rt_locker));
 } /* -- sr_add_entry -- */
 
 /*---------------------------------------------------------------------
@@ -168,13 +168,13 @@ struct in_addr gw, struct in_addr mask, uint32_t metric, char* if_name)
 
 void sr_print_routing_table(struct sr_instance* sr)
 {
-    pthread_mutex_lock(&(sr->rt_lock));
+    pthread_mutex_lock(&(sr->rt_locker));
     struct sr_rt* rt_walker = 0;
 
     if(sr->routing_table == 0)
     {
         printf(" *warning* Routing table empty \n");
-        pthread_mutex_unlock(&(sr->rt_lock));
+        pthread_mutex_unlock(&(sr->rt_locker));
         return;
     }
     printf("  <---------- Router Table ---------->\n");
@@ -187,7 +187,7 @@ void sr_print_routing_table(struct sr_instance* sr)
             sr_print_routing_entry(rt_walker);
         rt_walker = rt_walker->next;
     }
-    pthread_mutex_unlock(&(sr->rt_lock));
+    pthread_mutex_unlock(&(sr->rt_locker));
 
 
 } /* -- sr_print_routing_table -- */
@@ -220,10 +220,10 @@ void *sr_rip_timeout(void *sr_ptr) {
     struct sr_instance *sr = sr_ptr;
     while (1) {
         sleep(5);
-        pthread_mutex_lock(&(sr->rt_lock));
+        pthread_mutex_lock(&(sr->rt_locker));
         /* Lab5: Fill your code here */
         
-        pthread_mutex_unlock(&(sr->rt_lock));
+        pthread_mutex_unlock(&(sr->rt_locker));
     }
     return NULL;
 }
@@ -233,15 +233,15 @@ void send_rip_request(struct sr_instance *sr){
 }
 
 void send_rip_update(struct sr_instance *sr){
-    pthread_mutex_lock(&(sr->rt_lock));
+    pthread_mutex_lock(&(sr->rt_locker));
     /* Lab5: Fill your code here */
 
-    pthread_mutex_unlock(&(sr->rt_lock));
+    pthread_mutex_unlock(&(sr->rt_locker));
 }
 
 void update_route_table(struct sr_instance *sr, sr_ip_hdr_t* ip_packet ,sr_rip_pkt_t* rip_packet, char* iface){
-    pthread_mutex_lock(&(sr->rt_lock));
+    pthread_mutex_lock(&(sr->rt_locker));
     /* Lab5: Fill your code here */
     
-    pthread_mutex_unlock(&(sr->rt_lock));
+    pthread_mutex_unlock(&(sr->rt_locker));
 }
