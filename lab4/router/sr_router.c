@@ -229,11 +229,11 @@ void icmp_unreachable(struct sr_instance * sr, uint8_t code, sr_ip_hdr_t * ip, c
   sr_ip_hdr_t* pkt = (sr_ip_hdr_t *)(block + sizeof(sr_ethernet_hdr_t));
   pkt->ip_hl = 0x5;
   pkt->ip_v  = 4;
-  pkt->ip_tos = 0;
+  pkt->ip_tos = iptos;
   pkt->ip_len = htons((uint16_t) (sizeof(sr_ip_hdr_t) + sizeof(sr_icmp_hdr_t)));
-  pkt->ip_id = htons(0);
-  pkt->ip_off = htons(0);
-  pkt->ip_ttl = 15;
+  pkt->ip_id = htons(ipid);
+  pkt->ip_off = htons(ipoff);
+  pkt->ip_ttl = ipttl;
   pkt->ip_p = ip_protocol_icmp;
   pkt->ip_sum = 0;
   pkt->ip_src = htonl(ip_src);
@@ -294,7 +294,7 @@ void sr_icmp_send_message(struct sr_instance* sr, uint8_t type, uint8_t code, sr
   printf("print1\n");
   struct sr_arpentry * entry = sr_arpcache_lookup( &(sr->cache), ip->ip_src);
   printf("print2\n");
-  memcpy(ether_dhost, entry->mac, sizeof(unsigned char) * ETHER_ADDR_LEN);
+  memcpy(ether_dhost, entry->mac, sizeof(unsigned char) * ETHER_ADDR_LEN); /*something goes wrong here*/
   printf("dhost finished\n");
 
   memcpy((void *) block->ether_dhost, (void *) ether_dhost, sizeof(uint8_t) * ETHER_ADDR_LEN);
@@ -311,9 +311,6 @@ void sr_icmp_send_message(struct sr_instance* sr, uint8_t type, uint8_t code, sr
   uint32_t ip_src = ntohl(ip->ip_dst);
   uint32_t ip_dst= ntohl(ip->ip_src);
   sr_ip_hdr_t* pkt = (sr_ip_hdr_t *)(block + sizeof(sr_ethernet_hdr_t));
-  printf("size is %li\n", sizeof(sr_ip_hdr_t));
-
-  printf("size is %li\n", sizeof(sr_icmp_hdr_t));
   pkt->ip_hl = 0x5;
   pkt->ip_v  = 4;
   pkt->ip_tos = iptos;

@@ -106,7 +106,7 @@ enum ip_defaults {
 	iptos = 0,
 	ipid = 0,
 	ipoff = 0,
-	ipttl = 15
+	ipttl = 64
 };
 
 #endif /* SR_ROUTER_H */
