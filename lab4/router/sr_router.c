@@ -334,9 +334,9 @@ void sr_icmp_send_message(struct sr_instance* sr, uint8_t type, uint8_t code, sr
 
 
 bool is_own_ip(struct sr_instance* sr, sr_ip_hdr_t* current) {
-  print("is_own_ip\n");
+  printf("is_own_ip\n");
 	struct sr_if * iface = sr->if_list;
-  print("iface established\n");
+  printf("iface established\n");
 	while (iface != NULL) {
 		if (current->ip_dst == iface->ip) {
 			return true;
