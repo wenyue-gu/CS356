@@ -139,9 +139,9 @@ def send_command_and_check(node, node_name, command, expected_result):
     else:
         return False
 
-def check_traceroute(node, node_name, ip, hop):
-    info(">>>>>>>>>>>>>>>>Sending command: %s traceroute %s<<<<<<<<<<<<<<<\n" % (node_name.lower(), ip))
-    return_info = node.cmd("traceroute %s" % ip)
+def check_traceroute(node, node_name, ip, hop, ip_lists):
+    info(">>>>>>>>>>>>>>>>Sending command: %s traceroute -n %s<<<<<<<<<<<<<<<\n" % (node_name.lower(), ip))
+    return_info = node.cmd("traceroute -n %s" % ip)
     info(return_info+"\n")
 
     return_info = str.strip(return_info)
@@ -151,6 +151,17 @@ def check_traceroute(node, node_name, ip, hop):
         item = str.strip(listx[i]).split(" ")
         if item[0].isdigit():
             count = max(count, int(item[0]))
+            current_ip = ''
+            for j in range(1, len(item)):
+                if item[j] != '':
+                    current_ip = item[j]
+                    break
+            if int(item[0]) == 1 and ip_lists[current_ip].find("eth") == -1:
+                print(current_ip, ip_lists[current_ip])
+                return False
+    if hop == 2 and ip != current_ip:
+        print(ip, current_ip)
+        return False
     if count == hop:
         return True
     else:
@@ -378,7 +389,8 @@ def run_tests(net):
                     hop = 1
                 else:
                     hop = 2
-                if not check_traceroute(node, node_name, ip, hop):
+                time.sleep(5)
+                if not check_traceroute(node, node_name, ip, hop, ip_lists):
                     passed = False
                     break
             if not passed:
