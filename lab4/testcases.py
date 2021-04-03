@@ -156,7 +156,7 @@ def check_traceroute(node, node_name, ip, hop, ip_lists):
                 if item[j] != '':
                     current_ip = item[j]
                     break
-            if int(item[0]) == 1 and ip_lists[current_ip].find("eth") == -1:
+            if int(item[0]) == 1 and current_ip in ip_lists and ip_lists[current_ip].find("eth") == -1:
                 print(current_ip, ip_lists[current_ip])
                 return False
     if hop == 2 and ip != current_ip:
