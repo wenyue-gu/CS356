@@ -175,13 +175,14 @@ void sr_handle_ip(struct sr_instance* sr, uint8_t * buf, unsigned int len,char* 
         uint8_t * block = malloc(ntohs(ip->ip_len) + sizeof(sr_ethernet_hdr_t));
         sr_ip_hdr_t* pkt = (sr_ip_hdr_t *)(block + sizeof(sr_ethernet_hdr_t));
         memcpy(pkt, ip, ntohs(ip->ip_len));
-        struct sr_if *iface = sr_get_interface(sr, match->interface);
+        struct sr_if *srcMac = sr_get_interface(sr, interface);
+        struct sr_if *iface2 = sr_get_interface(sr, match->interface);
         sr_ethernet_hdr_t* start_of_pckt = (sr_ethernet_hdr_t*) block;
         /*save sr_arpcache_ lookup as struct sr_arp_entry, put that in if(sr_arp = true), */
         struct sr_arpentry * entry = sr_arpcache_lookup( &(sr->cache), ip->ip_dst);
         if(entry!=NULL){
           printf("2c3 entry not null\n");
-          memcpy((void *) (start_of_pckt->ether_shost), iface->addr, sizeof(uint8_t) * ETHER_ADDR_LEN);
+          memcpy((void *) (start_of_pckt->ether_shost), srcMac->addr, sizeof(uint8_t) * ETHER_ADDR_LEN);
           memcpy((void *) (start_of_pckt->ether_dhost), entry->mac, sizeof(uint8_t) * ETHER_ADDR_LEN);
           start_of_pckt->ether_type = ethertype_ip;
           sr_send_packet(sr, block, ntohs(ip->ip_len) + sizeof(sr_ethernet_hdr_t), interface);
@@ -198,7 +199,7 @@ void sr_handle_ip(struct sr_instance* sr, uint8_t * buf, unsigned int len,char* 
           printf("2c3 else did not contain dest ip\n");
           sr_arpcache_queuereq(&sr->cache, ip->ip_dst, (uint8_t *) ip, len, interface);
           printf("sending arp req\n");
-          send_arp_req(sr, iface, ip->ip_dst, sizeof(sr_ethernet_hdr_t) + sizeof(sr_arp_hdr_t));
+          send_arp_req(sr, iface2, ip->ip_dst, sizeof(sr_ethernet_hdr_t) + sizeof(sr_arp_hdr_t));
 
           /*dont send modified pack
           send ARP request to out interface
