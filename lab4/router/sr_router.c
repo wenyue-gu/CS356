@@ -152,11 +152,9 @@ void sr_handle_ip(struct sr_instance* sr, uint8_t * buf, unsigned int len,char* 
     If TTL=1, your router should reply an ICMP Time Exceeded message back to the Sender*/
     printf("\n******ttl is %i*******\n", ip->ip_ttl);
     if(ip->ip_ttl == 1){
-      printf("equal 1\n");
       icmp_time(sr, TimeExceededType, TimeExceededCode, (sr_ip_hdr_t *)ip, interface);
     }
     else{
-      printf("ttl not 1\n");
       /*2c2 Otherwise, check whether the destination IP address is in your routing table.*/
       /*If you can not find this destination IP in your routing table, 
       you should send an ICMP DEST_NET_UNREACHABLE message back to the Sender. 
@@ -204,7 +202,7 @@ void sr_handle_ip(struct sr_instance* sr, uint8_t * buf, unsigned int len,char* 
         }*/
         else /*(did not contain dest IP)*/ {
           printf("2c3 else did not contain dest ip\n");
-          sr_arpcache_queuereq(&sr->cache, ip->ip_dst, block, ntohs(ip->ip_len) + sizeof(sr_ethernet_hdr_t), interface);
+          sr_arpcache_queuereq(&sr->cache, ip->ip_dst, (uint8_t *) block, len, interface);
           printf("sending arp req\n");
           send_arp_req(sr, iface2, ip->ip_dst, sizeof(sr_ethernet_hdr_t) + sizeof(sr_arp_hdr_t));
 
@@ -257,7 +255,7 @@ void send_arp_req(struct sr_instance* sr, struct sr_if* iface, uint32_t ipadress
 
 
 void icmp_time(struct sr_instance * sr, uint8_t type, uint8_t code, sr_ip_hdr_t * ip, char* interface){
-  printf("icmp time exceeded\n");
+  
   uint8_t * block = (uint8_t *) malloc(sizeof(sr_ethernet_hdr_t) + ntohs(ip->ip_len));
 
   /*ethernet header*/
@@ -529,7 +527,7 @@ void sr_handle_arp(struct sr_instance* sr, uint8_t * buf, unsigned int len, char
           sr_ethernet_hdr_t *curheader = (sr_ethernet_hdr_t *)packet;
           memcpy(curheader->ether_dhost, arp->ar_sha, ETHER_ADDR_LEN);
           memcpy(curheader->ether_shost, iface->addr, ETHER_ADDR_LEN);
-          /*curheader->ether_type = htons(ethertype_ip);*/
+          curheader->ether_type = htons(ethertype_ip);
           print_hdrs(packet,current->len);
           sr_send_packet(sr, packet, current->len, interface);
 
@@ -555,7 +553,7 @@ void sr_handle_arp(struct sr_instance* sr, uint8_t * buf, unsigned int len, char
           sr_ethernet_hdr_t *curheader = (sr_ethernet_hdr_t *)packet;
           memcpy(curheader->ether_dhost, arp->ar_sha, ETHER_ADDR_LEN);
           memcpy(curheader->ether_shost, iface->addr, ETHER_ADDR_LEN);
-          /*curheader->ether_type = htons(ethertype_ip);*/
+          curheader->ether_type = htons(ethertype_ip);
           print_hdrs(packet, current->len);
           sr_send_packet(sr, packet, current->len, interface);
           current = current->next;
