@@ -152,10 +152,11 @@ void sr_handle_ip(struct sr_instance* sr, uint8_t * buf, unsigned int len,char* 
     If TTL=1, your router should reply an ICMP Time Exceeded message back to the Sender*/
     printf("\n******ttl is %i*******\n", ip->ip_ttl);
     if(ip->ip_ttl == 1){
-      print("equal 1");
+      printf("equal 1\n");
       icmp_time(sr, TimeExceededType, TimeExceededCode, (sr_ip_hdr_t *)ip, interface);
     }
     else{
+      printf("ttl not 1\n");
       /*2c2 Otherwise, check whether the destination IP address is in your routing table.*/
       /*If you can not find this destination IP in your routing table, 
       you should send an ICMP DEST_NET_UNREACHABLE message back to the Sender. 
