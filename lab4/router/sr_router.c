@@ -260,35 +260,37 @@ void icmp_time(struct sr_instance * sr, uint8_t type, uint8_t code, sr_ip_hdr_t 
   printf("icmp time\n");
   uint8_t * block = (uint8_t *) malloc(sizeof(sr_ethernet_hdr_t) + ntohs(ip->ip_len));
   printf("malloc successful\n");
+
   /*ethernet header*/
   sr_ethernet_hdr_t* ethernet_hdr = (sr_ethernet_hdr_t*)block;
-  
-  printf("ethernet header\n");
- /* uint8_t * ether_shost = malloc(sizeof(unsigned char) * ETHER_ADDR_LEN);
-  
-  memcpy((void*) ether_shost, iface->addr, sizeof(unsigned char) * ETHER_ADDR_LEN);
-
-  uint8_t * ether_dhost = malloc(sizeof(unsigned char) * ETHER_ADDR_LEN);
-  
-
-  memcpy(ether_dhost, entry->mac, sizeof(unsigned char) * ETHER_ADDR_LEN);
-*/
   struct sr_if * iface = sr_get_interface(sr, interface);
   struct sr_arpentry * entry = sr_arpcache_lookup( &(sr->cache), ip->ip_src);
-  printf("iface and entry established\n");
+  printf("entry and iface get\n");
+    
+  uint8_t * ether_shost = malloc(sizeof(unsigned char) * ETHER_ADDR_LEN);
+  memcpy((void*) ether_shost, iface->addr, sizeof(unsigned char) * ETHER_ADDR_LEN);
+  printf("got shost\n");
+
+  uint8_t * ether_dhost = malloc(sizeof(unsigned char) * ETHER_ADDR_LEN);
+  printf("malloc dhost successful\n");
   if(entry==NULL){
     printf("do something!\n");
-    ethernet_hdr->ether_dhost=0;
+    ether_dhost=0;
   }
   else{
-    memcpy(ethernet_hdr->ether_dhost, entry->mac, ETHER_ADDR_LEN);
+    memcpy(ether_dhost, entry->mac, sizeof(unsigned char) * ETHER_ADDR_LEN);
   }
+  printf("got dhost\n");
 
-  printf("dhost set\n");
-  memcpy(ethernet_hdr->ether_shost, iface->addr, ETHER_ADDR_LEN);
 
-  printf("shost set\n");
+  
+  memcpy(ethernet_hdr->ether_dhost, ether_dhost, ETHER_ADDR_LEN);
+  printf("dhost\n");
+  memcpy(ethernet_hdr->ether_shost, ether_shost, ETHER_ADDR_LEN);
+  printf("shost\n");
   ethernet_hdr->ether_type = htons(ethertype_ip);
+  printf("type\n");
+
 
   
   /*ip header*/
@@ -330,8 +332,8 @@ void icmp_time(struct sr_instance * sr, uint8_t type, uint8_t code, sr_ip_hdr_t 
   print_hdrs((uint8_t*) block, packet_len);
   sr_send_packet(sr, block, packet_len, interface );
   free(block);
-  /*free(ether_shost);
-  free(ether_dhost);*/
+  free(ether_shost);
+  free(ether_dhost);
   
 }
 
