@@ -191,6 +191,7 @@ void sr_handle_ip(struct sr_instance* sr, uint8_t * buf, unsigned int len,char* 
           start_of_pckt->ether_type = htons(ethertype_ip);
           print_hdrs(block,ntohs(ip->ip_len) + sizeof(sr_ethernet_hdr_t));
           sr_send_packet(sr, block, ntohs(ip->ip_len) + sizeof(sr_ethernet_hdr_t), interface);
+          free(block);
         }
         /*?
         if(sr_arpcache_lookup()){
@@ -205,7 +206,7 @@ void sr_handle_ip(struct sr_instance* sr, uint8_t * buf, unsigned int len,char* 
           sr_arpcache_queuereq(&sr->cache, ip->ip_dst, (uint8_t *) block, len, interface);
           printf("sending arp req\n");
           send_arp_req(sr, iface2, ip->ip_dst, sizeof(sr_ethernet_hdr_t) + sizeof(sr_arp_hdr_t));
-
+          free(block);
           /*dont send modified pack
           send ARP request to out interface
           cache modified ip packet in arp request queue
