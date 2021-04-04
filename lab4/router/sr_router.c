@@ -527,7 +527,7 @@ void sr_handle_arp(struct sr_instance* sr, uint8_t * buf, unsigned int len, char
     /* case 1a */
 
     printf("op request\n");
-    struct sr_arpreq * pending = sr_arpcache_insert(&sr->cache, arp->ar_sha, arp->ar_sip); /*1a1 Insert the Sender MAC in this packet to your ARP cache*/
+    struct sr_arpreq * pending = sr_arpcache_insert(&sr->cache, arp->ar_tha, arp->ar_tip); /*1a1 Insert the Sender MAC in this packet to your ARP cache*/
     /* TODO: 1a2: optimization? */
     if (pending) {
       printf("pending is happening in request\n");
@@ -559,7 +559,8 @@ void sr_handle_arp(struct sr_instance* sr, uint8_t * buf, unsigned int len, char
     if (pending) {
       printf("pending is happening in reply\n");
       struct sr_packet *current = pending->packets;
-      while (current) { 
+      while (current!=NULL) { 
+          printf("current\n");
           uint8_t *packet = current->buf;
           sr_ethernet_hdr_t *curheader = (sr_ethernet_hdr_t *)packet;
           memcpy(curheader->ether_dhost, arp->ar_sha, ETHER_ADDR_LEN);
