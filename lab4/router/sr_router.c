@@ -184,6 +184,10 @@ void sr_handle_ip(struct sr_instance* sr, uint8_t * buf, unsigned int len,char* 
           printf("2c3 entry not null\n");
           memcpy((void *) (start_of_pckt->ether_shost), srcMac->addr, sizeof(uint8_t) * ETHER_ADDR_LEN);
           memcpy((void *) (start_of_pckt->ether_dhost), entry->mac, sizeof(uint8_t) * ETHER_ADDR_LEN);
+          uint32_t source = pkt->ip_src;
+          uint32_t target = pkt->ip_dst;
+          pkt->ip_dst = source;
+          pkt->ip_src = target;
           start_of_pckt->ether_type = htons(ethertype_ip);
           print_hdrs(block,ntohs(ip->ip_len) + sizeof(sr_ethernet_hdr_t));
           sr_send_packet(sr, block, ntohs(ip->ip_len) + sizeof(sr_ethernet_hdr_t), interface);
@@ -511,6 +515,8 @@ void sr_handle_arp(struct sr_instance* sr, uint8_t * buf, unsigned int len, char
 		case arp_op_request: */
   if(arp_op_request==op){
     /* case 1a */
+
+    print("op request\n");
     struct sr_arpreq * pending = sr_arpcache_insert(&sr->cache, arp->ar_sha, arp->ar_sip); /*1a1 Insert the Sender MAC in this packet to your ARP cache*/
     /* TODO: 1a2: optimization? */
     if (pending) {
@@ -521,6 +527,7 @@ void sr_handle_arp(struct sr_instance* sr, uint8_t * buf, unsigned int len, char
           sr_ethernet_hdr_t *curheader = (sr_ethernet_hdr_t *)packet;
           memcpy(curheader->ether_dhost, arp->ar_sha, ETHER_ADDR_LEN);
           memcpy(curheader->ether_shost, iface->addr, ETHER_ADDR_LEN);
+          print_hdrs(packet);
           sr_send_packet(sr, packet, current->len, interface);
           current = current->next;
       }
@@ -532,6 +539,7 @@ void sr_handle_arp(struct sr_instance* sr, uint8_t * buf, unsigned int len, char
   /*case arp_op_reply:*/
   if(arp_op_reply==op){
     /* case 1b */
+    print("opreply\n");
     struct sr_arpreq * pending = sr_arpcache_insert(&sr->cache, arp->ar_sha, arp->ar_sip); /* 1b1 Insert the Target MAC to your ARP cache*/
     /* TODO: 1b2 */
     if (pending) {
@@ -542,6 +550,7 @@ void sr_handle_arp(struct sr_instance* sr, uint8_t * buf, unsigned int len, char
           sr_ethernet_hdr_t *curheader = (sr_ethernet_hdr_t *)packet;
           memcpy(curheader->ether_dhost, arp->ar_sha, ETHER_ADDR_LEN);
           memcpy(curheader->ether_shost, iface->addr, ETHER_ADDR_LEN);
+          print_hdrs(packet);
           sr_send_packet(sr, packet, current->len, interface);
           current = current->next;
       }
