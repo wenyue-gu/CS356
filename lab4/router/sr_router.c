@@ -152,6 +152,7 @@ void sr_handle_ip(struct sr_instance* sr, uint8_t * buf, unsigned int len,char* 
     If TTL=1, your router should reply an ICMP Time Exceeded message back to the Sender*/
     printf("\n******ttl is %i*******\n", ip->ip_ttl);
     if(ip->ip_ttl == 1){
+      print("equal 1");
       icmp_time(sr, TimeExceededType, TimeExceededCode, (sr_ip_hdr_t *)ip, interface);
     }
     else{
@@ -255,7 +256,7 @@ void send_arp_req(struct sr_instance* sr, struct sr_if* iface, uint32_t ipadress
 
 
 void icmp_time(struct sr_instance * sr, uint8_t type, uint8_t code, sr_ip_hdr_t * ip, char* interface){
-  
+  printf("icmp time exceeded\n");
   uint8_t * block = (uint8_t *) malloc(sizeof(sr_ethernet_hdr_t) + ntohs(ip->ip_len));
 
   /*ethernet header*/
