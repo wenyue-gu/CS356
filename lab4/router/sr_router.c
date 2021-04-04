@@ -165,6 +165,7 @@ void sr_handle_ip(struct sr_instance* sr, uint8_t * buf, unsigned int len,char* 
       }
       else{
         /*2c3*/
+        printf("2c3\n");
         ip -> ip_ttl -= 1;
         /*2c3ii Recalculate the checksum*/
         ip -> ip_sum = 0;
@@ -183,7 +184,7 @@ void sr_handle_ip(struct sr_instance* sr, uint8_t * buf, unsigned int len,char* 
           memcpy((void *) (start_of_pckt->ether_shost), iface->addr, sizeof(uint8_t) * ETHER_ADDR_LEN);
           memcpy((void *) (start_of_pckt->ether_dhost), entry->mac, sizeof(uint8_t) * ETHER_ADDR_LEN);
           start_of_pckt->ether_type = ethertype_ip;
-          sr_send_packet(sr, block, len + sizeof(sr_ethernet_hdr_t), interface);
+          sr_send_packet(sr, block, ntohs(ip->ip_len) + sizeof(sr_ethernet_hdr_t), interface);
         }
         /*?
         if(sr_arpcache_lookup()){
@@ -194,9 +195,10 @@ void sr_handle_ip(struct sr_instance* sr, uint8_t * buf, unsigned int len,char* 
           send modified packet immediately
         }*/
         else /*(did not contain dest IP)*/ {
-          printf("2c3 else did not contain dest ip");
+          printf("2c3 else did not contain dest ip\n");
           sr_arpcache_queuereq(&sr->cache, ip->ip_dst, (uint8_t *) ip, len, interface);
-          send_arp_req(sr, iface, ip->ip_dst, len);
+          printf("sending arp req\n")
+          send_arp_req(sr, iface, ip->ip_dst, sizeof(sr_ethernet_hdr_t) + sizeof(sr_arp_hdr_t));
 
           /*dont send modified pack
           send ARP request to out interface
