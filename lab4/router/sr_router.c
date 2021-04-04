@@ -231,7 +231,8 @@ void send_arp_req(struct sr_instance* sr, struct sr_if* iface, uint32_t ipadress
 
   memcpy(ethernet_hdr->ether_shost, iface->addr, sizeof(uint8_t) * ETHER_ADDR_LEN);
   memset(ethernet_hdr->ether_dhost, 0xff, sizeof(uint8_t) * ETHER_ADDR_LEN); /* Broadcast */
-
+  ethhdr->ether_type = htons(ethertype_arp);
+  
   arp_hdr->ar_op = htons(arp_op_request);
   memset(arp_hdr->ar_tha, 0xff, ETHER_ADDR_LEN); 
   memcpy(arp_hdr->ar_sha, iface->addr, ETHER_ADDR_LEN);
