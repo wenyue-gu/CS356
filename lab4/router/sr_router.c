@@ -190,7 +190,7 @@ void sr_handle_ip(struct sr_instance* sr, uint8_t * buf, unsigned int len,char* 
           pkt->ip_src = target;*/
           start_of_pckt->ether_type = htons(ethertype_ip);
           print_hdrs(block,ntohs(ip->ip_len) + sizeof(sr_ethernet_hdr_t));
-          sr_send_packet(sr, block, ntohs(ip->ip_len) + sizeof(sr_ethernet_hdr_t), interface);
+          sr_send_packet(sr, block, ntohs(ip->ip_len) + sizeof(sr_ethernet_hdr_t), match->interface);
           free(block);
         }
         /*?
