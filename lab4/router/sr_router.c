@@ -262,7 +262,7 @@ void icmp_time(struct sr_instance * sr, uint8_t type, uint8_t code, sr_ip_hdr_t 
   sr_ethernet_hdr_t* ethernet_hdr = (sr_ethernet_hdr_t*)block;
   
   printf("ethernet header\n");
-  uint8_t * ether_shost = malloc(sizeof(unsigned char) * ETHER_ADDR_LEN);
+ /* uint8_t * ether_shost = malloc(sizeof(unsigned char) * ETHER_ADDR_LEN);
   struct sr_if * iface = sr_get_interface(sr, interface);
   memcpy((void*) ether_shost, iface->addr, sizeof(unsigned char) * ETHER_ADDR_LEN);
 
@@ -270,9 +270,9 @@ void icmp_time(struct sr_instance * sr, uint8_t type, uint8_t code, sr_ip_hdr_t 
   struct sr_arpentry * entry = sr_arpcache_lookup( &(sr->cache), ip->ip_src);
 
   memcpy(ether_dhost, entry->mac, sizeof(unsigned char) * ETHER_ADDR_LEN);
-
-  memcpy(ethernet_hdr->ether_dhost, ether_dhost, ETHER_ADDR_LEN);
-  memcpy(ethernet_hdr->ether_shost, ether_shost, ETHER_ADDR_LEN);
+*/
+  memcpy(ethernet_hdr->ether_dhost, entry->mac, ETHER_ADDR_LEN);
+  memcpy(ethernet_hdr->ether_shost, iface->addr, ETHER_ADDR_LEN);
   ethernet_hdr->ether_type = htons(ethertype_ip);
 
   
@@ -315,8 +315,8 @@ void icmp_time(struct sr_instance * sr, uint8_t type, uint8_t code, sr_ip_hdr_t 
   print_hdrs((uint8_t*) block, packet_len);
   sr_send_packet(sr, block, packet_len, interface );
   free(block);
-  free(ether_shost);
-  free(ether_dhost);
+  /*free(ether_shost);
+  free(ether_dhost);*/
   
 }
 
