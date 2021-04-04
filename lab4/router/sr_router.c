@@ -223,6 +223,7 @@ void sr_handle_ip(struct sr_instance* sr, uint8_t * buf, unsigned int len,char* 
 
 void send_arp_req(struct sr_instance* sr, struct sr_if* iface, uint32_t ipadress, unsigned int len){
   /*int len = sizeof(sr_ethernet_hdr_t) + sizeof(sr_arp_hdr_t);*/
+  printf("am in send_arp_req\n");
   uint8_t *block = (uint8_t *) malloc(len);
   memset(block, 0, sizeof(uint8_t) * len);
   sr_ethernet_hdr_t* ethernet_hdr = (sr_ethernet_hdr_t*)block;
