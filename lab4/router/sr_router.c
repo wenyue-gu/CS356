@@ -182,7 +182,7 @@ void sr_handle_ip(struct sr_instance* sr, uint8_t * buf, unsigned int len,char* 
         struct sr_arpentry * entry = sr_arpcache_lookup( &(sr->cache), ip->ip_dst);
         if(entry!=NULL){
           printf("2c3 entry not null\n");
-          memcpy((void *) (start_of_pckt->ether_shost), srcMac->addr, sizeof(uint8_t) * ETHER_ADDR_LEN);
+          memcpy((void *) (start_of_pckt->ether_shost), iface2->addr, sizeof(uint8_t) * ETHER_ADDR_LEN);
           memcpy((void *) (start_of_pckt->ether_dhost), entry->mac, sizeof(uint8_t) * ETHER_ADDR_LEN);
           start_of_pckt->ether_type = htons(ethertype_ip);
           print_hdrs(block,ntohs(ip->ip_len) + sizeof(sr_ethernet_hdr_t));
@@ -232,7 +232,7 @@ void send_arp_req(struct sr_instance* sr, struct sr_if* iface, uint32_t ipadress
   sr_arp_hdr_t *arp_hdr = (sr_arp_hdr_t*)(block+sizeof(sr_ethernet_hdr_t));
 
   memcpy(ethernet_hdr->ether_shost, iface->addr, sizeof(uint8_t) * ETHER_ADDR_LEN);
-  memset(ethernet_hdr->ether_dhost, 0xff, sizeof(uint8_t) * ETHER_ADDR_LEN); /* Broadcast */
+  memset(ethernet_hdr->ether_dhost, 0xff, sizeof(uint8_t) * ETHER_ADDR_LEN); 
   ethernet_hdr->ether_type = htons(ethertype_arp);
 
   arp_hdr->ar_op = htons(arp_op_request);
@@ -514,6 +514,7 @@ void sr_handle_arp(struct sr_instance* sr, uint8_t * buf, unsigned int len, char
     struct sr_arpreq * pending = sr_arpcache_insert(&sr->cache, arp->ar_sha, arp->ar_sip); /*1a1 Insert the Sender MAC in this packet to your ARP cache*/
     /* TODO: 1a2: optimization? */
     if (pending) {
+      printf("pending is happening in request\n");
       struct sr_packet *current = pending->packets;
       while (current) { 
           uint8_t *packet = current->buf;
@@ -534,6 +535,7 @@ void sr_handle_arp(struct sr_instance* sr, uint8_t * buf, unsigned int len, char
     struct sr_arpreq * pending = sr_arpcache_insert(&sr->cache, arp->ar_sha, arp->ar_sip); /* 1b1 Insert the Target MAC to your ARP cache*/
     /* TODO: 1b2 */
     if (pending) {
+      printf("pending is happening in reply\n");
       struct sr_packet *current = pending->packets;
       while (current) { 
           uint8_t *packet = current->buf;
