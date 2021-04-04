@@ -373,6 +373,9 @@ void icmp_unreachable(struct sr_instance * sr, uint8_t code, sr_ip_hdr_t * ip, c
   printf("malloced shost\n");
   uint8_t * ether_dhost = malloc(sizeof(unsigned char) * ETHER_ADDR_LEN);
   printf("malloc successful\n");
+  if(entry==NULL){
+    printf("do something!\n");
+  }
   memcpy(ether_dhost, entry->mac, sizeof(unsigned char) * ETHER_ADDR_LEN);
   printf("malloced dhost\n");
 
