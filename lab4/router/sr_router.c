@@ -183,7 +183,7 @@ void sr_handle_ip(struct sr_instance* sr, uint8_t * buf, unsigned int len,char* 
         struct sr_arpentry * entry = sr_arpcache_lookup( &(sr->cache), ip->ip_dst);
         if(entry!=NULL){
           printf("2c3 entry not null\n");
-          printf("entry->mac %i\n",entry->mac);
+          printf("entry->mac %hhn\n",entry->mac);
           memcpy((void *) (start_of_pckt->ether_shost), iface2->addr, sizeof(uint8_t) * ETHER_ADDR_LEN);
           memcpy((void *) (start_of_pckt->ether_dhost), entry->mac, sizeof(uint8_t) * ETHER_ADDR_LEN);
           /*uint32_t source = pkt->ip_src;
