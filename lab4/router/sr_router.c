@@ -205,7 +205,7 @@ void sr_handle_ip(struct sr_instance* sr, uint8_t * buf, unsigned int len,char* 
           printf("2c3 else did not contain dest ip\n");
           sr_arpcache_queuereq(&sr->cache, ip->ip_dst, (uint8_t *) block, len, interface);
           printf("sending arp req\n");
-          send_arp_req(sr, iface2, ip->ip_dst, sizeof(sr_ethernet_hdr_t) + sizeof(sr_arp_hdr_t));
+          send_arp_req(sr, srcMac, ip->ip_dst, sizeof(sr_ethernet_hdr_t) + sizeof(sr_arp_hdr_t));
           free(block);
           /*dont send modified pack
           send ARP request to out interface
@@ -526,7 +526,7 @@ void sr_handle_arp(struct sr_instance* sr, uint8_t * buf, unsigned int len, char
     /* case 1a */
 
     printf("op request\n");
-    struct sr_arpreq * pending = sr_arpcache_insert(&sr->cache, arp->ar_tha, arp->ar_tip); /*1a1 Insert the Sender MAC in this packet to your ARP cache*/
+    struct sr_arpreq * pending = sr_arpcache_insert(&sr->cache, arp->ar_sha, arp->ar_sip); /*1a1 Insert the Sender MAC in this packet to your ARP cache*/
     /* TODO: 1a2: optimization? */
     if (pending) {
       printf("pending is happening in request\n");
