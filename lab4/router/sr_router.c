@@ -260,7 +260,8 @@ void icmp_time(struct sr_instance * sr, uint8_t type, uint8_t code, sr_ip_hdr_t 
   printf("malloc successful\n");
   /*ethernet header*/
   sr_ethernet_hdr_t* ethernet_hdr = (sr_ethernet_hdr_t*)block;
-    
+  
+  printf("ethernet header\n");
   uint8_t * ether_shost = malloc(sizeof(unsigned char) * ETHER_ADDR_LEN);
   struct sr_if * iface = sr_get_interface(sr, interface);
   memcpy((void*) ether_shost, iface->addr, sizeof(unsigned char) * ETHER_ADDR_LEN);
@@ -276,6 +277,8 @@ void icmp_time(struct sr_instance * sr, uint8_t type, uint8_t code, sr_ip_hdr_t 
 
   
   /*ip header*/
+
+  printf("ip header\n");
   uint32_t ip_src = ntohl(ip->ip_dst);
   uint32_t ip_dst= ntohl(ip->ip_src);
   sr_ip_hdr_t* pkt = (sr_ip_hdr_t *)(block + sizeof(sr_ethernet_hdr_t));
@@ -294,6 +297,8 @@ void icmp_time(struct sr_instance * sr, uint8_t type, uint8_t code, sr_ip_hdr_t 
   pkt->ip_sum = cksum(((void *) pkt), sizeof(sr_ip_hdr_t));
 
   /*icmp header*/
+
+  printf("icmp header\n");
   sr_icmp_t11_hdr_t* icmp_t11_hdr = (sr_icmp_t11_hdr_t*)(block + sizeof(sr_ethernet_hdr_t) + sizeof(sr_ip_hdr_t));
   icmp_t11_hdr->icmp_type = type;
   icmp_t11_hdr->icmp_code = code;
@@ -304,6 +309,7 @@ void icmp_time(struct sr_instance * sr, uint8_t type, uint8_t code, sr_ip_hdr_t 
 
 
   
+  printf("sending\n");
   /*Send this ICMP Reply packet back to the Sender*/
   unsigned int packet_len = sizeof(sr_ethernet_hdr_t) + sizeof(sr_ip_hdr_t) + sizeof(sr_icmp_t11_hdr_t);
   print_hdrs((uint8_t*) block, packet_len);
