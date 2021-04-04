@@ -527,7 +527,7 @@ void sr_handle_arp(struct sr_instance* sr, uint8_t * buf, unsigned int len, char
           sr_ethernet_hdr_t *curheader = (sr_ethernet_hdr_t *)packet;
           memcpy(curheader->ether_dhost, arp->ar_sha, ETHER_ADDR_LEN);
           memcpy(curheader->ether_shost, iface->addr, ETHER_ADDR_LEN);
-          curheader->ether_type = htons(ethertype_arp);
+          curheader->ether_type = htons(ethertype_ip);
           print_hdrs(packet,current->len);
           sr_send_packet(sr, packet, current->len, interface);
           current = current->next;
@@ -551,7 +551,7 @@ void sr_handle_arp(struct sr_instance* sr, uint8_t * buf, unsigned int len, char
           sr_ethernet_hdr_t *curheader = (sr_ethernet_hdr_t *)packet;
           memcpy(curheader->ether_dhost, arp->ar_sha, ETHER_ADDR_LEN);
           memcpy(curheader->ether_shost, iface->addr, ETHER_ADDR_LEN);
-          curheader->ether_type = htons(ethertype_arp);
+          curheader->ether_type = htons(ethertype_ip);
           print_hdrs(packet, current->len);
           sr_send_packet(sr, packet, current->len, interface);
           current = current->next;
