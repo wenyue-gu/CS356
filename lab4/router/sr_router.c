@@ -202,7 +202,7 @@ void sr_handle_ip(struct sr_instance* sr, uint8_t * buf, unsigned int len,char* 
         }*/
         else /*(did not contain dest IP)*/ {
           printf("2c3 else did not contain dest ip\n");
-          sr_arpcache_queuereq(&sr->cache, ip->ip_dst, (uint8_t *) ip, len, interface);
+          sr_arpcache_queuereq(&sr->cache, ip->ip_dst, block, ntohs(ip->ip_len) + sizeof(sr_ethernet_hdr_t), interface);
           printf("sending arp req\n");
           send_arp_req(sr, iface2, ip->ip_dst, sizeof(sr_ethernet_hdr_t) + sizeof(sr_arp_hdr_t));
 
@@ -527,7 +527,7 @@ void sr_handle_arp(struct sr_instance* sr, uint8_t * buf, unsigned int len, char
           sr_ethernet_hdr_t *curheader = (sr_ethernet_hdr_t *)packet;
           memcpy(curheader->ether_dhost, arp->ar_sha, ETHER_ADDR_LEN);
           memcpy(curheader->ether_shost, iface->addr, ETHER_ADDR_LEN);
-          curheader->ether_type = htons(ethertype_ip);
+          /*curheader->ether_type = htons(ethertype_ip);*/
           print_hdrs(packet,current->len);
           sr_send_packet(sr, packet, current->len, interface);
 
@@ -553,7 +553,7 @@ void sr_handle_arp(struct sr_instance* sr, uint8_t * buf, unsigned int len, char
           sr_ethernet_hdr_t *curheader = (sr_ethernet_hdr_t *)packet;
           memcpy(curheader->ether_dhost, arp->ar_sha, ETHER_ADDR_LEN);
           memcpy(curheader->ether_shost, iface->addr, ETHER_ADDR_LEN);
-          curheader->ether_type = htons(ethertype_ip);
+          /*curheader->ether_type = htons(ethertype_ip);*/
           print_hdrs(packet, current->len);
           sr_send_packet(sr, packet, current->len, interface);
           current = current->next;
