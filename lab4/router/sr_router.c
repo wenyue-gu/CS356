@@ -269,7 +269,7 @@ void icmp_time(struct sr_instance * sr, uint8_t type, uint8_t code, sr_ip_hdr_t 
 
   if(entry==NULL){
     printf("do something!\n");
-    memset(ethernet_hdr->ether_dhost, 0, ETHER_ADDR_LEN);
+    memset(ethernet_hdr->ether_dhost, 0xff, ETHER_ADDR_LEN);
   }
   else{
     memcpy(ethernet_hdr->ether_dhost, entry->mac, sizeof(unsigned char) * ETHER_ADDR_LEN);
@@ -367,7 +367,7 @@ void icmp_unreachable(struct sr_instance * sr, uint8_t code, sr_ip_hdr_t * ip, c
 
   if(entry==NULL){
     printf("do something!\n");
-    memset(ethernet_hdr->ether_dhost, 0, ETHER_ADDR_LEN);
+    memset(ethernet_hdr->ether_dhost, 0xff ETHER_ADDR_LEN);
   }
   else{
     memcpy(ethernet_hdr->ether_dhost, entry->mac, sizeof(unsigned char) * ETHER_ADDR_LEN);
