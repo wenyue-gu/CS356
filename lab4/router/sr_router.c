@@ -516,7 +516,7 @@ void sr_handle_arp(struct sr_instance* sr, uint8_t * buf, unsigned int len, char
   if(arp_op_request==op){
     /* case 1a */
 
-    print("op request\n");
+    printf("op request\n");
     struct sr_arpreq * pending = sr_arpcache_insert(&sr->cache, arp->ar_sha, arp->ar_sip); /*1a1 Insert the Sender MAC in this packet to your ARP cache*/
     /* TODO: 1a2: optimization? */
     if (pending) {
