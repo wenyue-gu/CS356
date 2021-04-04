@@ -503,17 +503,17 @@ void sr_icmp_send_message(struct sr_instance* sr, uint8_t type, uint8_t code, sr
 
 
 bool is_own_ip(struct sr_instance* sr, sr_ip_hdr_t* current) {
-  printf("is_own_ip\n");
+  /*printf("is_own_ip\n");*/
 	struct sr_if * iface = sr->if_list;
-  printf("iface established\n");
+  /*printf("iface established\n");*/
 	while (iface != NULL) {
-    printf("not null\n");
+    /*printf("not null\n");*/
 		if (current->ip_dst == iface->ip) {
 			return true;
 		}
 		iface = iface->next;
 	}
-  printf("is not own ip\n");
+  /*printf("is not own ip\n");*/
 	return false;
 }
 
@@ -526,8 +526,8 @@ void sr_handle_arp(struct sr_instance* sr, uint8_t * buf, unsigned int len, char
   if(arp_op_request==op){
     /* case 1a */
 
-    printf("op request\n");
-    print_hdrs(buf - sizeof(sr_ethernet_hdr_t), sizeof(sr_ethernet_hdr_t)+sizeof(sr_arp_hdr_t));
+    /*printf("op request\n");
+    print_hdrs(buf - sizeof(sr_ethernet_hdr_t), sizeof(sr_ethernet_hdr_t)+sizeof(sr_arp_hdr_t));*/
     struct sr_arpreq * pending = sr_arpcache_insert(&sr->cache, arp->ar_sha, arp->ar_sip); /*1a1 Insert the Sender MAC in this packet to your ARP cache*/
     /* TODO: 1a2: optimization? */
     if (pending) {
