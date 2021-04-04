@@ -197,7 +197,7 @@ void sr_handle_ip(struct sr_instance* sr, uint8_t * buf, unsigned int len,char* 
         else /*(did not contain dest IP)*/ {
           printf("2c3 else did not contain dest ip\n");
           sr_arpcache_queuereq(&sr->cache, ip->ip_dst, (uint8_t *) ip, len, interface);
-          printf("sending arp req\n")
+          printf("sending arp req\n");
           send_arp_req(sr, iface, ip->ip_dst, sizeof(sr_ethernet_hdr_t) + sizeof(sr_arp_hdr_t));
 
           /*dont send modified pack
