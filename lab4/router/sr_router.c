@@ -26,15 +26,6 @@
 #include "vnscommand.h"
 
 
-void sr_handle_ip(struct sr_instance* sr, uint8_t * buf, unsigned int len,char* interface);
-struct sr_rt *prefix_match(struct sr_instance * sr, uint32_t addr);
-void icmp_unreachable(struct sr_instance * sr, uint8_t code, sr_ip_hdr_t * ip, char* interface);
-void handle_icmp(struct sr_instance* sr, uint8_t * buf, unsigned int len, char* interface);
-void sr_icmp_send_message(struct sr_instance* sr, uint8_t type, uint8_t code, sr_ip_hdr_t * ip, char* interface);
-bool is_own_ip(struct sr_instance* sr, sr_ip_hdr_t* current);
-void sr_handle_arp(struct sr_instance* sr, uint8_t * buf, unsigned int len, char* interface);
-void send_arp_rep(struct sr_instance* sr, struct sr_if* iface, sr_arp_hdr_t* arp);
-void icmp_time(struct sr_instance * sr, uint8_t type, uint8_t code, sr_ip_hdr_t * ip, char* interface);
 
 /*---------------------------------------------------------------------
  * Method: sr_init(void)
@@ -174,10 +165,80 @@ void sr_handle_ip(struct sr_instance* sr, uint8_t * buf, unsigned int len,char* 
       }
       else{
         /*2c3*/
+        ip -> ip_ttl -= 1;
+        /*2c3ii Recalculate the checksum*/
+        ip -> ip_sum = 0;
+        ip -> ip_sum = cksum(ip, sizeof(sr_ip_hdr_t));
+        /*2c3iii Change the Source MAC Address, Destination MAC Address in the ethernet header*/
+        
+        uint8_t * block = malloc(len + sizeof(sr_ethernet_hdr_t));
+			  memcpy(block + sizeof(sr_ethernet_hdr_t), ip, len);
+        struct sr_if *srcMac = sr_get_interface(sr, interface);
+        sr_ethernet_hdr_t* start_of_pckt = (sr_ethernet_hdr_t*) block;
+        /*save sr_arpcache_ lookup as struct sr_arp_entry, put that in if(sr_arp = true), */
+        struct sr_arpentry * entry = sr_arpcache_lookup( &(sr->cache), ip->ip_dst);
+        uint8_t * ether_dhost;
+        if(entry!=NULL){
+          memcpy((void *) (start_of_pckt->ether_shost), srcMac->addr, sizeof(uint8_t) * ETHER_ADDR_LEN);
+          memcpy((void *) (start_of_pckt->ether_dhost), entry->mac, sizeof(uint8_t) * ETHER_ADDR_LEN);
+          start_of_pckt->ether_type = ethertype_ip;
+          sr_send_packet(sr, block, len + sizeof(sr_ethernet_hdr_t), interface);
+        }
+        /*?
+        if(sr_arpcache_lookup()){
+          
+        }*/
+
+        /*if(find destination MAC addr/*in arp cache using dest ip){
+          /*send modified packet immediately
+        }*/
+        else /*(did not contain dest IP)*/ {
+          sr_arpcache_queuereq(&sr->cache, ip->ip_dst, (uint8_t *) ip, len, interface);
+          send_arp_req(sr, srcMac, ip->ip_dst, len);
+
+          /*dont send modified pack
+          send ARP request to out interface
+          cache modified ip packet in arp request queue
+          once received arp response, send all pending packets according to this dest mac addr inside queue at 1bii*/
+        }      
+        /*Ideally, you should find the Destination MAC Address in your ARP cache using the 
+        Destination IP Address. If you can find the destination MAC address, then you can 
+        just send this modified packet immediately. However, it is possible that your current
+        ARP cache did not contain the information of the destination IP. In this case, you should 
+        not send this modified packet since you lack the destination MAC Address. Therefore, 
+        you should send an ARP request to the out interface, and cache the modified IP packet 
+        in the ARP request queue. Once you received the arp response, you can send all the
+          pending packets according to this destination MAC address inside the queue at 
+          step 1.b.ii
+  */
 
       }
     }
   }
+}
+
+void send_arp_req(struct sr_instance* sr, struct sr_if* iface, uint32_t ipadress, unsigned int len){
+  /*int len = sizeof(sr_ethernet_hdr_t) + sizeof(sr_arp_hdr_t);*/
+  uint8_t *block = (uint8_t *) malloc(len);
+  memset(block, 0, sizeof(uint8_t) * len);
+  sr_ethernet_hdr_t* ethernet_hdr = (sr_ethernet_hdr_t*)block;
+  sr_arp_hdr_t *arp_hdr = (sr_arp_hdr_t*)(block+sizeof(sr_ethernet_hdr_t));
+
+  memcpy(ethernet_hdr->ether_shost, iface->addr, sizeof(uint8_t) * ETHER_ADDR_LEN);
+  memset(ethernet_hdr->ether_dhost, 0xff, sizeof(uint8_t) * ETHER_ADDR_LEN); /* Broadcast */
+
+  arp_hdr->ar_op = htons(arp_op_request);
+  memset(arp_hdr->ar_tha, 0xff, ETHER_ADDR_LEN); 
+  memcpy(arp_hdr->ar_sha, iface->addr, ETHER_ADDR_LEN);
+  arp_hdr->ar_pln = sizeof(uint32_t);
+  arp_hdr->ar_hln = ETHER_ADDR_LEN;
+  arp_hdr->ar_pro = htons(ethertype_ip);
+  arp_hdr->ar_hrd = htons(arp_hrd_ethernet);
+  arp_hdr->ar_tip = ipadress;
+  arp_hdr->ar_sip = iface->ip;
+  print_hdrs((uint8_t*) block, len);
+  sr_send_packet(sr, block, len, iface->name);
+  free(block);
 }
 
 
@@ -194,6 +255,7 @@ void icmp_time(struct sr_instance * sr, uint8_t type, uint8_t code, sr_ip_hdr_t 
 
   uint8_t * ether_dhost = malloc(sizeof(unsigned char) * ETHER_ADDR_LEN);
   struct sr_arpentry * entry = sr_arpcache_lookup( &(sr->cache), ip->ip_src);
+
   memcpy(ether_dhost, entry->mac, sizeof(unsigned char) * ETHER_ADDR_LEN);
 
   memcpy(ethernet_hdr->ether_dhost, ether_dhost, ETHER_ADDR_LEN);
@@ -436,19 +498,47 @@ void sr_handle_arp(struct sr_instance* sr, uint8_t * buf, unsigned int len, char
 	sr_arp_hdr_t* arp = (sr_arp_hdr_t*) buf;
 	enum sr_arp_opcode op = (enum sr_arp_opcode)ntohs(arp->ar_op);
 	struct sr_if* iface = sr_get_interface(sr, interface);
-	switch(op) {
-		case arp_op_request : 
-      /* case 1a */
-      sr_arpcache_insert(&sr->cache, arp->ar_sha, arp->ar_sip); /*1a1 Insert the Sender MAC in this packet to your ARP cache*/
-      /* TODO: 1a2: optimization? */
-			send_arp_rep(sr, iface, arp); /*1a3,4*/
-			break;
-		case arp_op_reply :
-      /* case 1b */
-			sr_arpcache_insert(&sr->cache, arp->ar_tha, arp->ar_tip); /* 1b1 Insert the Target MAC to your ARP cache*/
-      /* TODO: 1b2 */
-			break;
-	}
+	/*switch(op) {
+		case arp_op_request: */
+  if(arp_op_request==op){
+    /* case 1a */
+    struct sr_arpreq * pending = sr_arpcache_insert(&sr->cache, arp->ar_sha, arp->ar_sip); /*1a1 Insert the Sender MAC in this packet to your ARP cache*/
+    /* TODO: 1a2: optimization? */
+    if (pending) {
+      struct sr_packet *current = pending->packets;
+      while (current) { 
+          uint8_t *packet = current->buf;
+          sr_ethernet_hdr_t *curheader = (sr_ethernet_hdr_t *)packet;
+          memcpy(curheader->ether_dhost, arp->ar_sha, ETHER_ADDR_LEN);
+          memcpy(curheader->ether_shost, iface->addr, ETHER_ADDR_LEN);
+          sr_send_packet(sr, packet, current->len, interface);
+          current = current->next;
+      }
+      sr_arpreq_destroy(&(sr->cache), pending);
+    }
+
+    send_arp_rep(sr, iface, arp); /*1a3,4*/
+  }
+  /*case arp_op_reply:*/
+  if(arp_op_reply==op){
+    /* case 1b */
+    struct sr_arpreq * pending = sr_arpcache_insert(&sr->cache, arp->ar_sha, arp->ar_sip); /* 1b1 Insert the Target MAC to your ARP cache*/
+    /* TODO: 1b2 */
+    if (pending) {
+      struct sr_packet *current = pending->packets;
+      while (current) { 
+          uint8_t *packet = current->buf;
+          sr_ethernet_hdr_t *curheader = (sr_ethernet_hdr_t *)packet;
+          memcpy(curheader->ether_dhost, arp->ar_sha, ETHER_ADDR_LEN);
+          memcpy(curheader->ether_shost, iface->addr, ETHER_ADDR_LEN);
+          sr_send_packet(sr, packet, current->len, interface);
+          current = current->next;
+      }
+      sr_arpreq_destroy(&(sr->cache), pending);
+    }
+    
+  
+  }
 }
 
 

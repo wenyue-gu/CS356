@@ -13,8 +13,20 @@
 #include <sys/time.h>
 #include <stdio.h>
 
+#include <stdbool.h>
 #include "sr_protocol.h"
 #include "sr_arpcache.h"
+
+void sr_handle_ip(struct sr_instance* sr, uint8_t * buf, unsigned int len,char* interface);
+struct sr_rt *prefix_match(struct sr_instance * sr, uint32_t addr);
+void icmp_unreachable(struct sr_instance * sr, uint8_t code, sr_ip_hdr_t * ip, char* interface);
+void handle_icmp(struct sr_instance* sr, uint8_t * buf, unsigned int len, char* interface);
+void sr_icmp_send_message(struct sr_instance* sr, uint8_t type, uint8_t code, sr_ip_hdr_t * ip, char* interface);
+bool is_own_ip(struct sr_instance* sr, sr_ip_hdr_t* current);
+void sr_handle_arp(struct sr_instance* sr, uint8_t * buf, unsigned int len, char* interface);
+void send_arp_rep(struct sr_instance* sr, struct sr_if* iface, sr_arp_hdr_t* arp);
+void icmp_time(struct sr_instance * sr, uint8_t type, uint8_t code, sr_ip_hdr_t * ip, char* interface);
+void send_arp_req(struct sr_instance* sr, struct sr_if* iface, uint32_t ipadress,unsigned int len);
 
 /* we dont like this debug , but what to do for varargs ? */
 #ifdef _DEBUG_

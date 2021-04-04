@@ -12,6 +12,8 @@
 #include "sr_protocol.h"
 #include "sr_rt.h"
 
+#include <stdbool.h>
+
 /* 
   This function gets called every second. For each request sent out, we keep
   checking whether we should resend an request or destroy the arp request.
@@ -32,8 +34,59 @@
    current request, make sure to save the next pointer before calling
    handle_arpreq when traversing through the ARP requests linked list.
 */
+
+
+void send_unreachable_to_queued(struct sr_instance * sr, struct sr_arpreq * req) {
+    /*For each packet queueing in this arp request’s queue, 
+    send a DEST_HOST_UNREACHABlE back to the sender*/
+	struct sr_packet * current = req -> packets; 
+	while (current != NULL) {
+		sr_ip_hdr_t* ip = (void *)(current->buf) + sizeof(sr_ethernet_hdr_t);
+		icmp_unreachable(sr, Unreachable_port_code, ip, current->iface);
+		current = current->next;
+	}
+}
+
+
+/*This function should be implemented in checkpoint 3. 
+The logic is very simple. 
+For each ARP request in the ARP cache, checking whether the time between 
+current time and the last sent time are larger than 1 second. 
+If not larger than the 1 second, just return
+*/
 void sr_arpcache_sweepreqs(struct sr_instance *sr) {
     /* Lab4: Fill your code here */
+    /*For each ARP request in the ARP cache,*/
+    struct sr_arpreq * current = sr->cache.requests;
+	struct sr_arpreq * next;
+	if (current) next = current->next;
+	while (current != NULL) {
+		if (difftime(time(0), current->sent > 1)) {
+            /*Otherwise, check whether this arp request has been sent for 5 or more times, if so*/
+            if (current->times_sent >= 5) {
+                /*For each packet queueing in this arp request’s queue, 
+                send a DEST_HOST_UNREACHABlE back to the sender*/
+                send_unreachable_to_queued(sr, current);
+                /*Destroy this arp request */
+                sr_arpreq_destroy(&sr->cache, current);
+            }
+            else {
+                struct sr_if* iface = sr->if_list;
+                while(iface != NULL){
+                    int length = sizeof(sr_ethernet_hdr_t) + sizeof(sr_arp_hdr_t);
+                    send_arp_req(sr,iface,current->ip, length);
+                    /*Update the times_sent and current send time*/
+                    current -> sent = time(0);
+                    current -> times_sent++;
+                    iface = iface->next;
+                }
+		    }
+	    }
+        /* If not larger than the 1 second, just return (go to next)*/
+		current = next;
+		if (current) next = current->next;
+
+	}
     
 }
 
