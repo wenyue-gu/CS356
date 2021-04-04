@@ -527,7 +527,7 @@ void sr_handle_arp(struct sr_instance* sr, uint8_t * buf, unsigned int len, char
     /* case 1a */
 
     printf("op request\n");
-    print_hdrs(buf - sizeof(sr_ethernet_hdr_t));
+    print_hdrs(buf - sizeof(sr_ethernet_hdr_t), sizeof(sr_ethernet_hdr_t)+sizeof(sr_arp_hdr_t));
     struct sr_arpreq * pending = sr_arpcache_insert(&sr->cache, arp->ar_sha, arp->ar_sip); /*1a1 Insert the Sender MAC in this packet to your ARP cache*/
     /* TODO: 1a2: optimization? */
     if (pending) {
