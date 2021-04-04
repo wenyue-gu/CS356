@@ -255,9 +255,9 @@ void send_arp_req(struct sr_instance* sr, struct sr_if* iface, uint32_t ipadress
 
 
 void icmp_time(struct sr_instance * sr, uint8_t type, uint8_t code, sr_ip_hdr_t * ip, char* interface){
-  
+  printf("icmp time\n");
   uint8_t * block = (uint8_t *) malloc(sizeof(sr_ethernet_hdr_t) + ntohs(ip->ip_len));
-
+  printf("malloc successful\n");
   /*ethernet header*/
   sr_ethernet_hdr_t* ethernet_hdr = (sr_ethernet_hdr_t*)block;
     
