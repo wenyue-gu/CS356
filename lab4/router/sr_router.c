@@ -177,7 +177,6 @@ void sr_handle_ip(struct sr_instance* sr, uint8_t * buf, unsigned int len,char* 
         sr_ethernet_hdr_t* start_of_pckt = (sr_ethernet_hdr_t*) block;
         /*save sr_arpcache_ lookup as struct sr_arp_entry, put that in if(sr_arp = true), */
         struct sr_arpentry * entry = sr_arpcache_lookup( &(sr->cache), ip->ip_dst);
-        uint8_t * ether_dhost;
         if(entry!=NULL){
           memcpy((void *) (start_of_pckt->ether_shost), iface->addr, sizeof(uint8_t) * ETHER_ADDR_LEN);
           memcpy((void *) (start_of_pckt->ether_dhost), entry->mac, sizeof(uint8_t) * ETHER_ADDR_LEN);
@@ -189,8 +188,8 @@ void sr_handle_ip(struct sr_instance* sr, uint8_t * buf, unsigned int len,char* 
           
         }*/
 
-        /*if(find destination MAC addr/*in arp cache using dest ip){
-          /*send modified packet immediately
+        /*if(find destination MAC addr in arp cache using dest ip){
+          send modified packet immediately
         }*/
         else /*(did not contain dest IP)*/ {
           sr_arpcache_queuereq(&sr->cache, ip->ip_dst, (uint8_t *) ip, len, interface);
