@@ -192,6 +192,7 @@ void sr_handle_ip(struct sr_instance* sr, uint8_t * buf, unsigned int len,char* 
           send modified packet immediately
         }*/
         else /*(did not contain dest IP)*/ {
+          printf("2c3 else did not contain dest ip");
           sr_arpcache_queuereq(&sr->cache, ip->ip_dst, (uint8_t *) ip, len, interface);
           send_arp_req(sr, iface, ip->ip_dst, len);
 
@@ -490,6 +491,7 @@ bool is_own_ip(struct sr_instance* sr, sr_ip_hdr_t* current) {
 		}
 		iface = iface->next;
 	}
+  printf("is not own ip\n");
 	return false;
 }
 
