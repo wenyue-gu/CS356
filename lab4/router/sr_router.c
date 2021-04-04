@@ -171,8 +171,9 @@ void sr_handle_ip(struct sr_instance* sr, uint8_t * buf, unsigned int len,char* 
         ip -> ip_sum = cksum(ip, sizeof(sr_ip_hdr_t));
         /*2c3iii Change the Source MAC Address, Destination MAC Address in the ethernet header*/
         
-        uint8_t * block = malloc(len + sizeof(sr_ethernet_hdr_t));
-			  memcpy(block + sizeof(sr_ethernet_hdr_t), ip, len);
+        uint8_t * block = malloc(ntohs(ip->ip_len) + sizeof(sr_ethernet_hdr_t));
+        sr_ip_hdr_t* pkt = (sr_ip_hdr_t *)(block + sizeof(sr_ethernet_hdr_t));
+        memcpy(pkt, ip, ntohs(ip->ip_len));
         struct sr_if *iface = sr_get_interface(sr, interface);
         sr_ethernet_hdr_t* start_of_pckt = (sr_ethernet_hdr_t*) block;
         /*save sr_arpcache_ lookup as struct sr_arp_entry, put that in if(sr_arp = true), */
