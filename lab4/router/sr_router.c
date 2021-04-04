@@ -275,8 +275,13 @@ void icmp_time(struct sr_instance * sr, uint8_t type, uint8_t code, sr_ip_hdr_t 
 */
   struct sr_if * iface = sr_get_interface(sr, interface);
   struct sr_arpentry * entry = sr_arpcache_lookup( &(sr->cache), ip->ip_src);
+  printf("iface and entry established\n");
   memcpy(ethernet_hdr->ether_dhost, entry->mac, ETHER_ADDR_LEN);
+
+  printf("dhost set\n");
   memcpy(ethernet_hdr->ether_shost, iface->addr, ETHER_ADDR_LEN);
+
+  printf("shost set\n");
   ethernet_hdr->ether_type = htons(ethertype_ip);
 
   
