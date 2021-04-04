@@ -179,6 +179,7 @@ void sr_handle_ip(struct sr_instance* sr, uint8_t * buf, unsigned int len,char* 
         /*save sr_arpcache_ lookup as struct sr_arp_entry, put that in if(sr_arp = true), */
         struct sr_arpentry * entry = sr_arpcache_lookup( &(sr->cache), ip->ip_dst);
         if(entry!=NULL){
+          printf("2c3 entry not null\n");
           memcpy((void *) (start_of_pckt->ether_shost), iface->addr, sizeof(uint8_t) * ETHER_ADDR_LEN);
           memcpy((void *) (start_of_pckt->ether_dhost), entry->mac, sizeof(uint8_t) * ETHER_ADDR_LEN);
           start_of_pckt->ether_type = ethertype_ip;
