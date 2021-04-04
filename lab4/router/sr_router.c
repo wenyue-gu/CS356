@@ -539,7 +539,7 @@ void sr_handle_arp(struct sr_instance* sr, uint8_t * buf, unsigned int len, char
   /*case arp_op_reply:*/
   if(arp_op_reply==op){
     /* case 1b */
-    print("opreply\n");
+    printf("opreply\n");
     struct sr_arpreq * pending = sr_arpcache_insert(&sr->cache, arp->ar_sha, arp->ar_sip); /* 1b1 Insert the Target MAC to your ARP cache*/
     /* TODO: 1b2 */
     if (pending) {
