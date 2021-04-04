@@ -263,14 +263,16 @@ void icmp_time(struct sr_instance * sr, uint8_t type, uint8_t code, sr_ip_hdr_t 
   
   printf("ethernet header\n");
  /* uint8_t * ether_shost = malloc(sizeof(unsigned char) * ETHER_ADDR_LEN);
-  struct sr_if * iface = sr_get_interface(sr, interface);
+  
   memcpy((void*) ether_shost, iface->addr, sizeof(unsigned char) * ETHER_ADDR_LEN);
 
   uint8_t * ether_dhost = malloc(sizeof(unsigned char) * ETHER_ADDR_LEN);
-  struct sr_arpentry * entry = sr_arpcache_lookup( &(sr->cache), ip->ip_src);
+  
 
   memcpy(ether_dhost, entry->mac, sizeof(unsigned char) * ETHER_ADDR_LEN);
 */
+  struct sr_if * iface = sr_get_interface(sr, interface);
+  struct sr_arpentry * entry = sr_arpcache_lookup( &(sr->cache), ip->ip_src);
   memcpy(ethernet_hdr->ether_dhost, entry->mac, ETHER_ADDR_LEN);
   memcpy(ethernet_hdr->ether_shost, iface->addr, ETHER_ADDR_LEN);
   ethernet_hdr->ether_type = htons(ethertype_ip);
