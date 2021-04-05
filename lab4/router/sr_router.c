@@ -299,7 +299,7 @@ void icmp_time(struct sr_instance * sr, uint8_t type, uint8_t code, sr_ip_hdr_t 
   pkt->ip_ttl = ipttl;
   pkt->ip_p = ip_protocol_icmp;
   pkt->ip_sum = 0;
-  pkt->ip_src = htonl(ip_src);
+  pkt->ip_src = sr_get_interface(sr, interface)->ip;
   pkt->ip_dst = htonl(ip_dst);
   pkt->ip_sum = cksum(((void *) pkt), sizeof(sr_ip_hdr_t));
 
@@ -394,7 +394,7 @@ void icmp_unreachable(struct sr_instance * sr, uint8_t code, sr_ip_hdr_t * ip, c
   pkt->ip_ttl = ipttl;
   pkt->ip_p = ip_protocol_icmp;
   pkt->ip_sum = 0;
-  pkt->ip_src = htonl(ip_src);
+  pkt->ip_src = sr_get_interface(sr, interface)->ip;
   pkt->ip_dst = htonl(ip_dst);
   pkt->ip_sum = cksum(((void *) pkt), sizeof(sr_ip_hdr_t));
 
