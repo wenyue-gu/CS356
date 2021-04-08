@@ -229,17 +229,20 @@ void *sr_rip_timeout(void *sr_ptr) {
 }
 
 void send_rip_request(struct sr_instance *sr){
-    /* Lab5: Fill your code here */
-}
-
-void send_rip_update(struct sr_instance *sr){
     pthread_mutex_lock(&(sr->rt_locker));
     /* Lab5: Fill your code here */
 
     pthread_mutex_unlock(&(sr->rt_locker));
 }
 
-void update_route_table(struct sr_instance *sr, sr_ip_hdr_t* ip_packet ,sr_rip_pkt_t* rip_packet, char* iface){
+void send_rip_response(struct sr_instance *sr){
+    pthread_mutex_lock(&(sr->rt_locker));
+    /* Lab5: Fill your code here */
+
+    pthread_mutex_unlock(&(sr->rt_locker));
+}
+
+void update_route_table(struct sr_instance *sr, uint8_t *packet, unsigned int len, char *interface){
     pthread_mutex_lock(&(sr->rt_locker));
     /* Lab5: Fill your code here */
     
