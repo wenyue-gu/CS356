@@ -141,11 +141,11 @@ def check_correctness(passed, testcase, testcases_scores, records):
     max_score = testcases_scores[testcase-1]
     if passed:
         score = max_score
-        output_info("Test Case %d: Passed (%d/%d)" % (testcase, score, max_score))
+        output_info("Test Case %d: Passed (%.1f/%.1f)" % (testcase, score, max_score))
         records[testcase-1] = 1
     else:
         score = 0
-        output_info("Test Case %d: Failed (0/%d)" % (testcase, max_score))
+        output_info("Test Case %d: Failed (0/%.1f)" % (testcase, max_score))
         records[testcase-1] = 0
     return score
 
@@ -216,7 +216,7 @@ def run_tests(net):
     }
     ip_list = ['10.0.1.1', '10.0.2.1', '10.0.3.1', '10.0.1.100', '10.0.2.2', '192.168.2.2', '192.168.3.1', '192.168.2.200', '10.0.3.2', '172.24.3.2', '192.168.3.2', '172.24.3.30']
     records = [-1]*15
-    testcases_scores = [1] * 15
+    testcases_scores = [0.5, 0.5, 0.5, 1, 0.5, 0.5, 1, 1, 1, 0.5, 0.5, 0.5, 1, 0.5, 0.5]
 
     client = [net.get('client'), '10.0.1.100', 'Client']
     server1 = [net.get('server1'), '192.168.2.200', 'Server1']
@@ -282,7 +282,7 @@ def run_tests(net):
         total_scores += check_correctness(passed, testcase, testcases_scores, records)
     else:
         testcases = range(1, 16)
-        max_score = 15
+        max_score = 10.0
         for testcase in testcases:
             passed = test_each_testcase(testcase, parameters[testcase-1], ip_list)
             total_scores += check_correctness(passed, testcase, testcases_scores, records)
@@ -309,7 +309,7 @@ def run_tests(net):
                 time.sleep(30)
 
     output_info("All Test Cases Finished")
-    output_info("Total Score: %d/%s" % (total_scores, max_score))
+    output_info("Total Score: %.1f/%.1f" % (total_scores, max_score))
     for i in range(len(records)):
         if records[i] != -1:
             if records[i] == 1:
