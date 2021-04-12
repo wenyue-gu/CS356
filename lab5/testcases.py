@@ -154,7 +154,6 @@ def send_command_and_check(node, node_name, command, expected_result):
     return_info = node.cmd(command)
     info(return_info+"\n")
     return_info = return_info.lower()
-    info("Expected Result:%s\n" % expected_result)
     if expected_result in return_info:
         return True
     else:
@@ -162,7 +161,7 @@ def send_command_and_check(node, node_name, command, expected_result):
 
 def check_traceroute(node, node_name, ip, hop):
     info(">>>>>>>>>>>>>>>>Sending command: %s traceroute %s<<<<<<<<<<<<<<<\n" % (node_name.lower(), ip))
-    return_info = node.cmd("traceroute %s" % ip)
+    return_info = node.cmd("traceroute -I -n %s" % ip)
     info(return_info+"\n")
 
     return_info = str.strip(return_info)
@@ -245,13 +244,20 @@ def run_tests(net):
         [client,  [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], ('192.168.2.200', 3)]
     ]
 
+    '''client tshark -i client-eth0 -w ./pcap_files/client.pcap &
+    server1 tshark -i server1-eth0 -w ../pcap_files/server1.pcap &
+    server2 tshark -i server2-eth0 -w ../pcap_files/server2.pcap &
+    vhost1 tshark -i vhost1-eth1 -i vhost1-eth2 -i vhost1-eth3 -w ./pcap_files/vhost1.pcap &
+    vhost2 tshark -i vhost2-eth1 -i vhost2-eth2 -i vhost2-eth3 -w ./pcap_files/vhost2.pcap &
+    vhost3 tshark -i vhost3-eth1 -i vhost3-eth2 -i vhost3-eth3 -w ./pcap_files/vhost3.pcap &'''
+
     if args.d == 1:
         client[0].cmd("tshark -i client-eth0 -w ./pcap_files/client.pcap &")
         server2[0].cmd("tshark -i server2-eth0 -w ../pcap_files/server2.pcap &")
         server1[0].cmd("tshark -i server1-eth0 -w ../pcap_files/server1.pcap &")
         vhost1.cmd("tshark -i vhost1-eth1 -i vhost1-eth2 -i vhost1-eth3 -w ./pcap_files/vhost1.pcap &")
-        vhost1.cmd("tshark -i vhost2-eth1 -i vhost2-eth2 -i vhost2-eth3 -w ./pcap_files/vhost2.pcap &")
-        vhost1.cmd("tshark -i vhost3-eth1 -i vhost3-eth2 -i vhost3-eth3 -w ./pcap_files/vhost3.pcap &")
+        vhost2.cmd("tshark -i vhost2-eth1 -i vhost2-eth2 -i vhost2-eth3 -w ./pcap_files/vhost2.pcap &")
+        vhost3.cmd("tshark -i vhost3-eth1 -i vhost3-eth2 -i vhost3-eth3 -w ./pcap_files/vhost3.pcap &")
         time.sleep(10)
     info( '>>>>>>>>>>Wait 30s for routing table converging<<<<<<<<<<\n')
     time.sleep(30)
