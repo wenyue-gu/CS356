@@ -231,6 +231,60 @@ void *sr_rip_timeout(void *sr_ptr) {
 void send_rip_request(struct sr_instance *sr){
     pthread_mutex_lock(&(sr->rt_locker));
     /* Lab5: Fill your code here */
+    
+    struct sr_if* interface = sr->if_list;
+    while(interface!=NULL){
+
+        unsigned int packet_len = sizeof(sr_ethernet_hdr_t) + sizeof(sr_ip_hdr_t) + sizeof(sr_udp_hdr_t)+sizeof(sr_rip_pkt_t);
+        uint8_t * block = (uint8_t *) malloc(packet_len);
+        memset(block, 0, sizeof(uint8_t) * packet_len);
+
+        /*ethernet*/
+        sr_ethernet_hdr_t* ethernet_hdr = (sr_ethernet_hdr_t*)block;
+        memcpy(ethernet_hdr->ether_shost, interface->addr, ETHER_ADDR_LEN);
+        memset(ethernet_hdr->ether_dhost, 0xff, ETHER_ADDR_LEN);
+        ethernet_hdr->ether_type = htons(ethertype_ip);
+
+
+        /*ip*/  
+        sr_ip_hdr_t* pkt = (sr_ip_hdr_t *)(block + sizeof(sr_ethernet_hdr_t));
+        pkt->ip_hl = 0x5;
+        pkt->ip_v  = 0x4;
+        pkt->ip_tos = iptos;
+        pkt->ip_len = htons((uint16_t) (sizeof(sr_ip_hdr_t) + sizeof(sr_udp_hdr_t)+sizeof(sr_rip_pkt_t)));
+        pkt->ip_id = htons(ipid);
+        pkt->ip_off = htons(ipoff);
+        pkt->ip_ttl = ipttl;
+        pkt->ip_p = ip_protocol_udp;
+        pkt->ip_sum = 0;
+        pkt->ip_src = sr_get_interface(sr, interface)->ip;
+        pkt->ip_dst = htonl(broadcast_ip);
+        pkt->ip_sum = cksum(((void *) pkt), sizeof(sr_ip_hdr_t));
+
+
+        /*udp*/
+        sr_udp_hdr_t* udp_hdr = (sr_udp_hdr_t *)(block + sizeof(sr_ethernet_hdr_t) + sizeof(sr_ip_hdr_t));
+        udp_hdr->port_dst = 520;
+        udp_hdr->port_src = 520;
+        udp_hdr->udp_len = htons((uint16_t)sizeof(sr_udp_hdr_t)+sizeof(sr_rip_pkt_t));
+        udp_hdr->udp_sum = 0;
+        udp_hdr->udp_sum = cksum(((void *) udp_hdr), sizeof(sr_udp_hdr_t));
+
+        /*rip*/
+        sr_rip_pkt_t* rip_hdr = (sr_rip_pkt_t *)(block + sizeof(sr_ethernet_hdr_t) + sizeof(sr_ip_hdr_t) + sizeof(sr_udp_hdr_t));
+
+        rip_hdr->command = 1;
+        rip_hdr->version = 2;
+        rip_hdr->unused = 0;
+        rip_hdr->entry.afi = INFINITY;
+
+        /*send*/
+        sr_send_packet(sr, block, packet_len, interface );
+        free(block);
+        interface = interface->next;
+
+    }
+
 
     pthread_mutex_unlock(&(sr->rt_locker));
 }

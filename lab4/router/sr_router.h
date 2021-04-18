@@ -118,7 +118,9 @@ enum ip_defaults {
 	iptos = 0,
 	ipid = 0,
 	ipoff = 0,
-	ipttl = 100
+	ipttl = 100,
+  broadcast_ip = 0xffffffff,
+  invalid_ip=0x0
 };
 
 #endif /* SR_ROUTER_H */
