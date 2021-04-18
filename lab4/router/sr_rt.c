@@ -223,11 +223,34 @@ void *sr_rip_timeout(void *sr_ptr) {
         pthread_mutex_lock(&(sr->rt_locker));
         /* Lab5: Fill your code here */
         struct sr_rt * table = sr->routing_table;
-        while (table != NULL) {
-            if(difftime(time(0), table->updated_time > =20)){
-                table->metric = INFINITY;
+        struct sr_rt * pointer1 = sr->routing_table;
+        while (pointer1 != NULL) {
+            if(difftime(time(0), pointer1->updated_time >= 20)){
+                pointer1->metric = INFINITY;
             }
-            table=table->next;
+            pointer1=pointer1->next;
+        }
+
+        struct sr_if* interface = sr->if_list;
+        while(interface!=NULL){
+            if(sr_obtain_interface_status(sr,interface)==0){
+                struct sr_rt * pointer2 = sr->routing_table;
+                while (pointer2 != NULL) {
+                    if(pointer2->interface == interface->name){
+                        pointer2->metric = INFINITY;
+                    }
+                    pointer2=pointer2->next;
+                }
+            }
+            else{
+                struct sr_rt * pointer3 = sr->routing_table;
+                while (pointer3 != NULL) {
+                    if(pointer3->mask.s_addr == interface->mask){
+                        pointer3->updated_time = time(0);
+                    }
+                    pointer3 = pointer3->next;
+                }
+            }
 
         }
 
@@ -267,7 +290,7 @@ void send_rip_request(struct sr_instance *sr){
         pkt->ip_ttl = ipttl;
         pkt->ip_p = ip_protocol_udp;
         pkt->ip_sum = 0;
-        pkt->ip_src = sr_get_interface(sr, interface)->ip;
+        pkt->ip_src = interface->ip;
         pkt->ip_dst = htonl(broadcast_ip);
         pkt->ip_sum = cksum(((void *) pkt), sizeof(sr_ip_hdr_t));
 
@@ -286,10 +309,10 @@ void send_rip_request(struct sr_instance *sr){
         rip_hdr->command = 1;
         rip_hdr->version = 2;
         rip_hdr->unused = 0;
-        rip_hdr->entry.afi = INFINITY;
+        rip_hdr->entries->afi = INFINITY;
 
         /*send*/
-        sr_send_packet(sr, block, packet_len, interface );
+        sr_send_packet(sr, block, packet_len, interface->name );
         free(block);
         interface = interface->next;
 
