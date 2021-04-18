@@ -222,6 +222,16 @@ void *sr_rip_timeout(void *sr_ptr) {
         sleep(5);
         pthread_mutex_lock(&(sr->rt_locker));
         /* Lab5: Fill your code here */
+        struct sr_rt * table = sr->routing_table;
+        while (table != NULL) {
+            if(difftime(time(0), table->updated_time > =20)){
+                table->metric = INFINITY;
+            }
+            table=table->next;
+
+        }
+
+        send_rip_response(sr);
         
         pthread_mutex_unlock(&(sr->rt_locker));
     }
