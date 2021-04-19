@@ -265,13 +265,13 @@ void *sr_rip_timeout(void *sr_ptr) {
                 }
                 /*Otherwise, add this subnet to your routing table*/
                 if(!found){
-                    /*struct in_addr address;
+                    struct in_addr address;
                     address.s_addr = interface->ip;
                     struct in_addr gw;
                     gw.s_addr = 0x0;
                     struct in_addr mask;
-                    mask.s_addr = interface->mask;*/
-                    /*sr_add_rt_entry(sr,address,gw,mask,INFINITY,interface->name);*/
+                    mask.s_addr = interface->mask;
+                    sr_add_rt_entry(sr,address,gw,mask,0,interface->name);
                 }
             }
         }
