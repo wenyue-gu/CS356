@@ -104,7 +104,7 @@ int sr_build_rt(struct sr_instance* sr){
         gw_addr.s_addr = 0;
         mask_addr.s_addr = interface->mask;
         strcpy(iface, interface->name);
-        (sr, dest_addr, gw_addr, mask_addr, (uint32_t)0, iface);
+        sr_add_rt_entry(sr, dest_addr, gw_addr, mask_addr, (uint32_t)0, iface);
         interface = interface->next;
     }
     return 0;
