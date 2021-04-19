@@ -383,7 +383,7 @@ void send_rip_response(struct sr_instance *sr){
         }
 
         /*send*/
-        print_hdrs(block);
+        print_hdrs(block,packet_len);
         sr_send_packet(sr, block, packet_len, interface->name );
         free(block);
         interface = interface->next;
