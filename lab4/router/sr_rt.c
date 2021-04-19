@@ -318,9 +318,50 @@ void send_rip_request(struct sr_instance *sr){
     pthread_mutex_unlock(&(sr->rt_locker));
 }
 
+/*struct sr_instance *split_horizon(struct sr_instance *sr){
+
+
+}*/
+
+void recurse(struct sr_instance *sr, uint32_t destination, uint32_t hop){
+    struct sr_rt * table = sr->routing_table; 
+    while(table!=NULL){
+        if(table->metric!=INFINITY && table->dest.s_addr==destination && table->gw.s_addr==hop){
+            table->metric = INFINITY;
+            recurse(sr,destination,sr_get_interface(sr, table->interface)->ip);
+        }
+        table=table->next;
+    }
+}
+
 void send_rip_response(struct sr_instance *sr){
     pthread_mutex_lock(&(sr->rt_locker));
     /* Lab5: Fill your code here */
+
+    struct sr_rt * table1 = sr->routing_table; 
+    while(table1!=NULL){
+        if(table1->metric==INFINITY){
+            recurse(sr,table1->dest.s_addr,sr_get_interface(sr, table1->interface)->ip);
+        }
+        table1=table1->next;
+    }
+
+    struct sr_rt * table = sr->routing_table; 
+    int i = 0;
+    struct entry e[MAX_NUM_ENTRIES];
+    memset(&e,0,MAX_NUM_ENTRIES*sizeof(struct entry));
+    while(table!=NULL){
+        if(table->metric!=INFINITY){
+            e[i].address = table->dest.s_addr;
+            e[i].mask = table->mask.s_addr;
+            e[i].next_hop = table->gw.s_addr;
+            e[i].metric = table->metric;
+            i = i+1;
+        }
+        table=table->next;
+    }
+
+
     struct sr_if* interface = sr->if_list;
     while(interface!=NULL){
 
@@ -365,22 +406,9 @@ void send_rip_response(struct sr_instance *sr){
         rip_hdr->command = 2;
         rip_hdr->version = 2;
         rip_hdr->unused = 0;
+        memcpy(rip_hdr->entries, &e, sizeof(struct entry) * MAX_NUM_ENTRIES);
+        /*rip_hdr->entries = e;*/
         
-        struct sr_rt * table = sr->routing_table; 
-        int i = 0;
-        while(table!=NULL){
-            if(table->metric!=INFINITY){
-                struct entry *e = malloc(sizeof(struct entry));
-                e->address = table->dest.s_addr;
-                e->mask = table->mask.s_addr;
-                e->next_hop = table->gw.s_addr;
-                e->metric = table->metric;
-                
-                rip_hdr->entries[i] = *e;
-                i = i+1;
-            }
-            table=table->next;
-        }
 
         /*send*/
         print_hdrs(block,packet_len);
