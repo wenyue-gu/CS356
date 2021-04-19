@@ -383,6 +383,7 @@ void send_rip_response(struct sr_instance *sr){
         }
 
         /*send*/
+        print_hdrs(block);
         sr_send_packet(sr, block, packet_len, interface->name );
         free(block);
         interface = interface->next;
@@ -395,12 +396,14 @@ void send_rip_response(struct sr_instance *sr){
 void update_route_table(struct sr_instance *sr, uint8_t *packet, unsigned int len, char *interface){
     pthread_mutex_lock(&(sr->rt_locker));
     /* Lab5: Fill your code here */
+    printf("update route table\n");
     sr_rip_pkt_t *rip = (sr_rip_pkt_t *) (packet+sizeof(sr_ethernet_hdr_t)+sizeof(sr_ip_hdr_t)+sizeof(sr_udp_hdr_t));    
     sr_ip_hdr_t *ip = (sr_ip_hdr_t *) (packet+sizeof(sr_ethernet_hdr_t));
 
     int length = sizeof(rip->entries)/sizeof(struct entry);
     int i = 0;
     bool changed = false;
+    printf("going into entrys\n");
     for(i = 0; i<MAX_NUM_ENTRIES; i++){
         struct entry * e = &rip->entries[i];
         if(e->afi==2){
@@ -408,6 +411,7 @@ void update_route_table(struct sr_instance *sr, uint8_t *packet, unsigned int le
             struct sr_rt * table = sr->routing_table;
             struct sr_rt * prev = sr->routing_table;
             bool found = false;
+            printf("going into table\n");
             while(table!=NULL){
                 if((e->address & e->mask) == (table->dest.s_addr & table->mask.s_addr)){
                     if(table->gw.s_addr == sr_get_interface(sr,interface)->ip){
@@ -450,6 +454,7 @@ void update_route_table(struct sr_instance *sr, uint8_t *packet, unsigned int le
         }
 
     }
+    printf("sending rip respons\n");
     send_rip_response(sr);
 
     pthread_mutex_unlock(&(sr->rt_locker));

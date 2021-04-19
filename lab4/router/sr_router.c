@@ -107,7 +107,7 @@ void sr_handlepacket(struct sr_instance* sr,
     case ethertype_ip:
       /* case2 */
       printf("handle_ip\n");
-      sr_handle_ip(sr, packet+sizeof(sr_ethernet_hdr_t), len-sizeof(sr_ethernet_hdr_t), interface);
+      sr_handle_ip(sr, packet, len-sizeof(sr_ethernet_hdr_t), interface);
       break;
   }
 }/* end sr_ForwardPacket */
@@ -116,7 +116,7 @@ void sr_handle_ip(struct sr_instance* sr, uint8_t * buf, unsigned int len,char* 
   /*2a Check whether the checksum in the IP header is correct. 
   If the checksum is not correct, just ignore this packet and return. 
   Recall the Internet checksum algorithm returns zero if there is no bit error*/
-  sr_ip_hdr_t* ip = (sr_ip_hdr_t*)buf;
+  sr_ip_hdr_t* ip = (sr_ip_hdr_t*)(buf++sizeof(sr_ethernet_hdr_t));
   uint16_t received = ip->ip_sum;
   ip->ip_sum = 0;
   uint16_t calc = cksum(ip,sizeof(sr_ip_hdr_t));
@@ -139,13 +139,13 @@ void sr_handle_ip(struct sr_instance* sr, uint8_t * buf, unsigned int len,char* 
     if(ip->ip_p==ip_protocol_udp){
 
       printf("ip->ip_p==ip_protocol_udp\n");
-      sr_udp_hdr_t* udp = (sr_udp_hdr_t*) (buf+sizeof(sr_ip_hdr_t));
+      sr_udp_hdr_t* udp = (sr_udp_hdr_t*) (buf+sizeof(sr_ip_hdr_t)+sizeof(sr_ethernet_hdr_t));
       /*LAB 5 1Ai1*/
       if(udp->port_src==520 && udp->port_dst==520){
 
         printf("udp->port_src==520 && udp->port_dst==520\n");
         /* send rip packet*/
-        sr_rip_pkt_t* rip = (sr_rip_pkt_t*) (buf+sizeof(sr_ip_hdr_t) + sizeof(sr_udp_hdr_t));
+        sr_rip_pkt_t* rip = (sr_rip_pkt_t*) (buf+sizeof(sr_ip_hdr_t) + sizeof(sr_udp_hdr_t)+sizeof(sr_ethernet_hdr_t));
         /*LAB5 1ai1a*/
         if(rip->command==1){/*it's a request?*/
 
@@ -156,7 +156,7 @@ void sr_handle_ip(struct sr_instance* sr, uint8_t * buf, unsigned int len,char* 
         else{/*it's a reply?*/
 
           printf("it's a reply\n");
-          update_route_table(sr,(uint8_t*)rip,len,interface);
+          update_route_table(sr,(uint8_t*)buf,len,interface);
         }
 
       }
