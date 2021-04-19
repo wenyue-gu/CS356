@@ -129,12 +129,12 @@ void sr_handle_ip(struct sr_instance* sr, uint8_t * buf, unsigned int len,char* 
     printf("something went wrong with checksum");
     return;
   }*/
-  printf("checksum fine\n");
+  /*printf("checksum fine\n");*/
 
   /*LAB 5 1A*/
   if(ip->ip_dst==broadcast_ip){
 
-    printf("ip->ip_dst==broadcast_ip\n");
+    /*printf("ip->ip_dst==broadcast_ip\n");*/
     /*LAB 5 1Ai*/
     if(ip->ip_p==ip_protocol_udp){
 

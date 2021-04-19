@@ -104,7 +104,7 @@ int sr_build_rt(struct sr_instance* sr){
         gw_addr.s_addr = 0;
         mask_addr.s_addr = interface->mask;
         strcpy(iface, interface->name);
-        sr_add_rt_entry(sr, dest_addr, gw_addr, mask_addr, (uint32_t)0, iface);
+        (sr, dest_addr, gw_addr, mask_addr, (uint32_t)0, iface);
         interface = interface->next;
     }
     return 0;
@@ -225,16 +225,22 @@ void *sr_rip_timeout(void *sr_ptr) {
         /* Lab5: Fill your code here */
         
         struct sr_rt * pointer1 = sr->routing_table;
+        /*For each entry in your routing table*/
         while (pointer1 != NULL) {
+            /*check whether this entry has expired (Current_time – Updated_time >= 20 seconds).*/
             if(difftime(time(0), pointer1->updated_time >= 20)){
+                /*If expired, delete it from the routing table*/
                 pointer1->metric = INFINITY;
             }
             pointer1=pointer1->next;
         }
 
         struct sr_if* interface = sr->if_list;
+        /*Checking the status of the router's own interfaces*/
         while(interface!=NULL){
+            /*If the status of an interface is down*/
             if(sr_obtain_interface_status(sr,interface->name)==0){
+                /*you should delete all the routing entries which use this interface to send packets*/
                 struct sr_rt * pointer2 = sr->routing_table;
                 while (pointer2 != NULL) {
                     if(pointer2->interface == interface->name){
@@ -243,13 +249,29 @@ void *sr_rip_timeout(void *sr_ptr) {
                     pointer2=pointer2->next;
                 }
             }
+            /*If the status of an interface is up*/
             else{
                 struct sr_rt * pointer3 = sr->routing_table;
+                bool found = false;
                 while (pointer3 != NULL) {
-                    if(pointer3->mask.s_addr == interface->mask){
+                    /*you should check whether your current routing table contains the subnet 
+                    this interface is directly connected to.*/
+                    if(pointer3->dest.s_addr == interface->ip && pointer3->mask.s_addr == interface->mask){
+                        /*If it contains, update the updated time. */
                         pointer3->updated_time = time(0);
+                        found = true;
                     }
                     pointer3 = pointer3->next;
+                }
+                /*Otherwise, add this subnet to your routing table*/
+                if(!found){
+                    /*struct in_addr address;
+                    address.s_addr = interface->ip;
+                    struct in_addr gw;
+                    gw.s_addr = 0x0;
+                    struct in_addr mask;
+                    mask.s_addr = interface->mask;*/
+                    /*sr_add_rt_entry(sr,address,gw,mask,INFINITY,interface->name);*/
                 }
             }
         }
@@ -304,10 +326,11 @@ void send_rip_request(struct sr_instance *sr){
         /*rip*/
         sr_rip_pkt_t* rip_hdr = (sr_rip_pkt_t *)(block + sizeof(sr_ethernet_hdr_t) + sizeof(sr_ip_hdr_t) + sizeof(sr_udp_hdr_t));
 
-        rip_hdr->command = 1;
+        rip_hdr->command = htons(1);
         rip_hdr->version = 2;
         rip_hdr->unused = 0;
-        rip_hdr->entries->metric = INFINITY;
+        rip_hdr->entries[0].afi = htons(2);
+        rip_hdr->entries[0].metric = INFINITY;
 
         /*send*/
         sr_send_packet(sr, block, packet_len, interface->name );
@@ -411,7 +434,7 @@ void send_rip_response(struct sr_instance *sr){
         
 
         /*send*/
-        print_hdrs(block,packet_len);
+        /*print_hdrs(block,packet_len);*/
         sr_send_packet(sr, block, packet_len, interface->name );
         free(block);
         interface = interface->next;
@@ -428,62 +451,80 @@ void update_route_table(struct sr_instance *sr, uint8_t *packet, unsigned int le
     sr_rip_pkt_t *rip = (sr_rip_pkt_t *) (packet+sizeof(sr_ethernet_hdr_t)+sizeof(sr_ip_hdr_t)+sizeof(sr_udp_hdr_t));    
     sr_ip_hdr_t *ip = (sr_ip_hdr_t *) (packet+sizeof(sr_ethernet_hdr_t));
 
-    int length = sizeof(rip->entries)/sizeof(struct entry);
     int i = 0;
     bool changed = false;
     printf("going into entrys\n");
+    /*For each routing entry in the RIP response packet*/
     for(i = 0; i<MAX_NUM_ENTRIES; i++){
-        struct entry * e = &rip->entries[i];
-        if(e->afi==2){
-            e->metric = (e->metric+1< INFINITY) ? (e->metric+1) : (INFINITY);
+        struct entry e = rip->entries[i];
+        /*if valid*/
+        if(e.afi!=0){
+            /*obtain the metric = MIN(received_metric+1, INFINITY),*/
+            e.metric = (e.metric+1< INFINITY) ? (e.metric+1) : (INFINITY);
             struct sr_rt * table = sr->routing_table;
-            struct sr_rt * prev = sr->routing_table;
             bool found = false;
             printf("going into table\n");
+            /*then check whether your routing table*/
             while(table!=NULL){
-                if((e->address & e->mask) == (table->dest.s_addr & table->mask.s_addr)){
+                /* contains this routing entry.*/
+                if((e.address & e.mask) == (table->dest.s_addr & table->mask.s_addr)){
+                    /*If it has this entry, check if the packet is from the same router as the existing entry*/
                     if(table->gw.s_addr == sr_get_interface(sr,interface)->ip){
                         changed = true;
+                        /*If true, update the updating time to the new one*/
                         table->updated_time = time(0);
-                        if(e->metric==INFINITY){
+                        /*If metric == INFINITY,*/
+                        if(e.metric==INFINITY){
+                            /* delete this routing entry*/
                             table->metric=INFINITY;
                         }
                         else{
-                            if(e->metric < table->metric){
-                                table->dest.s_addr = e->address;
-                                table->metric = e->metric;
+                            /*If metric < current metric in routing table*/
+                            if(e.metric < table->metric){
+                                /*updating all the information in the routing entry*/
+                                table->dest.s_addr = e.address;
+                                table->metric = e.metric;
                                 table->updated_time  = time(0);
-                                table->mask.s_addr = e->mask;
+                                table->mask.s_addr = e.mask;
                                 table->gw.s_addr = ip->ip_src;
+                                memcpy(table->interface, sr_get_interface(sr,interface)->name, sizeof(unsigned char) * sr_IFACE_NAMELEN);
                             }
                         }
                     }
                     found=true;
                     break;
                 }
-                prev = table;
                 table = table->next;
             }
+            /*If not, add this routing entry to your routing table*/
             if(!found){
                 changed = true;
-                struct sr_rt * new = (struct sr_rt*)malloc(sizeof(struct sr_rt));
-                memset(new, 0, sizeof(struct sr_rt));
-                new->dest.s_addr = e->address;
-                new->metric = e->metric;
-                /*memcpy(&new->gw.s_addr, &sr_get_interface(sr,interface)->addr, ETHER_ADDR_LEN);*/
-                new->gw.s_addr = ip->ip_src;
-                memcpy(new->interface, sr_get_interface(sr,interface)->name, sizeof(unsigned char) * sr_IFACE_NAMELEN);
+                struct in_addr address;
+                address.s_addr = e.address;
+                struct in_addr gw;
+                gw.s_addr = ip->ip_src;
+                struct in_addr mask;
+                mask.s_addr = e.mask;
+                sr_add_rt_entry(sr, address,gw, mask, e.metric, interface);
 
+                /*struct sr_rt * new = (struct sr_rt*)malloc(sizeof(struct sr_rt));
+                memset(new, 0, sizeof(struct sr_rt));
+                new->dest.s_addr = e.address;
+                new->metric = e.metric;
                 new->updated_time = time(0);
                 new->mask.s_addr = e->mask;
-
-                prev->next = new;
+                new->gw.s_addr = ip->ip_src;
+                memcpy(new->interface, sr_get_interface(sr,interface)->name, sizeof(unsigned char) * sr_IFACE_NAMELEN);*/
             }
         }
 
     }
-    printf("sending rip respons\n");
-    send_rip_response(sr);
+    /*Call send_rip_response function to send out the RIP response through all 
+    interfaces if your routing table has changed (trigger updates).*/
+    if(changed){
+        printf("sending rip respons\n");
+        send_rip_response(sr);
+    }
 
     pthread_mutex_unlock(&(sr->rt_locker));
 }
