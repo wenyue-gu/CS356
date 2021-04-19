@@ -58,7 +58,7 @@ void sr_arpcache_sweepreqs(struct sr_instance *sr) {
     /* Lab4: Fill your code here */
     /*For each ARP request in the ARP cache,*/
 
-    printf("sr_arpcache_sweepreqs\n");
+    /*printf("sr_arpcache_sweepreqs\n");*/
     struct sr_arpreq * current = sr->cache.requests;
 	struct sr_arpreq * next;
 	if (current) next = current->next;

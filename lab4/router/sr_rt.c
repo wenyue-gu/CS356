@@ -307,7 +307,7 @@ void send_rip_request(struct sr_instance *sr){
         rip_hdr->command = 1;
         rip_hdr->version = 2;
         rip_hdr->unused = 0;
-        rip_hdr->entries->afi = INFINITY;
+        rip_hdr->entries->metric = INFINITY;
 
         /*send*/
         sr_send_packet(sr, block, packet_len, interface->name );
@@ -321,6 +321,73 @@ void send_rip_request(struct sr_instance *sr){
 void send_rip_response(struct sr_instance *sr){
     pthread_mutex_lock(&(sr->rt_locker));
     /* Lab5: Fill your code here */
+    struct sr_if* interface = sr->if_list;
+    while(interface!=NULL){
+
+        unsigned int packet_len = sizeof(sr_ethernet_hdr_t) + sizeof(sr_ip_hdr_t) + sizeof(sr_udp_hdr_t)+sizeof(sr_rip_pkt_t);
+        uint8_t * block = (uint8_t *) malloc(packet_len);
+        memset(block, 0, sizeof(uint8_t) * packet_len);
+
+        /*ethernet*/
+        sr_ethernet_hdr_t* ethernet_hdr = (sr_ethernet_hdr_t*)block;
+        memcpy(ethernet_hdr->ether_shost, interface->addr, ETHER_ADDR_LEN);
+        memset(ethernet_hdr->ether_dhost, 0xff, ETHER_ADDR_LEN);
+        ethernet_hdr->ether_type = htons(ethertype_ip);
+
+
+        /*ip*/  
+        sr_ip_hdr_t* pkt = (sr_ip_hdr_t *)(block + sizeof(sr_ethernet_hdr_t));
+        pkt->ip_hl = 0x5;
+        pkt->ip_v  = 0x4;
+        pkt->ip_tos = iptos;
+        pkt->ip_len = htons((uint16_t) (sizeof(sr_ip_hdr_t) + sizeof(sr_udp_hdr_t)+sizeof(sr_rip_pkt_t)));
+        pkt->ip_id = htons(ipid);
+        pkt->ip_off = htons(ipoff);
+        pkt->ip_ttl = ipttl;
+        pkt->ip_p = ip_protocol_udp;
+        pkt->ip_sum = 0;
+        pkt->ip_src = interface->ip;
+        pkt->ip_dst = htonl(broadcast_ip);
+        pkt->ip_sum = cksum(((void *) pkt), sizeof(sr_ip_hdr_t));
+
+
+        /*udp*/
+        sr_udp_hdr_t* udp_hdr = (sr_udp_hdr_t *)(block + sizeof(sr_ethernet_hdr_t) + sizeof(sr_ip_hdr_t));
+        udp_hdr->port_dst = 520;
+        udp_hdr->port_src = 520;
+        udp_hdr->udp_len = htons((uint16_t)sizeof(sr_udp_hdr_t)+sizeof(sr_rip_pkt_t));
+        udp_hdr->udp_sum = 0;
+        udp_hdr->udp_sum = cksum(((void *) udp_hdr), sizeof(sr_udp_hdr_t));
+
+        /*rip*/
+        sr_rip_pkt_t* rip_hdr = (sr_rip_pkt_t *)(block + sizeof(sr_ethernet_hdr_t) + sizeof(sr_ip_hdr_t) + sizeof(sr_udp_hdr_t));
+
+        rip_hdr->command = 2;
+        rip_hdr->version = 2;
+        rip_hdr->unused = 0;
+        
+        struct sr_rt * table = sr->routing_table; 
+        int i = 0;
+        while(table!=NULL){
+            if(table->metric!=INFINITY){
+                struct entry *e = malloc(sizeof(struct entry));
+                e->address = table->dest.s_addr;
+                e->mask = table->mask.s_addr;
+                e->next_hop = table->gw.s_addr;
+                e->metric = table->metric;
+                
+                rip_hdr->entries[i] = *e;
+                i = i+1;
+            }
+            table=table->next;
+        }
+
+        /*send*/
+        sr_send_packet(sr, block, packet_len, interface->name );
+        free(block);
+        interface = interface->next;
+
+    }
 
     pthread_mutex_unlock(&(sr->rt_locker));
 }
@@ -328,52 +395,58 @@ void send_rip_response(struct sr_instance *sr){
 void update_route_table(struct sr_instance *sr, uint8_t *packet, unsigned int len, char *interface){
     pthread_mutex_lock(&(sr->rt_locker));
     /* Lab5: Fill your code here */
-    sr_rip_pkt_t *rip = (sr_rip_pkt_t *) packet;
+    sr_rip_pkt_t *rip = (sr_rip_pkt_t *) (packet+sizeof(sr_ethernet_hdr_t)+sizeof(sr_ip_hdr_t)+sizeof(sr_udp_hdr_t));    
+    sr_rip_pkt_t *ip = (sr_rip_pkt_t *) (packet+sizeof(sr_ethernet_hdr_t));
+
     int length = sizeof(rip->entries)/sizeof(struct entry);
     int i = 0;
     bool changed = false;
-    for(i = 0; i<length; i++){
-        struct entry e = rip->entries[i];
-        e.metric = (e.metric+1< INFINITY) ? (e.metric+1) : (INFINITY);
-        struct sr_rt * table = sr->routing_table;
-        struct sr_rt * prev = sr->routing_table;
-        bool found = false;
-        while(table!=NULL){
-            if(table->dest.s_addr==e.address){
-                if(table->gw.s_addr == sr_get_interface(sr,interface)->ip){
-                    changed = true;
-                    table->updated_time = time(0);
-                    if(e.metric==INFINITY){
-                        table->metric=INFINITY;
-                    }
-                    else{
-                        if(e.metric < table->metric){
-                            table->dest.s_addr = e.address;
-                            table->metric = e.metric;
-                            table->updated_time  = time(0);
+    for(i = 0; i<MAX_NUM_ENTRIES; i++){
+        struct entry * e = rip->entries[i];
+        if(e->afi==2){
+            e->metric = (e->metric+1< INFINITY) ? (e->metric+1) : (INFINITY);
+            struct sr_rt * table = sr->routing_table;
+            struct sr_rt * prev = sr->routing_table;
+            bool found = false;
+            while(table!=NULL){
+                if((e->address & e->mask) == (table->dest.s_addr & table->mask.s_addr)){
+                    if(table->gw.s_addr == sr_get_interface(sr,interface)->ip){
+                        changed = true;
+                        table->updated_time = time(0);
+                        if(e->metric==INFINITY){
+                            table->metric=INFINITY;
+                        }
+                        else{
+                            if(e->metric < table->metric){
+                                table->dest.s_addr = e->address;
+                                table->metric = e->metric;
+                                table->updated_time  = time(0);
+                                table->mask.s_addr = e->mask;
+                                table->gw.s_addr = ip->ip_src;
+                            }
                         }
                     }
+                    found=true;
+                    break;
                 }
-                found=true;
-                break;
+                prev = table;
+                table = table->next;
             }
-            prev = table;
-            table = table->next;
-        }
-        if(!found){
-            changed = true;
-            struct sr_rt * new = (struct sr_rt*)malloc(sizeof(struct sr_rt));
-            memset(new, 0, sizeof(struct sr_rt));
-            new->dest.s_addr = e.address;
-            new->metric = e.metric;
-            /*memcpy(&new->gw.s_addr, &sr_get_interface(sr,interface)->addr, ETHER_ADDR_LEN);*/
-            new->gw.s_addr = sr_get_interface(sr,interface)->ip;
-            memcpy(new->interface, sr_get_interface(sr,interface)->name, sizeof(unsigned char) * sr_IFACE_NAMELEN);
+            if(!found){
+                changed = true;
+                struct sr_rt * new = (struct sr_rt*)malloc(sizeof(struct sr_rt));
+                memset(new, 0, sizeof(struct sr_rt));
+                new->dest.s_addr = e->address;
+                new->metric = e->metric;
+                /*memcpy(&new->gw.s_addr, &sr_get_interface(sr,interface)->addr, ETHER_ADDR_LEN);*/
+                new->gw.s_addr = ip->ip_src;
+                memcpy(new->interface, sr_get_interface(sr,interface)->name, sizeof(unsigned char) * sr_IFACE_NAMELEN);
 
-            new->updated_time = time(0);
-            new->mask.s_addr = sr_get_interface(sr,interface)->mask;
+                new->updated_time = time(0);
+                new->mask.s_addr = e->mask;
 
-            prev->next = new;
+                prev->next = new;
+            }
         }
 
     }
