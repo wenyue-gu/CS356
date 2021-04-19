@@ -435,11 +435,13 @@ void send_rip_response(struct sr_instance *sr){
 
         /*send*/
         /*print_hdrs(block,packet_len);*/
+        printf("sending rip response\n");
         sr_send_packet(sr, block, packet_len, interface->name );
         free(block);
         interface = interface->next;
 
     }
+
 
     pthread_mutex_unlock(&(sr->rt_locker));
 }
@@ -498,6 +500,7 @@ void update_route_table(struct sr_instance *sr, uint8_t *packet, unsigned int le
             }
             /*If not, add this routing entry to your routing table*/
             if(!found){
+                printf("not found");
                 changed = true;
                 struct in_addr address;
                 address.s_addr = e.address;
