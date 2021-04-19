@@ -396,13 +396,13 @@ void update_route_table(struct sr_instance *sr, uint8_t *packet, unsigned int le
     pthread_mutex_lock(&(sr->rt_locker));
     /* Lab5: Fill your code here */
     sr_rip_pkt_t *rip = (sr_rip_pkt_t *) (packet+sizeof(sr_ethernet_hdr_t)+sizeof(sr_ip_hdr_t)+sizeof(sr_udp_hdr_t));    
-    sr_rip_pkt_t *ip = (sr_rip_pkt_t *) (packet+sizeof(sr_ethernet_hdr_t));
+    sr_ip_hdr_t *ip = (sr_ip_hdr_t *) (packet+sizeof(sr_ethernet_hdr_t));
 
     int length = sizeof(rip->entries)/sizeof(struct entry);
     int i = 0;
     bool changed = false;
     for(i = 0; i<MAX_NUM_ENTRIES; i++){
-        struct entry * e = rip->entries[i];
+        struct entry * e = &rip->entries[i];
         if(e->afi==2){
             e->metric = (e->metric+1< INFINITY) ? (e->metric+1) : (INFINITY);
             struct sr_rt * table = sr->routing_table;
