@@ -462,7 +462,7 @@ void update_route_table(struct sr_instance *sr, uint8_t *packet, unsigned int le
                 /* contains this routing entry.*/
                 if((e.address & e.mask) == (table->dest.s_addr & table->mask.s_addr)){
                     /*If it has this entry, check if the packet is from the same router as the existing entry*/
-                    if(table->gw.s_addr == sr_get_interface(sr,interface)->ip){
+                    if(table->interface == interface){
                         changed = true;
                         /*If true, update the updating time to the new one*/
                         table->updated_time = time(0);
@@ -480,7 +480,8 @@ void update_route_table(struct sr_instance *sr, uint8_t *packet, unsigned int le
                                 table->updated_time  = time(0);
                                 table->mask.s_addr = e.mask;
                                 table->gw.s_addr = ip->ip_src;
-                                memcpy(table->interface, sr_get_interface(sr,interface)->name, sizeof(unsigned char) * sr_IFACE_NAMELEN);
+                                /*table->interface = interface;*/
+                                memcpy(table->interface, interface, sizeof(unsigned char) * sr_IFACE_NAMELEN);
                             }
                         }
                     }
