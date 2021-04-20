@@ -461,8 +461,10 @@ void update_route_table(struct sr_instance *sr, uint8_t *packet, unsigned int le
             while(table!=NULL){
                 /* contains this routing entry.*/
                 if((e.address & e.mask) == (table->dest.s_addr & table->mask.s_addr)){
+                    printf("table contains this routing entry\n");
                     /*If it has this entry, check if the packet is from the same router as the existing entry*/
                     if(table->interface == interface){
+                        printf("from same router, updating\n");
                         changed = true;
                         /*If true, update the updating time to the new one*/
                         table->updated_time = time(0);
@@ -492,7 +494,7 @@ void update_route_table(struct sr_instance *sr, uint8_t *packet, unsigned int le
             }
             /*If not, add this routing entry to your routing table*/
             if(!found){
-                printf("not found");
+                printf("not found\n");
                 changed = true;
                 struct in_addr address;
                 address.s_addr = e.address;
