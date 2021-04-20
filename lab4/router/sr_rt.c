@@ -328,7 +328,7 @@ void send_rip_request(struct sr_instance *sr){
         /*rip*/
         sr_rip_pkt_t* rip_hdr = (sr_rip_pkt_t *)(block + sizeof(sr_ethernet_hdr_t) + sizeof(sr_ip_hdr_t) + sizeof(sr_udp_hdr_t));
 
-        rip_hdr->command = htons(1);
+        rip_hdr->command = 1;
         rip_hdr->version = 2;
         rip_hdr->unused = 0;
         rip_hdr->entries[0].metric = INFINITY;
