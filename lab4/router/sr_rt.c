@@ -259,7 +259,7 @@ void *sr_rip_timeout(void *sr_ptr) {
                     /*you should check whether your current routing table contains the subnet 
                     this interface is directly connected to.*/
 
-                    if(ntohl(pointer3->dest.s_addr) == interface->ip && pointer3->mask.s_addr == interface->mask){
+                    if(htonl(pointer3->dest.s_addr) == interface->ip && pointer3->mask.s_addr == interface->mask){
                         /*If it contains, update the updated time. */
                         printf("timeout update time\n");
                         pointer3->updated_time = time(0);
