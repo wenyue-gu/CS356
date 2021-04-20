@@ -275,7 +275,8 @@ void *sr_rip_timeout(void *sr_ptr) {
                 }
             }
         }
-        send_rip_response(sr);        
+        send_rip_response(sr);     
+        sr_print_routing_table(sr);   
         pthread_mutex_unlock(&(sr->rt_locker));
     }
     return NULL;
@@ -329,7 +330,6 @@ void send_rip_request(struct sr_instance *sr){
         rip_hdr->command = htons(1);
         rip_hdr->version = 2;
         rip_hdr->unused = 0;
-        rip_hdr->entries[0].afi = htons(2);
         rip_hdr->entries[0].metric = INFINITY;
 
         /*send*/
@@ -346,7 +346,7 @@ void send_rip_request(struct sr_instance *sr){
 
 }*/
 
-void recurse(struct sr_instance *sr, uint32_t destination, uint32_t hop){
+/*void recurse(struct sr_instance *sr, uint32_t destination, uint32_t hop){
     struct sr_rt * table = sr->routing_table; 
     while(table!=NULL){
         if(table->metric!=INFINITY && table->dest.s_addr==destination && table->gw.s_addr==hop){
@@ -355,35 +355,11 @@ void recurse(struct sr_instance *sr, uint32_t destination, uint32_t hop){
         }
         table=table->next;
     }
-}
+}*/
 
 void send_rip_response(struct sr_instance *sr){
     pthread_mutex_lock(&(sr->rt_locker));
     /* Lab5: Fill your code here */
-
-    struct sr_rt * table1 = sr->routing_table; 
-    while(table1!=NULL){
-        if(table1->metric==INFINITY){
-            recurse(sr,table1->dest.s_addr,sr_get_interface(sr, table1->interface)->ip);
-        }
-        table1=table1->next;
-    }
-
-    struct sr_rt * table = sr->routing_table; 
-    int i = 0;
-    struct entry e[MAX_NUM_ENTRIES];
-    memset(&e,0,MAX_NUM_ENTRIES*sizeof(struct entry));
-    while(table!=NULL){
-        if(table->metric!=INFINITY){
-            e[i].address = table->dest.s_addr;
-            e[i].mask = table->mask.s_addr;
-            e[i].next_hop = table->gw.s_addr;
-            e[i].metric = table->metric;
-            i = i+1;
-        }
-        table=table->next;
-    }
-
 
     struct sr_if* interface = sr->if_list;
     while(interface!=NULL){
@@ -429,11 +405,25 @@ void send_rip_response(struct sr_instance *sr){
         rip_hdr->command = 2;
         rip_hdr->version = 2;
         rip_hdr->unused = 0;
-        memcpy(rip_hdr->entries, &e, sizeof(struct entry) * MAX_NUM_ENTRIES);
+
+        struct sr_rt * table = sr->routing_table; 
+        int i = 0;
+        memset(&rip_hdr->entries,0,MAX_NUM_ENTRIES*sizeof(struct entry));
+        while(table!=NULL){
+            if(table->interface != interface->name && difftime(time(0), table->updated_time < 20)){
+                rip_hdr->entries[i].afi = htons(2);
+                rip_hdr->entries[i].address = table->dest.s_addr;
+                rip_hdr->entries[i].mask = table->mask.s_addr;
+                rip_hdr->entries[i].next_hop = table->gw.s_addr;
+                rip_hdr->entries[i].metric = table->metric;
+                i = i+1;
+            }
+            table=table->next;
+        }
         /*rip_hdr->entries = e;*/
         
 
-        /*send*/
+        /*se
         /*print_hdrs(block,packet_len);*/
         printf("sending rip response\n");
         sr_send_packet(sr, block, packet_len, interface->name );
