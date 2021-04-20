@@ -272,6 +272,7 @@ void *sr_rip_timeout(void *sr_ptr) {
                     gw.s_addr = 0x0;
                     struct in_addr mask;
                     mask.s_addr = interface->mask;
+                    printf("timeout add entry\n");
                     sr_add_rt_entry(sr,address,gw,mask,0,interface->name);
                 }
             }
