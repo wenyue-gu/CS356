@@ -277,12 +277,12 @@ void *sr_rip_timeout(void *sr_ptr) {
                     mask.s_addr = interface->mask;
                     printf("timeout add entry\n");
                     sr_add_rt_entry(sr,address,gw,mask,0,interface->name);
+                    sr_print_routing_table(sr);   
                 }
             }
             interface = interface->next;
         }
-
-        sr_print_routing_table(sr);   
+ 
         send_rip_response(sr);     
         sr_print_routing_table(sr);   
         pthread_mutex_unlock(&(sr->rt_locker));
