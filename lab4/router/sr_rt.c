@@ -424,7 +424,6 @@ void send_rip_response(struct sr_instance *sr){
         /*rip_hdr->entries = e;*/
         
 
-        /*se
         /*print_hdrs(block,packet_len);*/
         printf("sending rip response\n");
         sr_send_packet(sr, block, packet_len, interface->name );
