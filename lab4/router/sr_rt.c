@@ -229,7 +229,7 @@ void *sr_rip_timeout(void *sr_ptr) {
         /*For each entry in your routing table*/
         while (pointer1 != NULL) {
             /*check whether this entry has expired (Current_time – Updated_time >= 20 seconds).*/
-            if(difftime(time(0), pointer1->updated_time >= 20)){
+            if(difftime(time(0), pointer1->updated_time) >= 20){
                 /*If expired, delete it from the routing table*/
                 pointer1->metric = INFINITY;
             }
