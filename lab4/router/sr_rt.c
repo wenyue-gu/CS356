@@ -275,6 +275,7 @@ void *sr_rip_timeout(void *sr_ptr) {
                     sr_add_rt_entry(sr,address,gw,mask,0,interface->name);
                 }
             }
+            interface = interface->next;
         }
         send_rip_response(sr);     
         sr_print_routing_table(sr);   
