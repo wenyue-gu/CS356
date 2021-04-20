@@ -437,6 +437,7 @@ void send_rip_response(struct sr_instance *sr){
 }
 
 void update_route_table(struct sr_instance *sr, uint8_t *packet, unsigned int len, char *interface){
+    printf("route table before mutex lock\n");
     pthread_mutex_lock(&(sr->rt_locker));
     /* Lab5: Fill your code here */
     printf("update route table\n");
