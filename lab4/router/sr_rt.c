@@ -473,18 +473,22 @@ void update_route_table(struct sr_instance *sr, uint8_t *packet, unsigned int le
                             /* delete this routing entry*/
                             table->metric=INFINITY;
                         }
-                        else{
-                            /*If metric < current metric in routing table*/
-                            if(e.metric < table->metric){
-                                /*updating all the information in the routing entry*/
-                                table->dest.s_addr = e.address;
-                                table->metric = e.metric;
-                                table->updated_time  = time(0);
-                                table->mask.s_addr = e.mask;
-                                table->gw.s_addr = ip->ip_src;
-                                /*table->interface = interface;*/
-                                memcpy(table->interface, interface, sizeof(unsigned char) * sr_IFACE_NAMELEN);
-                            }
+                        
+                    }
+                    else{
+                        printf("not from same router?\n");
+                        printf("interface is %s\n",interface);
+                        printf("table interface %s\n",table->interface);
+                        /*If metric < current metric in routing table*/
+                        if(e.metric < table->metric){
+                            /*updating all the information in the routing entry*/
+                            table->dest.s_addr = e.address;
+                            table->metric = e.metric;
+                            table->updated_time  = time(0);
+                            table->mask.s_addr = e.mask;
+                            table->gw.s_addr = ip->ip_src;
+                            /*table->interface = interface;*/
+                            memcpy(table->interface, interface, sizeof(unsigned char) * sr_IFACE_NAMELEN);
                         }
                     }
                     found=true;
