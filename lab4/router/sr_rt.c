@@ -280,6 +280,8 @@ void *sr_rip_timeout(void *sr_ptr) {
             }
             interface = interface->next;
         }
+
+        sr_print_routing_table(sr);   
         send_rip_response(sr);     
         sr_print_routing_table(sr);   
         pthread_mutex_unlock(&(sr->rt_locker));
