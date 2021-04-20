@@ -116,7 +116,7 @@ void sr_handle_ip(struct sr_instance* sr, uint8_t * buf, unsigned int len,char* 
   /*2a Check whether the checksum in the IP header is correct. 
   If the checksum is not correct, just ignore this packet and return. 
   Recall the Internet checksum algorithm returns zero if there is no bit error*/
-  print_hdrs(buf,sizeof(sr_ethernet_hdr_t) + sizeof(sr_ip_hdr_t)+sizeof(sr_udp_hdr_t)+sizeof(sr_rip_pkt_t));
+  /*print_hdrs(buf,sizeof(sr_ethernet_hdr_t) + sizeof(sr_ip_hdr_t)+sizeof(sr_udp_hdr_t)+sizeof(sr_rip_pkt_t));*/
   sr_ip_hdr_t* ip = (sr_ip_hdr_t*)(buf+sizeof(sr_ethernet_hdr_t));
   uint16_t received = ip->ip_sum;
   ip->ip_sum = 0;

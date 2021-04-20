@@ -425,7 +425,7 @@ void send_rip_response(struct sr_instance *sr){
         
 
         /*print_hdrs(block,packet_len);*/
-        printf("sending rip response\n");
+        printf("sending rip response in rip response\n");
         sr_send_packet(sr, block, packet_len, interface->name );
         free(block);
         interface = interface->next;
@@ -516,7 +516,7 @@ void update_route_table(struct sr_instance *sr, uint8_t *packet, unsigned int le
     /*Call send_rip_response function to send out the RIP response through all 
     interfaces if your routing table has changed (trigger updates).*/
     if(changed){
-        printf("sending rip respons\n");
+        printf("changed so sending rip respons\n");
         send_rip_response(sr);
     }
 
