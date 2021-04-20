@@ -220,6 +220,7 @@ void sr_print_routing_entry(struct sr_rt* entry)
 void *sr_rip_timeout(void *sr_ptr) {
     struct sr_instance *sr = sr_ptr;
     while (1) {
+        printf("rip timeout\n");
         sleep(5);
         pthread_mutex_lock(&(sr->rt_locker));
         /* Lab5: Fill your code here */
