@@ -241,6 +241,7 @@ void *sr_rip_timeout(void *sr_ptr) {
         while(interface!=NULL){
             /*If the status of an interface is down*/
             if(sr_obtain_interface_status(sr,interface->name)==0){
+                printf("interface down");
                 /*you should delete all the routing entries which use this interface to send packets*/
                 struct sr_rt * pointer2 = sr->routing_table;
                 while (pointer2 != NULL) {
@@ -259,6 +260,7 @@ void *sr_rip_timeout(void *sr_ptr) {
                     this interface is directly connected to.*/
                     if(pointer3->dest.s_addr == interface->ip && pointer3->mask.s_addr == interface->mask){
                         /*If it contains, update the updated time. */
+                        printf("timeout update time\n");
                         pointer3->updated_time = time(0);
                         found = true;
                     }
