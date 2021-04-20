@@ -269,6 +269,7 @@ void *sr_rip_timeout(void *sr_ptr) {
                 /*Otherwise, add this subnet to your routing table*/
                 if(!found){
                     struct in_addr address;
+                    printf("%d",interface->ip);
                     address.s_addr = interface->ip;
                     struct in_addr gw;
                     gw.s_addr = 0x0;
