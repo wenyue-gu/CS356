@@ -206,8 +206,8 @@ void sr_handle_ip(struct sr_instance* sr, uint8_t * buf, unsigned int len,char* 
 
         /*struct in_addr ipdst;
         ipdst.s_addr = ip->ip_dst;
-        printf("ip destination %s\n", inet_ntoa(ipdst));
-        sr_print_routing_entry(match);*/
+        printf("ip destination %s\n", inet_ntoa(ipdst));*/
+        sr_print_routing_entry(match);
         if(match==NULL){
           
           icmp_unreachable(sr, Unreachable_net_code, ip, interface);
@@ -233,12 +233,13 @@ void sr_handle_ip(struct sr_instance* sr, uint8_t * buf, unsigned int len,char* 
             struct sr_arpentry * entry;
             /*LAB5 1b2*/
             printf("match gwsaddr is %s\n",inet_ntoa(match->gw));
-            if(match->gw.s_addr != 0){
+            /*if(match->gw.s_addr != 0){
               entry = sr_arpcache_lookup(&(sr->cache), match->gw.s_addr);
             }
             else{
               entry = sr_arpcache_lookup( &(sr->cache), ip->ip_dst);
-            }
+            }*/
+            entry = sr_arpcache_lookup( &(sr->cache), ip->ip_dst);
             if(entry!=NULL){
               printf("2c3 entry not null\n");
               memcpy((void *) (start_of_pckt->ether_shost), iface2->addr, sizeof(uint8_t) * ETHER_ADDR_LEN);
@@ -268,9 +269,10 @@ void sr_handle_ip(struct sr_instance* sr, uint8_t * buf, unsigned int len,char* 
               send modified packet immediately
             }*/
             else /*(did not contain dest IP)*/ {
-              printf("2c3 else did not contain dest ip\n");
+              printf("2c3 else lookup entry is null\n");
+              print_hdrs(block,ntohs(ip->ip_len) + sizeof(sr_ethernet_hdr_t));
               sr_arpcache_queuereq(&sr->cache, ip->ip_dst, (uint8_t *) block, ntohs(ip->ip_len) + sizeof(sr_ethernet_hdr_t), interface);
-              printf("sending arp req\n");
+              /*printf("sending arp req\n");*/
               send_arp_req(sr, iface2, ip->ip_dst, sizeof(sr_ethernet_hdr_t) + sizeof(sr_arp_hdr_t));
               free(block);
               /*dont send modified pack
