@@ -100,6 +100,7 @@ enum icmp_echo {
 enum icmp_unreachables {
 	t3_type = 3,
 	Unreachable_net_code = 0,
+  Unreachable_host_code = 1,
   Unreachable_port_code=3,
   Next_mtu=0,
   Unused=0
