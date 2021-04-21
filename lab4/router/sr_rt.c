@@ -477,6 +477,7 @@ void update_route_table(struct sr_instance *sr, uint8_t *packet, unsigned int le
                         /*If metric == INFINITY,*/
                         if(e.metric==INFINITY){
                             /* delete this routing entry*/
+                            printf("e metric infinity\n");
                             table->metric=INFINITY;
                         }
                         
