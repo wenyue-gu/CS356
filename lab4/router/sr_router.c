@@ -272,7 +272,7 @@ void sr_handle_ip(struct sr_instance* sr, uint8_t * buf, unsigned int len,char* 
             }*/
             else /*(did not contain dest IP)*/ {
               printf("2c3 else lookup entry is null\n");
-              print_hdrs(block,ntohs(ip->ip_len) + sizeof(sr_ethernet_hdr_t));
+              /*print_hdrs(block,ntohs(ip->ip_len) + sizeof(sr_ethernet_hdr_t));*/
               sr_arpcache_queuereq(&sr->cache, ip->ip_dst, (uint8_t *) block, ntohs(ip->ip_len) + sizeof(sr_ethernet_hdr_t), interface);
               /*printf("sending arp req\n");*/
               send_arp_req(sr, iface2, ip->ip_dst, sizeof(sr_ethernet_hdr_t) + sizeof(sr_arp_hdr_t));
