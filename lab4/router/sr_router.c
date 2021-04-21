@@ -175,7 +175,7 @@ void sr_handle_ip(struct sr_instance* sr, uint8_t * buf, unsigned int len,char* 
       printf("is own ip\n");
       /*LAB 5 1bi*/
       if(sr_obtain_interface_status(sr,interface)!=0){
-        uint8_t ip_proto = ip_protocol(buf);
+        uint8_t ip_proto = ip_protocol(buf+sizeof(sr_ethernet_hdr_t));
         /*2b1 */
         if (ip_proto == ip_protocol_icmp) {
           printf("isicmp\n");
