@@ -245,7 +245,7 @@ void *sr_rip_timeout(void *sr_ptr) {
                 /*you should delete all the routing entries which use this interface to send packets*/
                 struct sr_rt * pointer2 = sr->routing_table;
                 while (pointer2 != NULL) {
-                    if(strcmp( pointer2->interface, interface->name)==0){
+                    if(strcmp(pointer2->interface, interface->name)==0){
                         pointer2->metric = INFINITY;
                     }
                     pointer2=pointer2->next;
@@ -417,7 +417,7 @@ void send_rip_response(struct sr_instance *sr){
         int i = 0;
         memset(&rip_hdr->entries,0,MAX_NUM_ENTRIES*sizeof(struct entry));
         while(table!=NULL){
-            if(table->interface != interface->name ){
+            if(strcmp(table->interface, interface->name)!=0){
                 rip_hdr->entries[i].afi = htons(2);
                 rip_hdr->entries[i].address = table->dest.s_addr;
                 rip_hdr->entries[i].mask = table->mask.s_addr;
@@ -469,18 +469,14 @@ void update_route_table(struct sr_instance *sr, uint8_t *packet, unsigned int le
                 if((e.address & e.mask) == (table->dest.s_addr & table->mask.s_addr)){
                     /*printf("table contains this routing entry\n");*/
                     /*If it has this entry, check if the packet is from the same router as the existing entry*/
-                    /*printf("table interface %s current interface %s emtric %d table metric %d\n",table->interface , interface,e.metric, table->metric);*/
-                    if(strcmp(table->interface,interface)==0){
-                        /*printf("from same router, updating\n");*/
-                        
+                    if(strcmp(table->interface,interface==0)){
+                        /*printf("from same router, updating\n");*/   
                         /*If true, update the updating time to the new one*/
                         table->updated_time = time(0);
-                        printf("updating time\n");
                         /*If metric == INFINITY,*/
                         if(e.metric==INFINITY){
-                            changed = true;
                             /* delete this routing entry*/
-                            
+                            changed = true;
                             table->metric=INFINITY;
                         }
                         
@@ -492,7 +488,7 @@ void update_route_table(struct sr_instance *sr, uint8_t *packet, unsigned int le
                         /*If metric < current metric in routing table*/
                         if(e.metric < table->metric){
                             /*updating all the information in the routing entry*/
-                            printf("adding something in\n");
+                            changed = true;
                             table->dest.s_addr = e.address;
                             table->metric = e.metric;
                             table->updated_time  = time(0);
@@ -500,9 +496,7 @@ void update_route_table(struct sr_instance *sr, uint8_t *packet, unsigned int le
                             table->gw.s_addr = ip->ip_src;
                             /*table->interface = interface;*/
                             memcpy(table->interface, interface, sizeof(unsigned char) * sr_IFACE_NAMELEN);
-                            changed = true;
                         }
-                        /*printf("not anywhere\n");*/
                     }
                     found=true;
                     break;
@@ -520,6 +514,15 @@ void update_route_table(struct sr_instance *sr, uint8_t *packet, unsigned int le
                 struct in_addr mask;
                 mask.s_addr = e.mask;
                 sr_add_rt_entry(sr, address,gw, mask, e.metric, interface);
+
+                /*struct sr_rt * new = (struct sr_rt*)malloc(sizeof(struct sr_rt));
+                memset(new, 0, sizeof(struct sr_rt));
+                new->dest.s_addr = e.address;
+                new->metric = e.metric;
+                new->updated_time = time(0);
+                new->mask.s_addr = e->mask;
+                new->gw.s_addr = ip->ip_src;
+                memcpy(new->interface, sr_get_interface(sr,interface)->name, sizeof(unsigned char) * sr_IFACE_NAMELEN);*/
             }
         }
 
