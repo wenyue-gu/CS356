@@ -472,12 +472,13 @@ void update_route_table(struct sr_instance *sr, uint8_t *packet, unsigned int le
                     /*printf("table interface %s current interface %s emtric %d table metric %d\n",table->interface , interface,e.metric, table->metric);*/
                     if(strcmp(table->interface,interface)==0){
                         /*printf("from same router, updating\n");*/
-                        changed = true;
+                        
                         /*If true, update the updating time to the new one*/
                         table->updated_time = time(0);
                         printf("updating time\n");
                         /*If metric == INFINITY,*/
                         if(e.metric==INFINITY){
+                            changed = true;
                             /* delete this routing entry*/
                             
                             table->metric=INFINITY;
