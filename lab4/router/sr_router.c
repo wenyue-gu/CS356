@@ -204,9 +204,9 @@ void sr_handle_ip(struct sr_instance* sr, uint8_t * buf, unsigned int len,char* 
         You should implement a Longest Prefix Matching here.*/
         struct sr_rt * match = prefix_match(sr,ip->ip_dst);
 
-        struct in_addr ipdst;
+        /*struct in_addr ipdst;
         ipdst.s_addr = ip->ip_dst;
-        printf("ip destination %s\n", inet_ntoa(ipdst));
+        printf("ip destination %s\n", inet_ntoa(ipdst));*/
         sr_print_routing_entry(match);
         if(match==NULL){
           

@@ -60,8 +60,6 @@ void sr_arpcache_sweepreqs(struct sr_instance *sr) {
 
     /*printf("sr_arpcache_sweepreqs\n");*/
     struct sr_arpreq * current = sr->cache.requests;
-	struct sr_arpreq * next;
-	if (current) next = current->next;
 	while (current != NULL) {
 		if (difftime(time(0), current->sent > 1)) {
             /*Otherwise, check whether this arp request has been sent for 5 or more times, if so*/
@@ -85,9 +83,7 @@ void sr_arpcache_sweepreqs(struct sr_instance *sr) {
 		    }
 	    }
         /* If not larger than the 1 second, just return (go to next)*/
-		current = next;
-		if (current) next = current->next;
-
+		current = current->next;
 	}
     
 }
