@@ -524,6 +524,7 @@ void update_route_table(struct sr_instance *sr, uint8_t *packet, unsigned int le
     interfaces if your routing table has changed (trigger updates).*/
     if(changed){
         printf("changed so sending rip respons\n");
+        sr_print_routing_table(sr);
         send_rip_response(sr);
     }
 
