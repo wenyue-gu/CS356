@@ -234,7 +234,7 @@ void sr_handle_ip(struct sr_instance* sr, uint8_t * buf, unsigned int len,char* 
             /*LAB5 1b2*/
             printf("match gwsaddr is %s\n",inet_ntoa(match->gw));
             if(match->gw.s_addr != 0){
-              entry = sr_arpcache_lookup(&(sr->cache), match->dest.s_addr);
+              entry = sr_arpcache_lookup(&(sr->cache), match->gw.s_addr);
             }
             else{
               entry = sr_arpcache_lookup( &(sr->cache), ip->ip_dst);
