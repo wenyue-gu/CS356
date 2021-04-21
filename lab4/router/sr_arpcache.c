@@ -40,6 +40,7 @@ void send_unreachable_to_queued(struct sr_instance * sr, struct sr_arpreq * req)
 	struct sr_packet * current = req -> packets; 
 	while (current != NULL) {
 		sr_ip_hdr_t* ip = (void *)(current->buf) + sizeof(sr_ethernet_hdr_t);
+        printf("unreachable arpache sweepreq\n");
 		icmp_unreachable(sr, Unreachable_port_code, ip, current->iface);
 		current = current->next;
 	}
