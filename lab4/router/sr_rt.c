@@ -459,7 +459,7 @@ void update_route_table(struct sr_instance *sr, uint8_t *packet, unsigned int le
         /*if valid*/
         if(e.afi!=0){
             /*obtain the metric = MIN(received_metric+1, INFINITY),*/
-            sr_print_routing_entry(e);
+            sr_print_routing_entry(&e);
             e.metric = (e.metric+1< INFINITY) ? (e.metric+1) : (INFINITY);
             struct sr_rt * table = sr->routing_table;
             bool found = false;
