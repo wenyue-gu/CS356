@@ -245,7 +245,7 @@ void *sr_rip_timeout(void *sr_ptr) {
                 /*you should delete all the routing entries which use this interface to send packets*/
                 struct sr_rt * pointer2 = sr->routing_table;
                 while (pointer2 != NULL) {
-                    if(pointer2->interface == interface->name){
+                    if(strcmp( pointer2->interface, interface->name)==0){
                         pointer2->metric = INFINITY;
                     }
                     pointer2=pointer2->next;
@@ -469,8 +469,8 @@ void update_route_table(struct sr_instance *sr, uint8_t *packet, unsigned int le
                 if((e.address & e.mask) == (table->dest.s_addr & table->mask.s_addr)){
                     /*printf("table contains this routing entry\n");*/
                     /*If it has this entry, check if the packet is from the same router as the existing entry*/
-                    /*printf("table interface %s current interface %s emtric %d table metric %d\n",table->interface , interface,e.metric, table->metric);*/
-                    if(table->interface == interface){
+                    printf("table interface %s current interface %s emtric %d table metric %d\n",table->interface , interface,e.metric, table->metric);
+                    if(strcmp(table->interface,interface)==0){
                         /*printf("from same router, updating\n");*/
                         changed = true;
                         /*If true, update the updating time to the new one*/
@@ -501,7 +501,7 @@ void update_route_table(struct sr_instance *sr, uint8_t *packet, unsigned int le
                             memcpy(table->interface, interface, sizeof(unsigned char) * sr_IFACE_NAMELEN);
                             changed = true;
                         }
-                        printf("not anywhere\n");
+                        /*printf("not anywhere\n");*/
                     }
                     found=true;
                     break;
