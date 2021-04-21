@@ -220,7 +220,7 @@ void sr_print_routing_entry(struct sr_rt* entry)
 void *sr_rip_timeout(void *sr_ptr) {
     struct sr_instance *sr = sr_ptr;
     while (1) {
-        printf("rip timeout\n");
+        /*printf("rip timeout\n");*/
         sleep(5);
         pthread_mutex_lock(&(sr->rt_locker));
         /* Lab5: Fill your code here */
@@ -241,7 +241,7 @@ void *sr_rip_timeout(void *sr_ptr) {
         while(interface!=NULL){
             /*If the status of an interface is down*/
             if(sr_obtain_interface_status(sr,interface->name)==0){
-                printf("interface down");
+                /*printf("interface down");*/
                 /*you should delete all the routing entries which use this interface to send packets*/
                 struct sr_rt * pointer2 = sr->routing_table;
                 while (pointer2 != NULL) {
@@ -261,7 +261,7 @@ void *sr_rip_timeout(void *sr_ptr) {
 
                     if((pointer3->dest.s_addr & pointer3->mask.s_addr) == (interface->ip & interface->mask) && pointer3->mask.s_addr == interface->mask){
                         /*If it contains, update the updated time. */
-                        printf("timeout update time\n");
+                        /*printf("timeout update time\n");*/
                         pointer3->updated_time = time(0);
                         found = true;
                     }
@@ -275,7 +275,7 @@ void *sr_rip_timeout(void *sr_ptr) {
                     gw.s_addr = 0x0;
                     struct in_addr mask;
                     mask.s_addr = interface->mask;
-                    printf("timeout add entry\n");
+                    /*printf("timeout add entry\n");*/
                     sr_add_rt_entry(sr,address,gw,mask,0,interface->name);
                 }
             }
@@ -443,7 +443,7 @@ void send_rip_response(struct sr_instance *sr){
 }
 
 void update_route_table(struct sr_instance *sr, uint8_t *packet, unsigned int len, char *interface){
-    printf("route table before mutex lock\n");
+    /*printf("route table before mutex lock\n");*/
     pthread_mutex_lock(&(sr->rt_locker));
     /* Lab5: Fill your code here */
     printf("update route table\n");
@@ -452,7 +452,7 @@ void update_route_table(struct sr_instance *sr, uint8_t *packet, unsigned int le
 
     int i = 0;
     bool changed = false;
-    printf("going into entrys\n");
+    /*printf("going into entrys\n");*/
     /*For each routing entry in the RIP response packet*/
     for(i = 0; i<MAX_NUM_ENTRIES; i++){
         struct entry e = rip->entries[i];
@@ -462,15 +462,15 @@ void update_route_table(struct sr_instance *sr, uint8_t *packet, unsigned int le
             e.metric = (e.metric+1< INFINITY) ? (e.metric+1) : (INFINITY);
             struct sr_rt * table = sr->routing_table;
             bool found = false;
-            printf("going into table\n");
+            /*printf("going into table\n");*/
             /*then check whether your routing table*/
             while(table!=NULL){
                 /* contains this routing entry.*/
                 if((e.address & e.mask) == (table->dest.s_addr & table->mask.s_addr)){
-                    printf("table contains this routing entry\n");
+                    /*printf("table contains this routing entry\n");*/
                     /*If it has this entry, check if the packet is from the same router as the existing entry*/
                     if(table->interface == interface){
-                        printf("from same router, updating\n");
+                        /*printf("from same router, updating\n");*/
                         changed = true;
                         /*If true, update the updating time to the new one*/
                         table->updated_time = time(0);
@@ -482,9 +482,9 @@ void update_route_table(struct sr_instance *sr, uint8_t *packet, unsigned int le
                         
                     }
                     else{
-                        printf("not from same router?\n");
+                        /*printf("not from same router?\n");
                         printf("interface is %s\n",interface);
-                        printf("table interface %s\n",table->interface);
+                        printf("table interface %s\n",table->interface);*/
                         /*If metric < current metric in routing table*/
                         if(e.metric < table->metric){
                             /*updating all the information in the routing entry*/
@@ -504,7 +504,7 @@ void update_route_table(struct sr_instance *sr, uint8_t *packet, unsigned int le
             }
             /*If not, add this routing entry to your routing table*/
             if(!found){
-                printf("not found\n");
+                /*printf("not found\n");*/
                 changed = true;
                 struct in_addr address;
                 address.s_addr = e.address;

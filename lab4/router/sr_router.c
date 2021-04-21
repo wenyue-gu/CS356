@@ -172,7 +172,7 @@ void sr_handle_ip(struct sr_instance* sr, uint8_t * buf, unsigned int len,char* 
   else{
     /*2b If the destination IP of this packet is router’s own IP */
     if(is_own_ip(sr,ip)){
-      printf("is own ip\n");
+      /*printf("is own ip\n");*/
       /*LAB 5 1bi*/
       if(sr_obtain_interface_status(sr,interface)!=0){
         uint8_t ip_proto = ip_protocol(buf+sizeof(sr_ethernet_hdr_t));
