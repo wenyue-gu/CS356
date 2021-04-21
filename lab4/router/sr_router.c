@@ -239,12 +239,9 @@ void sr_handle_ip(struct sr_instance* sr, uint8_t * buf, unsigned int len,char* 
             else{
               entry = sr_arpcache_lookup( &(sr->cache), ip->ip_dst);
             }
-
-            start_of_pckt->ether_type = htons(ethertype_ip);
-            memcpy((void *) (start_of_pckt->ether_shost), iface2->addr, sizeof(uint8_t) * ETHER_ADDR_LEN);
-
             if(entry!=NULL){
               printf("2c3 entry not null\n");
+              memcpy((void *) (start_of_pckt->ether_shost), iface2->addr, sizeof(uint8_t) * ETHER_ADDR_LEN);
               /*LAB5 2*/
               unsigned char value[ETHER_ADDR_LEN] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
               if(entry->mac==value){ 
@@ -257,10 +254,10 @@ void sr_handle_ip(struct sr_instance* sr, uint8_t * buf, unsigned int len,char* 
               uint32_t target = pkt->ip_dst;
               pkt->ip_dst = source;
               pkt->ip_src = target;*/
+              start_of_pckt->ether_type = htons(ethertype_ip);
               print_hdrs(block,ntohs(ip->ip_len) + sizeof(sr_ethernet_hdr_t));
               sr_send_packet(sr, block, ntohs(ip->ip_len) + sizeof(sr_ethernet_hdr_t), match->interface);
               free(block);
-              free(entry);
             }
             /*?
             if(sr_arpcache_lookup()){
@@ -272,7 +269,7 @@ void sr_handle_ip(struct sr_instance* sr, uint8_t * buf, unsigned int len,char* 
             }*/
             else /*(did not contain dest IP)*/ {
               printf("2c3 else lookup entry is null\n");
-              /*print_hdrs(block,ntohs(ip->ip_len) + sizeof(sr_ethernet_hdr_t));*/
+              print_hdrs(block,ntohs(ip->ip_len) + sizeof(sr_ethernet_hdr_t));
               sr_arpcache_queuereq(&sr->cache, ip->ip_dst, (uint8_t *) block, ntohs(ip->ip_len) + sizeof(sr_ethernet_hdr_t), interface);
               /*printf("sending arp req\n");*/
               send_arp_req(sr, iface2, ip->ip_dst, sizeof(sr_ethernet_hdr_t) + sizeof(sr_arp_hdr_t));
