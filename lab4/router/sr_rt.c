@@ -261,7 +261,7 @@ void *sr_rip_timeout(void *sr_ptr) {
 
                     if((pointer3->dest.s_addr & pointer3->mask.s_addr) == (interface->ip & interface->mask) && pointer3->mask.s_addr == interface->mask){
                         /*If it contains, update the updated time. */
-                        printf("timeout update time\n");
+                        /*printf("timeout update time\n");*/
                         pointer3->updated_time = time(0);
                         found = true;
                     }
@@ -446,7 +446,7 @@ void update_route_table(struct sr_instance *sr, uint8_t *packet, unsigned int le
     /*printf("route table before mutex lock\n");*/
     pthread_mutex_lock(&(sr->rt_locker));
     /* Lab5: Fill your code here */
-    printf("update route table\n");
+    /*printf("update route table\n");*/
     sr_rip_pkt_t *rip = (sr_rip_pkt_t *) (packet+sizeof(sr_ethernet_hdr_t)+sizeof(sr_ip_hdr_t)+sizeof(sr_udp_hdr_t));    
     sr_ip_hdr_t *ip = (sr_ip_hdr_t *) (packet+sizeof(sr_ethernet_hdr_t));
 
@@ -505,7 +505,7 @@ void update_route_table(struct sr_instance *sr, uint8_t *packet, unsigned int le
             }
             /*If not, add this routing entry to your routing table*/
             if(!found){
-                printf("not found\n");
+                /*printf("not found\n");*/
                 changed = true;
                 struct in_addr address;
                 address.s_addr = e.address;
@@ -530,7 +530,7 @@ void update_route_table(struct sr_instance *sr, uint8_t *packet, unsigned int le
     /*Call send_rip_response function to send out the RIP response through all 
     interfaces if your routing table has changed (trigger updates).*/
     if(changed){
-        printf("changed so sending rip respons\n");
+        /*printf("changed so sending rip respons\n");*/
         send_rip_response(sr);
     }
 

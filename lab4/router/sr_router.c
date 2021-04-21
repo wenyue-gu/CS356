@@ -239,9 +239,12 @@ void sr_handle_ip(struct sr_instance* sr, uint8_t * buf, unsigned int len,char* 
             else{
               entry = sr_arpcache_lookup( &(sr->cache), ip->ip_dst);
             }
+            
+            start_of_pckt->ether_type = htons(ethertype_ip);
+            memcpy((void *) (start_of_pckt->ether_shost), iface2->addr, sizeof(uint8_t) * ETHER_ADDR_LEN);
+
             if(entry!=NULL){
               printf("2c3 entry not null\n");
-              memcpy((void *) (start_of_pckt->ether_shost), iface2->addr, sizeof(uint8_t) * ETHER_ADDR_LEN);
               /*LAB5 2*/
               unsigned char value[ETHER_ADDR_LEN] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
               if(entry->mac==value){ 
@@ -254,7 +257,6 @@ void sr_handle_ip(struct sr_instance* sr, uint8_t * buf, unsigned int len,char* 
               uint32_t target = pkt->ip_dst;
               pkt->ip_dst = source;
               pkt->ip_src = target;*/
-              start_of_pckt->ether_type = htons(ethertype_ip);
               print_hdrs(block,ntohs(ip->ip_len) + sizeof(sr_ethernet_hdr_t));
               sr_send_packet(sr, block, ntohs(ip->ip_len) + sizeof(sr_ethernet_hdr_t), match->interface);
               free(block);
@@ -604,6 +606,8 @@ void sr_handle_arp(struct sr_instance* sr, uint8_t * buf, unsigned int len, char
 	/*switch(op) {
 		case arp_op_request: */
   if(arp_op_request==op){
+
+    printf("it's an arp request\n");
     /* case 1a */
 
     /*printf("op request\n");
@@ -634,7 +638,7 @@ void sr_handle_arp(struct sr_instance* sr, uint8_t * buf, unsigned int len, char
   /*case arp_op_reply:*/
   if(arp_op_reply==op){
     /* case 1b */
-    printf("opreply\n");
+    printf("it's an arp reply\n");
     struct sr_arpreq * pending = sr_arpcache_insert(&sr->cache, arp->ar_sha, arp->ar_sip); /* 1b1 Insert the Target MAC to your ARP cache*/
     /* TODO: 1b2 */
     if (pending) {
