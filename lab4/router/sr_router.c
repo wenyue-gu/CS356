@@ -239,7 +239,7 @@ void sr_handle_ip(struct sr_instance* sr, uint8_t * buf, unsigned int len,char* 
             else{
               entry = sr_arpcache_lookup( &(sr->cache), ip->ip_dst);
             }
-            
+
             start_of_pckt->ether_type = htons(ethertype_ip);
             memcpy((void *) (start_of_pckt->ether_shost), iface2->addr, sizeof(uint8_t) * ETHER_ADDR_LEN);
 
@@ -260,6 +260,7 @@ void sr_handle_ip(struct sr_instance* sr, uint8_t * buf, unsigned int len,char* 
               print_hdrs(block,ntohs(ip->ip_len) + sizeof(sr_ethernet_hdr_t));
               sr_send_packet(sr, block, ntohs(ip->ip_len) + sizeof(sr_ethernet_hdr_t), match->interface);
               free(block);
+              free(entry);
             }
             /*?
             if(sr_arpcache_lookup()){
