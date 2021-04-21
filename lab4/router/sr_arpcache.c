@@ -24,12 +24,10 @@
    until we send 5 ARP requests, then we send ICMP host unreachable back to
    all packets waiting on this ARP request), you must fill out the following
    function that is called every second and is defined in sr_arpcache.c:
-
    void sr_arpcache_sweepreqs(struct sr_instance *sr) {
        for each request on sr->cache.requests:
            handle_arpreq(request)
    }
-
    Since handle_arpreq as defined in the comments above could destroy your
    current request, make sure to save the next pointer before calling
    handle_arpreq when traversing through the ARP requests linked list.
@@ -324,4 +322,3 @@ void *sr_arpcache_timeout(void *sr_ptr) {
     
     return NULL;
 }
-

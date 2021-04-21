@@ -206,8 +206,8 @@ void sr_handle_ip(struct sr_instance* sr, uint8_t * buf, unsigned int len,char* 
 
         /*struct in_addr ipdst;
         ipdst.s_addr = ip->ip_dst;
-        printf("ip destination %s\n", inet_ntoa(ipdst));*/
-        sr_print_routing_entry(match);
+        printf("ip destination %s\n", inet_ntoa(ipdst));
+        sr_print_routing_entry(match);*/
         if(match==NULL){
           
           icmp_unreachable(sr, Unreachable_net_code, ip, interface);
@@ -268,10 +268,8 @@ void sr_handle_ip(struct sr_instance* sr, uint8_t * buf, unsigned int len,char* 
               send modified packet immediately
             }*/
             else /*(did not contain dest IP)*/ {
-              printf("2c3 else lookup entry is null\n");
-              print_hdrs(block,ntohs(ip->ip_len) + sizeof(sr_ethernet_hdr_t));
+              printf("2c3 else lookup did not contain dest ip\n");
               sr_arpcache_queuereq(&sr->cache, ip->ip_dst, (uint8_t *) block, ntohs(ip->ip_len) + sizeof(sr_ethernet_hdr_t), interface);
-              /*printf("sending arp req\n");*/
               send_arp_req(sr, iface2, ip->ip_dst, sizeof(sr_ethernet_hdr_t) + sizeof(sr_arp_hdr_t));
               free(block);
               /*dont send modified pack
@@ -636,7 +634,7 @@ void sr_handle_arp(struct sr_instance* sr, uint8_t * buf, unsigned int len, char
   /*case arp_op_reply:*/
   if(arp_op_reply==op){
     /* case 1b */
-    printf("it's an arp reply\n");
+    printf("its an opreply\n");
     struct sr_arpreq * pending = sr_arpcache_insert(&sr->cache, arp->ar_sha, arp->ar_sip); /* 1b1 Insert the Target MAC to your ARP cache*/
     /* TODO: 1b2 */
     if (pending) {
