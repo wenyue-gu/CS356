@@ -515,20 +515,22 @@ void sr_icmp_send_message(struct sr_instance* sr, uint8_t type, uint8_t code, sr
   printf("filling in\n");
   /*fillin( sr,ip, interface,block);*/
   /*2b12d,e Fill the Source MAC Address, Destination MAC Address, Ethernet Type in ethernet header*/
-  uint8_t * ether_shost = malloc(sizeof(unsigned char) * ETHER_ADDR_LEN);
   struct sr_if * iface = sr_get_interface(sr, interface);
-  memcpy((void*) ether_shost, iface->addr, sizeof(unsigned char) * ETHER_ADDR_LEN);
+  memcpy(ethernet_hdr->ether_shost, iface->addr, sizeof(unsigned char) * ETHER_ADDR_LEN);
   printf("shost finished\n");
 
-  uint8_t * ether_dhost = malloc(sizeof(unsigned char) * ETHER_ADDR_LEN);
-  printf("print1\n");
   struct sr_arpentry * entry = sr_arpcache_lookup( &(sr->cache), ip->ip_src);
   printf("print2\n");
-  memcpy(ether_dhost, entry->mac, sizeof(unsigned char) * ETHER_ADDR_LEN); /*something goes wrong here*/
+
+  if(entry==NULL){
+    printf("do something!\n");
+    memset(ethernet_hdr->ether_dhost, 0xff, ETHER_ADDR_LEN);
+  }
+  else{
+    memcpy(ethernet_hdr->ether_dhost, entry->mac, sizeof(unsigned char) * ETHER_ADDR_LEN);
+  }
   printf("dhost finished\n");
 
-  memcpy(ethernet_hdr->ether_dhost, ether_dhost, ETHER_ADDR_LEN);
-  memcpy(ethernet_hdr->ether_shost, ether_shost, ETHER_ADDR_LEN);
   ethernet_hdr->ether_type = htons(ethertype_ip);
 
   /*struct sr_if * iface = sr_get_interface(sr, interface);
@@ -573,8 +575,6 @@ void sr_icmp_send_message(struct sr_instance* sr, uint8_t type, uint8_t code, sr
   print_hdrs((uint8_t*) block, packet_len);
   sr_send_packet(sr, block, packet_len, interface );
   free(block);
-  free(ether_shost);
-  free(ether_dhost);
 }
 
 
