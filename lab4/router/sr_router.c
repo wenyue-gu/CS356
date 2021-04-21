@@ -226,12 +226,13 @@ void sr_handle_ip(struct sr_instance* sr, uint8_t * buf, unsigned int len,char* 
             /*save sr_arpcache_ lookup as struct sr_arp_entry, put that in if(sr_arp = true), */
             struct sr_arpentry * entry;
             /*LAB5 1b2*/
-            /*if(match->gw.s_addr != 0){
+            printf("match gwsaddr is %s\n",inet_ntoa(match->gw));
+            if(match->gw.s_addr != 0){
               entry = sr_arpcache_lookup(&(sr->cache), match->gw.s_addr);
             }
-            else{*/
+            else{
               entry = sr_arpcache_lookup( &(sr->cache), ip->ip_dst);
-            /*}*/
+            }
             if(entry!=NULL){
               printf("2c3 entry not null\n");
               memcpy((void *) (start_of_pckt->ether_shost), iface2->addr, sizeof(uint8_t) * ETHER_ADDR_LEN);
