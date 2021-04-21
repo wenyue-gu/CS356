@@ -101,12 +101,10 @@ void sr_handlepacket(struct sr_instance* sr,
   switch(ethtype) {
  		case ethertype_arp:
       /* case1 */
-      /*printf("handle_arp\n");*/
 			sr_handle_arp(sr, packet+sizeof(sr_ethernet_hdr_t), len-sizeof(sr_ethernet_hdr_t), interface);
       break;
     case ethertype_ip:
       /* case2 */
-      /*printf("handle_ip\n");*/
       sr_handle_ip(sr, packet, len-sizeof(sr_ethernet_hdr_t), interface);
       break;
   }
@@ -139,12 +137,10 @@ void sr_handle_ip(struct sr_instance* sr, uint8_t * buf, unsigned int len,char* 
     /*LAB 5 1Ai*/
     if(ip->ip_p==ip_protocol_udp){
 
-      /*printf("ip->ip_p==ip_protocol_udp\n");*/
       sr_udp_hdr_t* udp = (sr_udp_hdr_t*) (buf+sizeof(sr_ip_hdr_t)+sizeof(sr_ethernet_hdr_t));
       /*LAB 5 1Ai1*/
       if(udp->port_src==520 && udp->port_dst==520){
 
-        /*printf("udp->port_src==520 && udp->port_dst==520\n");*/
         /* send rip packet*/
         sr_rip_pkt_t* rip = (sr_rip_pkt_t*) (buf+sizeof(sr_ip_hdr_t) + sizeof(sr_udp_hdr_t)+sizeof(sr_ethernet_hdr_t));
         /*LAB5 1ai1a*/
@@ -172,12 +168,11 @@ void sr_handle_ip(struct sr_instance* sr, uint8_t * buf, unsigned int len,char* 
   else{
     /*2b If the destination IP of this packet is router’s own IP */
     if(is_own_ip(sr,ip)){
-      /*printf("is own ip\n");*/
+      printf("is own ip\n");
       /*LAB 5 1bi*/
       if(sr_obtain_interface_status(sr,interface)!=0){
-        uint8_t ip_proto = ip_protocol(buf+sizeof(sr_ethernet_hdr_t));
         /*2b1 */
-        if (ip_proto == ip_protocol_icmp) {
+        if (ip->ip_p == ip_protocol_icmp) {
           printf("isicmp\n");
           handle_icmp(sr, buf+sizeof(sr_ethernet_hdr_t) , len , interface);
         }
@@ -232,7 +227,6 @@ void sr_handle_ip(struct sr_instance* sr, uint8_t * buf, unsigned int len,char* 
             struct sr_arpentry * entry;
             /*LAB5 1b2*/
             if(match->gw.s_addr != 0){
-              printf("match gw saddr not 0 %s\n", inet_ntoa(match->gw));
               entry = sr_arpcache_lookup(&(sr->cache), match->gw.s_addr);
             }
             else{
