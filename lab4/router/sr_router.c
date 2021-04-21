@@ -233,13 +233,12 @@ void sr_handle_ip(struct sr_instance* sr, uint8_t * buf, unsigned int len,char* 
             struct sr_arpentry * entry;
             /*LAB5 1b2*/
             printf("match gwsaddr is %s\n",inet_ntoa(match->gw));
-            /*if(match->gw.s_addr != 0){
-              entry = sr_arpcache_lookup(&(sr->cache), match->gw.s_addr);
+            if(match->gw.s_addr != 0){
+              entry = sr_arpcache_lookup(&(sr->cache), match->dest.s_addr);
             }
             else{
               entry = sr_arpcache_lookup( &(sr->cache), ip->ip_dst);
-            }*/
-            entry = sr_arpcache_lookup( &(sr->cache), ip->ip_dst);
+            }
             if(entry!=NULL){
               printf("2c3 entry not null\n");
               memcpy((void *) (start_of_pckt->ether_shost), iface2->addr, sizeof(uint8_t) * ETHER_ADDR_LEN);
