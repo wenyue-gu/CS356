@@ -417,7 +417,7 @@ void send_rip_response(struct sr_instance *sr){
         int i = 0;
         memset(&rip_hdr->entries,0,MAX_NUM_ENTRIES*sizeof(struct entry));
         while(table!=NULL){
-            if(table->interface != interface->name && difftime(time(0), table->updated_time < 20)){
+            if(table->interface != interface->name ){
                 rip_hdr->entries[i].afi = htons(2);
                 rip_hdr->entries[i].address = table->dest.s_addr;
                 rip_hdr->entries[i].mask = table->mask.s_addr;
@@ -431,7 +431,7 @@ void send_rip_response(struct sr_instance *sr){
         
 
         /*print_hdrs(block,packet_len);*/
-        printf("sending rip response in rip response\n");
+        /*printf("sending rip response in rip response\n");*/
         sr_send_packet(sr, block, packet_len, interface->name );
         free(block);
         interface = interface->next;
@@ -474,10 +474,11 @@ void update_route_table(struct sr_instance *sr, uint8_t *packet, unsigned int le
                         changed = true;
                         /*If true, update the updating time to the new one*/
                         table->updated_time = time(0);
+                        printf("updating time\n");
                         /*If metric == INFINITY,*/
                         if(e.metric==INFINITY){
                             /* delete this routing entry*/
-                            printf("e metric infinity\n");
+                            
                             table->metric=INFINITY;
                         }
                         
@@ -489,6 +490,7 @@ void update_route_table(struct sr_instance *sr, uint8_t *packet, unsigned int le
                         /*If metric < current metric in routing table*/
                         if(e.metric < table->metric){
                             /*updating all the information in the routing entry*/
+                            printf("adding something in\n");
                             table->dest.s_addr = e.address;
                             table->metric = e.metric;
                             table->updated_time  = time(0);
@@ -505,7 +507,7 @@ void update_route_table(struct sr_instance *sr, uint8_t *packet, unsigned int le
             }
             /*If not, add this routing entry to your routing table*/
             if(!found){
-                /*printf("not found\n");*/
+                printf("not found\n");
                 changed = true;
                 struct in_addr address;
                 address.s_addr = e.address;
@@ -514,15 +516,6 @@ void update_route_table(struct sr_instance *sr, uint8_t *packet, unsigned int le
                 struct in_addr mask;
                 mask.s_addr = e.mask;
                 sr_add_rt_entry(sr, address,gw, mask, e.metric, interface);
-
-                /*struct sr_rt * new = (struct sr_rt*)malloc(sizeof(struct sr_rt));
-                memset(new, 0, sizeof(struct sr_rt));
-                new->dest.s_addr = e.address;
-                new->metric = e.metric;
-                new->updated_time = time(0);
-                new->mask.s_addr = e->mask;
-                new->gw.s_addr = ip->ip_src;
-                memcpy(new->interface, sr_get_interface(sr,interface)->name, sizeof(unsigned char) * sr_IFACE_NAMELEN);*/
             }
         }
 
