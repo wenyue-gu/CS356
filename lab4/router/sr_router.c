@@ -229,11 +229,10 @@ void sr_handle_ip(struct sr_instance* sr, uint8_t * buf, unsigned int len,char* 
             struct sr_if *iface2 = sr_get_interface(sr, match->interface);
             sr_ethernet_hdr_t* start_of_pckt = (sr_ethernet_hdr_t*) block;
             /*save sr_arpcache_ lookup as struct sr_arp_entry, put that in if(sr_arp = true), */
-            printf("ip dest %s\n", inet_ntoa(ip->ip_dst));
             struct sr_arpentry * entry;
             /*LAB5 1b2*/
             if(match->gw.s_addr != 0){
-              printf("match gw saddr not 0%s\n", inet_ntoa(match->gw.s_addr));
+              printf("match gw saddr not 0 %s\n", inet_ntoa(match->gw));
               entry = sr_arpcache_lookup(&(sr->cache), match->gw.s_addr);
             }
             else{
