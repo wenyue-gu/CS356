@@ -469,7 +469,7 @@ void update_route_table(struct sr_instance *sr, uint8_t *packet, unsigned int le
                 if((e.address & e.mask) == (table->dest.s_addr & table->mask.s_addr)){
                     /*printf("table contains this routing entry\n");*/
                     /*If it has this entry, check if the packet is from the same router as the existing entry*/
-                    printf("table interface %s current interface %s emtric %d table metric %d\n",table->interface , interface,e.metric, table->metric);
+                    /*printf("table interface %s current interface %s emtric %d table metric %d\n",table->interface , interface,e.metric, table->metric);*/
                     if(strcmp(table->interface,interface)==0){
                         /*printf("from same router, updating\n");*/
                         changed = true;
