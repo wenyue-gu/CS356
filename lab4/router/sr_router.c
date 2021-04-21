@@ -580,14 +580,16 @@ void sr_icmp_send_message(struct sr_instance* sr, uint8_t type, uint8_t code, sr
 
 bool is_own_ip(struct sr_instance* sr, sr_ip_hdr_t* current) {
   /*printf("is_own_ip\n");*/
-	struct sr_if * iface = sr->if_list;
+
+	struct sr_rt * table = sr->routing_table;
+	/*struct sr_if * iface = sr->if_list;*/
   /*printf("iface established\n");*/
-	while (iface != NULL) {
+	while (table != NULL) {
     /*printf("not null\n");*/
-		if (current->ip_dst == iface->ip) {
+		if (current->ip_dst == table->dest.s_addr) {
 			return true;
 		}
-		iface = iface->next;
+		table = table->next;
 	}
   /*printf("is not own ip\n");*/
 	return false;
