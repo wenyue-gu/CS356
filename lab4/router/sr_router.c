@@ -206,8 +206,8 @@ void sr_handle_ip(struct sr_instance* sr, uint8_t * buf, unsigned int len,char* 
 
         /*struct in_addr ipdst;
         ipdst.s_addr = ip->ip_dst;
-        printf("ip destination %s\n", inet_ntoa(ipdst));*/
-        sr_print_routing_entry(match);
+        printf("ip destination %s\n", inet_ntoa(ipdst));
+        sr_print_routing_entry(match);*/
         if(match==NULL){
           
           icmp_unreachable(sr, Unreachable_net_code, ip, interface);
@@ -233,10 +233,6 @@ void sr_handle_ip(struct sr_instance* sr, uint8_t * buf, unsigned int len,char* 
             struct sr_arpentry * entry;
             /*LAB5 1b2*/
             printf("match gwsaddr is %s\n",inet_ntoa(match->gw));
-
-            memcpy((void *) (start_of_pckt->ether_shost), iface2->addr, sizeof(uint8_t) * ETHER_ADDR_LEN);
-            start_of_pckt->ether_type = htons(ethertype_ip);
-
             if(match->gw.s_addr != 0){
               entry = sr_arpcache_lookup(&(sr->cache), match->gw.s_addr);
             }
@@ -245,6 +241,7 @@ void sr_handle_ip(struct sr_instance* sr, uint8_t * buf, unsigned int len,char* 
             }
             if(entry!=NULL){
               printf("2c3 entry not null\n");
+              memcpy((void *) (start_of_pckt->ether_shost), iface2->addr, sizeof(uint8_t) * ETHER_ADDR_LEN);
               /*LAB5 2*/
               unsigned char value[ETHER_ADDR_LEN] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
               if(entry->mac==value){ 
@@ -257,7 +254,7 @@ void sr_handle_ip(struct sr_instance* sr, uint8_t * buf, unsigned int len,char* 
               uint32_t target = pkt->ip_dst;
               pkt->ip_dst = source;
               pkt->ip_src = target;*/
-              
+              start_of_pckt->ether_type = htons(ethertype_ip);
               print_hdrs(block,ntohs(ip->ip_len) + sizeof(sr_ethernet_hdr_t));
               sr_send_packet(sr, block, ntohs(ip->ip_len) + sizeof(sr_ethernet_hdr_t), match->interface);
               free(block);
@@ -271,10 +268,9 @@ void sr_handle_ip(struct sr_instance* sr, uint8_t * buf, unsigned int len,char* 
               send modified packet immediately
             }*/
             else /*(did not contain dest IP)*/ {
-              printf("2c3 else did not contain dest ip entry is null\n");
+              printf("2c3 else did not contain dest ip\n");
               sr_arpcache_queuereq(&sr->cache, ip->ip_dst, (uint8_t *) block, ntohs(ip->ip_len) + sizeof(sr_ethernet_hdr_t), interface);
-              /*printf("sending arp req\n");*/
-              print_hdrs(block,ntohs(ip->ip_len) + sizeof(sr_ethernet_hdr_t));
+              printf("sending arp req\n");
               send_arp_req(sr, iface2, ip->ip_dst, sizeof(sr_ethernet_hdr_t) + sizeof(sr_arp_hdr_t));
               free(block);
               /*dont send modified pack
