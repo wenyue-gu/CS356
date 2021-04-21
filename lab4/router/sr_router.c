@@ -179,7 +179,7 @@ void sr_handle_ip(struct sr_instance* sr, uint8_t * buf, unsigned int len,char* 
         /*2b1 */
         if (ip_proto == ip_protocol_icmp) {
           printf("isicmp\n");
-          handle_icmp(sr, buf , len , interface);
+          handle_icmp(sr, buf+sizeof(sr_ethernet_hdr_t) , len , interface);
         }
         /*2b2 */
         else{
