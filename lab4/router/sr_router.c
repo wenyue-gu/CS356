@@ -229,10 +229,11 @@ void sr_handle_ip(struct sr_instance* sr, uint8_t * buf, unsigned int len,char* 
             struct sr_if *iface2 = sr_get_interface(sr, match->interface);
             sr_ethernet_hdr_t* start_of_pckt = (sr_ethernet_hdr_t*) block;
             /*save sr_arpcache_ lookup as struct sr_arp_entry, put that in if(sr_arp = true), */
-            printf("ip dest %i\n", ip->ip_dst);
+            printf("ip dest %s\n", inet_ntoa(ip->ip_dst));
             struct sr_arpentry * entry;
             /*LAB5 1b2*/
             if(match->gw.s_addr != 0){
+              printf("match gw saddr not 0%s\n", inet_ntoa(match->gw.s_addr));
               entry = sr_arpcache_lookup(&(sr->cache), match->gw.s_addr);
             }
             else{
@@ -581,15 +582,15 @@ void sr_icmp_send_message(struct sr_instance* sr, uint8_t type, uint8_t code, sr
 bool is_own_ip(struct sr_instance* sr, sr_ip_hdr_t* current) {
   /*printf("is_own_ip\n");*/
 
-	struct sr_rt * table = sr->routing_table;
-	/*struct sr_if * iface = sr->if_list;*/
+	/*struct sr_rt * table = sr->routing_table;*/
+	struct sr_if * iface = sr->if_list;
   /*printf("iface established\n");*/
-	while (table != NULL) {
+	while (iface != NULL) {
     /*printf("not null\n");*/
-		if (current->ip_dst == table->dest.s_addr) {
+		if (current->ip_dst == iface->ip) {
 			return true;
 		}
-		table = table->next;
+		iface = iface->next;
 	}
   /*printf("is not own ip\n");*/
 	return false;
