@@ -42,7 +42,7 @@ void send_unreachable_to_queued(struct sr_instance * sr, struct sr_arpreq * req)
 	struct sr_packet * current = req -> packets; 
 	while (current != NULL) {
 		sr_ip_hdr_t* ip = (void *)(current->buf) + sizeof(sr_ethernet_hdr_t);
-		icmp_unreachable(sr, Unreachable_host_code, ip, current->iface);
+		icmp_unreachable(sr, Unreachable_port_code, ip, current->iface);
 		current = current->next;
 	}
 }
@@ -60,6 +60,8 @@ void sr_arpcache_sweepreqs(struct sr_instance *sr) {
 
     /*printf("sr_arpcache_sweepreqs\n");*/
     struct sr_arpreq * current = sr->cache.requests;
+	struct sr_arpreq * next;
+	if (current) next = current->next;
 	while (current != NULL) {
 		if (difftime(time(0), current->sent > 1)) {
             /*Otherwise, check whether this arp request has been sent for 5 or more times, if so*/
@@ -83,7 +85,9 @@ void sr_arpcache_sweepreqs(struct sr_instance *sr) {
 		    }
 	    }
         /* If not larger than the 1 second, just return (go to next)*/
-		current = current->next;
+		current = next;
+		if (current) next = current->next;
+
 	}
     
 }
