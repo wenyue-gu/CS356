@@ -261,7 +261,7 @@ void *sr_rip_timeout(void *sr_ptr) {
 
                     if((pointer3->dest.s_addr & pointer3->mask.s_addr) == (interface->ip & interface->mask) && pointer3->mask.s_addr == interface->mask){
                         /*If it contains, update the updated time. */
-                        /*printf("timeout update time\n");*/
+                        printf("timeout update time\n");
                         pointer3->updated_time = time(0);
                         found = true;
                     }
@@ -469,7 +469,7 @@ void update_route_table(struct sr_instance *sr, uint8_t *packet, unsigned int le
                 if((e.address & e.mask) == (table->dest.s_addr & table->mask.s_addr)){
                     /*printf("table contains this routing entry\n");*/
                     /*If it has this entry, check if the packet is from the same router as the existing entry*/
-                    printf("table interface %s current interface %s emtric %d table metric %d\n",table->interface , interface,e.metric, table->metric);
+                    /*printf("table interface %s current interface %s emtric %d table metric %d\n",table->interface , interface,e.metric, table->metric);*/
                     if(table->interface == interface){
                         /*printf("from same router, updating\n");*/
                         changed = true;
