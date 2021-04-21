@@ -469,7 +469,7 @@ void update_route_table(struct sr_instance *sr, uint8_t *packet, unsigned int le
                 if((e.address & e.mask) == (table->dest.s_addr & table->mask.s_addr)){
                     /*printf("table contains this routing entry\n");*/
                     /*If it has this entry, check if the packet is from the same router as the existing entry*/
-                    if(strcmp(table->interface,interface==0)){
+                    if(strcmp(table->interface,interface)==0){
                         /*printf("from same router, updating\n");*/   
                         /*If true, update the updating time to the new one*/
                         table->updated_time = time(0);
