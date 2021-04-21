@@ -290,7 +290,7 @@ void sr_handle_ip(struct sr_instance* sr, uint8_t * buf, unsigned int len,char* 
           /*LAB5 1bii*/
           else{
             printf("match not null but match interface down\n");
-            icmp_unreachable(sr, Unreachable_net_code, ip, match->interface);
+            icmp_unreachable(sr, Unreachable_net_code, ip, interface);
           }
 
         }
