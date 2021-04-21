@@ -172,6 +172,9 @@ void sr_handle_ip(struct sr_instance* sr, uint8_t * buf, unsigned int len,char* 
       /*LAB 5 1bi*/
       if(sr_obtain_interface_status(sr,interface)!=0){
         /*2b1 */
+        printf("sr_obtain_interface_status(sr,interface) is %d\n",sr_obtain_interface_status(sr,interface));
+        printf(" interface is %s\n",interface);
+
         if (ip->ip_p == ip_protocol_icmp) {
           printf("isicmp\n");
           handle_icmp(sr, buf+sizeof(sr_ethernet_hdr_t) , len , interface);
