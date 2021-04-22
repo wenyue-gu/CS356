@@ -474,7 +474,7 @@ void update_route_table(struct sr_instance *sr, uint8_t *packet, unsigned int le
                         /*If true, update the updating time to the new one*/
                         table->updated_time = time(0);
                         /*If metric == INFINITY,*/
-                        if(e.metric==INFINITY){
+                        if(e.metric==INFINITY && table->metric!=INFINITY){
                             /* delete this routing entry*/
                             changed = true;
                             table->metric=INFINITY;
