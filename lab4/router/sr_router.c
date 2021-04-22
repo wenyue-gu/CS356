@@ -592,7 +592,7 @@ bool is_own_ip(struct sr_instance* sr, sr_ip_hdr_t* current) {
 	/*struct sr_rt * table = sr->routing_table;*/
 	struct sr_if * iface = sr->if_list;
   /*printf("iface established\n");*/
-	while (iface != NULL) {
+	while (iface != NULL && sr_obtain_interface_status(sr,iface)!=0) {
     /*printf("not null\n");*/
 		if (current->ip_dst == iface->ip) {
 			return true;

@@ -482,8 +482,8 @@ void update_route_table(struct sr_instance *sr, uint8_t *packet, unsigned int le
                         
                     }
                     else{
-                        /*printf("not from same router?\n");
-                        printf("interface is %s\n",interface);
+                        /*printf("not from same router? e metric is %d table metric is %d\n",e.metric , table->metric);*/
+                        /*printf("interface is %s\n",interface);
                         printf("table interface %s\n",table->interface);*/
                         /*If metric < current metric in routing table*/
                         if(e.metric < table->metric){
