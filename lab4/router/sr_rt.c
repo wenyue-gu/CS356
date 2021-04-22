@@ -264,6 +264,7 @@ void *sr_rip_timeout(void *sr_ptr) {
                         /*printf("timeout update time\n");*/
                         pointer3->updated_time = time(0);
                         if(pointer3->metric==INFINITY){
+                            printf("interface up, matches, but infinity\n");
                             pointer3->metric = 1;
                         }
                         found = true;
@@ -284,7 +285,7 @@ void *sr_rip_timeout(void *sr_ptr) {
             }
             interface = interface->next;
         }
- 
+        printf("sending rip response in timeout\n");
         send_rip_response(sr);     
         sr_print_routing_table(sr);   
         pthread_mutex_unlock(&(sr->rt_locker));
