@@ -594,7 +594,7 @@ bool is_own_ip(struct sr_instance* sr, sr_ip_hdr_t* current) {
   /*printf("iface established\n");*/
 	while (iface != NULL) {
     /*printf("not null\n");*/
-		if (current->ip_dst == iface->ip && sr_obtain_interface_status(sr,iface->name)!=0) {
+		if (current->ip_dst == iface->ip) {
 			return true;
 		}
 		iface = iface->next;
