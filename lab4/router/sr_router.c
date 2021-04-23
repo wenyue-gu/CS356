@@ -202,8 +202,7 @@ void sr_handle_ip(struct sr_instance* sr, uint8_t * buf, unsigned int len,char* 
       If TTL=1, your router should reply an ICMP Time Exceeded message back to the Sender*/
       printf("\n******ttl is %i*******\n", ip->ip_ttl);
       if(ip->ip_ttl == 1){
-        /*icmp_time(sr, TimeExceededType, TimeExceededCode, (sr_ip_hdr_t *)ip, interface);*/
-        icmp_unreachable(sr, Unreachable_net_code, ip, interface);
+        icmp_time(sr, TimeExceededType, TimeExceededCode, (sr_ip_hdr_t *)ip, interface);
       }
       else{
         /*2c2 Otherwise, check whether the destination IP address is in your routing table.*/
@@ -592,7 +591,6 @@ void sr_icmp_send_message(struct sr_instance* sr, uint8_t type, uint8_t code, sr
 
 
 int is_own_ip(struct sr_instance* sr, sr_ip_hdr_t* current) {
-  /*printf("is_own_ip\n");*/
   int value = 0;
 	/*struct sr_rt * table = sr->routing_table;*/
 	struct sr_if * iface = sr->if_list;
