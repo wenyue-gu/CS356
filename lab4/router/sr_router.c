@@ -367,7 +367,7 @@ void icmp_time(struct sr_instance * sr, uint8_t type, uint8_t code, sr_ip_hdr_t 
   
   /*ip header*/
 
-  printf("ip header\n");
+  /*printf("ip header\n");*/
   uint32_t ip_src = ntohl(ip->ip_dst);
   uint32_t ip_dst= ntohl(ip->ip_src);
   sr_ip_hdr_t* pkt = (sr_ip_hdr_t *)(block + sizeof(sr_ethernet_hdr_t));
@@ -418,7 +418,7 @@ struct sr_rt *prefix_match(struct sr_instance * sr, uint32_t addr){
   while (table != NULL) {
 		in_addr_t left = (table->mask.s_addr & addr);
 		in_addr_t right = (table->dest.s_addr & table->mask.s_addr);
-		if (left == right) {
+		if (left == right && table->metric < INFINITY) {
       uint8_t size = 0;
       uint32_t checker = 1 << 31;
       while ((checker != 0) && ((checker & table->mask.s_addr) != 0)) {
