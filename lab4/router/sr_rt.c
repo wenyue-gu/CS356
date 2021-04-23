@@ -229,7 +229,7 @@ void *sr_rip_timeout(void *sr_ptr) {
         /*For each entry in your routing table*/
         while (pointer1 != NULL) {
             /*check whether this entry has expired (Current_time – Updated_time >= 20 seconds).*/
-            if(difftime(time(0), pointer1->updated_time) >= 20){
+            if(difftime(time(NULL), pointer1->updated_time) > 20){
                 /*If expired, delete it from the routing table*/
                 pointer1->metric = INFINITY;
             }
@@ -262,7 +262,7 @@ void *sr_rip_timeout(void *sr_ptr) {
                     if((pointer3->dest.s_addr & pointer3->mask.s_addr) == (interface->ip & interface->mask) && pointer3->mask.s_addr == interface->mask){
                         /*If it contains, update the updated time. */
                         /*printf("timeout update time\n");*/
-                        pointer3->updated_time = time(0); /*update time */
+                        pointer3->updated_time = time(NULL); /*update time */
                         pointer3->metric = 0;
                         pointer3->gw.s_addr = 0;
                         strcpy(pointer3->interface, interface->name);
@@ -284,9 +284,9 @@ void *sr_rip_timeout(void *sr_ptr) {
             }
             interface = interface->next;
         }
-        printf("sending rip response in timeout\n");
+        /*printf("sending rip response in timeout\n");*/
         send_rip_response(sr);     
-        sr_print_routing_table(sr);   
+        /*sr_print_routing_table(sr);   */
         pthread_mutex_unlock(&(sr->rt_locker));
     }
     return NULL;
