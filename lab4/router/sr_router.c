@@ -167,7 +167,8 @@ void sr_handle_ip(struct sr_instance* sr, uint8_t * buf, unsigned int len,char* 
 
   else{
     /*2b If the destination IP of this packet is router’s own IP */
-    if(is_own_ip(sr,ip)){
+    int i = is_own_ip(sr,ip);
+    if(i==1){
       printf("is own ip\n");
       /*LAB 5 1bi*/
       if(sr_obtain_interface_status(sr,interface)!=0){
@@ -191,6 +192,9 @@ void sr_handle_ip(struct sr_instance* sr, uint8_t * buf, unsigned int len,char* 
         icmp_unreachable(sr, Unreachable_net_code, ip, interface);
       }
 
+    }
+    else if(i==2){
+      icmp_unreachable(sr, Unreachable_net_code, ip, interface);
     }
     /*2c*/
     else{
@@ -586,21 +590,25 @@ void sr_icmp_send_message(struct sr_instance* sr, uint8_t type, uint8_t code, sr
 }
 
 
-bool is_own_ip(struct sr_instance* sr, sr_ip_hdr_t* current) {
+int is_own_ip(struct sr_instance* sr, sr_ip_hdr_t* current) {
   /*printf("is_own_ip\n");*/
-
+  int value = 0;
 	/*struct sr_rt * table = sr->routing_table;*/
 	struct sr_if * iface = sr->if_list;
   /*printf("iface established\n");*/
 	while (iface != NULL) {
     /*printf("not null\n");*/
 		if (current->ip_dst == iface->ip && sr_obtain_interface_status(sr,iface->name)!=0) {
-			return true;
+			return 1;
 		}
+    else if(current->ip_dst == iface->ip && sr_obtain_interface_status(sr,iface->name)==0) {
+      value = 2;
+    }
 		iface = iface->next;
 	}
   /*printf("is not own ip\n");*/
-	return false;
+	if(value==2) return 2;
+  return 0;
 }
 
 void sr_handle_arp(struct sr_instance* sr, uint8_t * buf, unsigned int len, char* interface) {
