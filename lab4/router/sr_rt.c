@@ -229,7 +229,7 @@ void *sr_rip_timeout(void *sr_ptr) {
         /*For each entry in your routing table*/
         while (pointer1 != NULL) {
             /*check whether this entry has expired (Current_time – Updated_time >= 20 seconds).*/
-            if(difftime(time(0), pointer1->updated_time) >= 20){
+            if(difftime(time(0), pointer1->updated_time) >= 20 || sr_obtain_interface_status(sr,interface->name)==0){
                 /*If expired, delete it from the routing table*/
                 pointer1->metric = INFINITY;
             }
@@ -239,49 +239,36 @@ void *sr_rip_timeout(void *sr_ptr) {
         struct sr_if* interface = sr->if_list;
         /*Checking the status of the router's own interfaces*/
         while(interface!=NULL){
-            /*If the status of an interface is down*/
-            if(sr_obtain_interface_status(sr,interface->name)==0){
-                /*printf("interface down");*/
-                /*you should delete all the routing entries which use this interface to send packets*/
-                struct sr_rt * pointer2 = sr->routing_table;
-                while (pointer2 != NULL) {
-                    if(strcmp(pointer2->interface, interface->name)==0){
-                        pointer2->metric = INFINITY;
-                    }
-                    pointer2=pointer2->next;
-                }
-            }
-            /*If the status of an interface is up*/
-            else{
-                struct sr_rt * pointer3 = sr->routing_table;
-                bool found = false;
-                while (pointer3 != NULL) {
-                    /*you should check whether your current routing table contains the subnet 
-                    this interface is directly connected to.*/
 
-                    if((pointer3->dest.s_addr & pointer3->mask.s_addr) == (interface->ip & interface->mask) && pointer3->mask.s_addr == interface->mask){
-                        /*If it contains, update the updated time. */
-                        /*printf("timeout update time\n");*/
-                        pointer3->updated_time = time(0); /*update time */
-                        pointer3->metric = 0;
-                        pointer3->gw.s_addr = 0;
-                        strcpy(pointer3->interface, interface->name);
-                        found = true;
-                    }
-                    pointer3 = pointer3->next;
+            struct sr_rt * pointer3 = sr->routing_table;
+            bool found = false;
+            while (pointer3 != NULL) {
+                /*you should check whether your current routing table contains the subnet 
+                this interface is directly connected to.*/
+
+                if((pointer3->dest.s_addr & pointer3->mask.s_addr) == (interface->ip & interface->mask) && pointer3->mask.s_addr == interface->mask && sr_obtain_interface_status(sr,interface->name)!=0){
+                    /*If it contains, update the updated time. */
+                    /*printf("timeout update time\n");*/
+                    pointer3->updated_time = time(0); /*update time */
+                    pointer3->metric = 0;
+                    pointer3->gw.s_addr = 0;
+                    strcpy(pointer3->interface, interface->name);
+                    found = true;
                 }
-                /*Otherwise, add this subnet to your routing table*/
-                if(!found){
-                    struct in_addr address;
-                    address.s_addr = interface->ip;
-                    struct in_addr gw;
-                    gw.s_addr = 0x0;
-                    struct in_addr mask;
-                    mask.s_addr = interface->mask;
-                    /*printf("timeout add entry\n");*/
-                    sr_add_rt_entry(sr,address,gw,mask,0,interface->name);
-                }
+                pointer3 = pointer3->next;
             }
+            /*Otherwise, add this subnet to your routing table*/
+            if(!found){
+                struct in_addr address;
+                address.s_addr = interface->ip;
+                struct in_addr gw;
+                gw.s_addr = 0x0;
+                struct in_addr mask;
+                mask.s_addr = interface->mask;
+                /*printf("timeout add entry\n");*/
+                sr_add_rt_entry(sr,address,gw,mask,0,interface->name);
+                }
+            
             interface = interface->next;
         }
         printf("sending rip response in timeout\n");
