@@ -262,10 +262,10 @@ void *sr_rip_timeout(void *sr_ptr) {
                     if((pointer3->dest.s_addr & pointer3->mask.s_addr) == (interface->ip & interface->mask) && pointer3->mask.s_addr == interface->mask){
                         /*If it contains, update the updated time. */
                         /*printf("timeout update time\n");*/
-                        pointer3->updated_time = time(0);
-                        if(pointer3->metric==INFINITY){
-                            pointer3->metric = 0;
-                        }
+                        pointer3->updated_time = time(0); /*update time */
+                        pointer3->metric = 0;
+                        pointer3->gw.s_addr = 0;
+                        strcpy(pointer3->interface, interface->name);
                         found = true;
                     }
                     pointer3 = pointer3->next;
